@@ -39,6 +39,9 @@ import {
 /** Inheritance depth limit, inclusive. depth == number of ancestors. */
 const MAX_INHERITANCE_DEPTH = 3;
 
+/** Pattern a plugin id must match: <plugin>@<marketplace>. */
+const PLUGIN_PATTERN = /^[a-z0-9][a-z0-9-]*@[a-z0-9][a-z0-9_-]*$/;
+
 /** Resolve repo root by walking up from this file: bin/cli/lib -> repo root. */
 const REPO_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -130,10 +133,30 @@ async function readRawProfile(name: string): Promise<Profile> {
     ]);
   }
 
+  const rawRecord = parsed as Record<string, unknown>;
+
+  // Guard: reject the old skills.plugins shape immediately after parsing, once,
+  // before normalization or merging happens. Error is friendlier than AJV's.
+  const rawSkills = rawRecord.skills;
+  if (
+    rawSkills !== null &&
+    typeof rawSkills === "object" &&
+    !Array.isArray(rawSkills) &&
+    "plugins" in (rawSkills as Record<string, unknown>) &&
+    (rawSkills as Record<string, unknown>).plugins !== undefined
+  ) {
+    throw new SchemaViolation(name, [
+      {
+        keyword: "deprecated-field",
+        message:
+          'skills.plugins has been renamed. Move plugin entries to top-level "plugins:" ' +
+          'and add the @<marketplace> qualifier (e.g. "myplugin@claude-plugins-official").',
+      },
+    ]);
+  }
+
   // Pre-validation: check plugin marketplace qualifier early so the error
   // message is friendlier than Ajv's pattern mismatch.
-  const PLUGIN_PATTERN = /^[a-z0-9][a-z0-9-]*@[a-z0-9][a-z0-9_-]*$/;
-  const rawRecord = parsed as Record<string, unknown>;
   if (Array.isArray(rawRecord.plugins)) {
     for (const ref of rawRecord.plugins as unknown[]) {
       const id = typeof ref === "string" ? ref : (typeof ref === "object" && ref !== null ? (ref as Record<string, unknown>).id : null);
@@ -220,39 +243,15 @@ function dedupePrimitiveArray<T extends string>(
 }
 
 /**
- * Merge ResolvedMCP arrays — dedup by `id`, child wins on collision.
+ * Merge arrays of id-bearing objects — dedup by `id`, child wins on collision.
+ * Parent entries appear first (Map insertion order); child entries that share an
+ * id overwrite the parent value in place; new child-only ids are appended.
  */
-function mergeMCPRefs(
-  parent: ResolvedMCP[] | undefined,
-  child: ResolvedMCP[] | undefined,
-): ResolvedMCP[] {
-  const byId = new Map<string, ResolvedMCP>();
-  for (const ref of parent ?? []) byId.set(ref.id, ref);
-  for (const ref of child ?? []) byId.set(ref.id, ref);
-  return [...byId.values()];
-}
-
-/**
- * Merge ResolvedSkill arrays — dedup by `id`, child wins on collision.
- */
-function mergeSkillRefs(
-  parent: ResolvedSkill[] | undefined,
-  child: ResolvedSkill[] | undefined,
-): ResolvedSkill[] {
-  const byId = new Map<string, ResolvedSkill>();
-  for (const ref of parent ?? []) byId.set(ref.id, ref);
-  for (const ref of child ?? []) byId.set(ref.id, ref);
-  return [...byId.values()];
-}
-
-/**
- * Merge ResolvedPlugin arrays — dedup by `id`, child wins on collision.
- */
-function mergePluginRefs(
-  parent: ResolvedPlugin[] | undefined,
-  child: ResolvedPlugin[] | undefined,
-): ResolvedPlugin[] {
-  const byId = new Map<string, ResolvedPlugin>();
+function mergeObjectRefs<T extends { id: string }>(
+  parent: T[] | undefined,
+  child: T[] | undefined,
+): T[] {
+  const byId = new Map<string, T>();
   for (const ref of parent ?? []) byId.set(ref.id, ref);
   for (const ref of child ?? []) byId.set(ref.id, ref);
   return [...byId.values()];
@@ -283,23 +282,10 @@ interface ProfileSkillsResolved {
 function mergeSkills(
   parent: ResolvedProfile["skills"] | undefined,
   child: Profile["skills"],
-  profileName: string,
 ): ProfileSkillsResolved {
-  // Guard: reject the old skills.plugins shape with a clear migration error.
-  if (child && "plugins" in child && (child as Record<string, unknown>).plugins !== undefined) {
-    throw new SchemaViolation(profileName, [
-      {
-        keyword: "deprecated-field",
-        message:
-          'skills.plugins has been renamed. Move plugin entries to top-level "plugins:" ' +
-          'and add the @<marketplace> qualifier (e.g. "myplugin@claude-plugins-official").',
-      },
-    ]);
-  }
-
   const childLocal = child?.local?.map(normalizeSkillRef);
   return {
-    local: mergeSkillRefs(parent?.local, childLocal),
+    local: mergeObjectRefs<ResolvedSkill>(parent?.local, childLocal),
     npx: mergeNpxRefs(parent?.npx, child?.npx),
   };
 }
@@ -375,12 +361,12 @@ function foldChain(chain: Profile[]): ResolvedProfile {
       // because the chain is already flattened. But we surface it on the leaf
       // so callers can see the immediate parent if they want.
       inherits: child.inherits,
-      skills: mergeSkills(acc.skills, child.skills, child.name),
-      mcps: mergeMCPRefs(
+      skills: mergeSkills(acc.skills, child.skills),
+      mcps: mergeObjectRefs<ResolvedMCP>(
         acc.mcps,
         child.mcps?.map(normalizeMCPRef),
       ),
-      plugins: mergePluginRefs(
+      plugins: mergeObjectRefs<ResolvedPlugin>(
         acc.plugins,
         child.plugins?.map(normalizePluginRef),
       ),
@@ -399,18 +385,6 @@ function foldChain(chain: Profile[]): ResolvedProfile {
 
 /** Promote a raw `Profile` into a `ResolvedProfile` with all defaults applied. */
 function normalizeToResolved(p: Profile, chain: string[]): ResolvedProfile {
-  // Guard: reject the old skills.plugins shape.
-  if (p.skills && "plugins" in p.skills && (p.skills as Record<string, unknown>).plugins !== undefined) {
-    throw new SchemaViolation(p.name, [
-      {
-        keyword: "deprecated-field",
-        message:
-          'skills.plugins has been renamed. Move plugin entries to top-level "plugins:" ' +
-          'and add the @<marketplace> qualifier (e.g. "myplugin@claude-plugins-official").',
-      },
-    ]);
-  }
-
   return {
     name: p.name,
     description: p.description,

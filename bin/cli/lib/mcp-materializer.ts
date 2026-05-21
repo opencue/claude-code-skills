@@ -288,10 +288,8 @@ export async function materializeMcp(
     ...Object.keys(codexCfg.servers),
   ]);
 
-  // Extract string ids from the resolved MCPs (which may be { id, agents? } objects).
-  const mcpIds = profile.mcps.map((ref) =>
-    typeof ref === "string" ? ref : (ref as { id: string }).id,
-  );
+  // Extract string ids from the resolved MCPs ({ id, agents? } objects).
+  const mcpIds = profile.mcps.map((ref) => ref.id);
 
   for (const id of mcpIds) {
     if (!knownUnion.has(id)) {

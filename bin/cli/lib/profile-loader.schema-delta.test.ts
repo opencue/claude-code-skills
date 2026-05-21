@@ -4,19 +4,34 @@
  * Run with: `bun test bin/cli/lib/profile-loader.schema-delta.test.ts`
  */
 
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtemp, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { loadProfile } from "./profile-loader";
 
+let scratchRoot: string;
+let priorEnv: string | undefined;
+
+beforeEach(async () => {
+  scratchRoot = await mkdtemp(join(tmpdir(), "cue-schema-"));
+  priorEnv = process.env.SOUL_PROFILES_DIR;
+});
+
+afterEach(() => {
+  if (priorEnv === undefined) {
+    delete process.env.SOUL_PROFILES_DIR;
+  } else {
+    process.env.SOUL_PROFILES_DIR = priorEnv;
+  }
+});
+
 async function fixture(yaml: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "cue-schema-"));
-  await mkdir(join(dir, "frontend"), { recursive: true });
-  await writeFile(join(dir, "frontend", "profile.yaml"), yaml);
-  process.env.SOUL_PROFILES_DIR = dir;
-  return dir;
+  await mkdir(join(scratchRoot, "frontend"), { recursive: true });
+  await writeFile(join(scratchRoot, "frontend", "profile.yaml"), yaml);
+  process.env.SOUL_PROFILES_DIR = scratchRoot;
+  return scratchRoot;
 }
 
 describe("schema delta", () => {
