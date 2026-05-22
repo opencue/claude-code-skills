@@ -1,0 +1,14 @@
+name: hostinger
+icon: "🏠"
+description: "Hostinger DNS, domain, VPS, and hosting management"
+inherits: core
+skills:
+  local:
+    - hostinger/dns
+    - hostinger/domains
+    - hostinger/hosting
+    - hostinger/vps
+    - deployment/coolify
+mcps:
+  - hostinger-api
+  - gbrain

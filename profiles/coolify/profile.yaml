@@ -1,0 +1,15 @@
+name: coolify
+icon: "🚢"
+description: "Coolify deploys, server config, app env vars, and CI"
+inherits: core
+skills:
+  local:
+    - deployment/coolify
+    - deployment/pnpm
+    - github/github
+    - github/gh-fix-ci
+    - review/security-review
+    - secrets/envoult
+mcps:
+  - coolify
+  - gbrain
