@@ -67,6 +67,47 @@ concurrent running session never sees a partial state.
 For Codex the shape is identical under `runtime/<profile>/codex/` with
 `CODEX_HOME` and a `config.toml` instead of `settings.json`.
 
+## Profile icons (emoji + Kitty inline images)
+
+Each profile can declare two icon fields:
+
+- `icon: "🦊"` — a 1-2 char emoji shown in any terminal (the picker label)
+- `iconImage: "logo.png"` — a path (relative to the profile dir) to a real
+  PNG/JPG logo. Rendered inline via the [Kitty graphics protocol] when the
+  picker detects a Kitty terminal; otherwise falls back to the emoji.
+
+[Kitty graphics protocol]: https://sw.kovidgoyal.net/kitty/graphics-protocol/
+
+### Detection
+
+Cue tries, in order:
+
+1. `CUE_KITTY=1` env var — explicit opt-in (recommended for tmux setups)
+2. `CUE_DISABLE_KITTY_IMAGES=1` — explicit opt-out
+3. `TERM=xterm-kitty` or `KITTY_WINDOW_ID` set — direct Kitty
+4. `KITTY_PID`, `TERM_PROGRAM=kitty`, `LC_TERMINAL=kitty`
+5. Inside tmux/screen: walk `/proc/<pid>/comm` parent chain looking for a
+   `kitty` process (works only when not detached behind a tmux server)
+
+### tmux setup
+
+When inside tmux, two things are required for Kitty images to render:
+
+1. **`set -g allow-passthrough on`** in `~/.tmux.conf` (default in tmux 3.3+)
+2. **Cue knows it's Kitty.** Because tmux strips `KITTY_*` env vars and runs
+   its server detached, the auto-detection often misses Kitty when launching
+   from inside tmux. Set `CUE_KITTY=1` once and propagate it:
+   ```bash
+   # in ~/.bashrc
+   export CUE_KITTY=1
+
+   # also tell tmux to expose it to all panes (one-time)
+   tmux set-environment -g CUE_KITTY 1
+   ```
+
+If the wrapped passthrough sequence renders as garbage in your terminal, set
+`CUE_DISABLE_KITTY_IMAGES=1` to fall back to emoji icons.
+
 ## Multi-account / credentials persistence
 
 When `CLAUDE_CONFIG_DIR` is set in the environment **before** launching cue
