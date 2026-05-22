@@ -1,7 +1,7 @@
 {
   "name": "cue",
   "version": "0.2.0",
-  "description": "agent profile manager — pick a profile, exec claude/codex with the right skills/MCPs/plugins",
+  "description": "cue — Agent Profile Manager for Claude Code & Codex. Pick a profile, launch with the right skills, MCPs, and plugins.",
   "private": true,
   "type": "module",
   "bin": {
@@ -11,7 +11,7 @@
     "bun": ">=1.0.0"
   },
   "scripts": {
-    "soul": "bun bin/cli/index.ts"
+    "cue": "bun src/index.ts"
   },
   "dependencies": {
     "@clack/prompts": "^1.4.0",

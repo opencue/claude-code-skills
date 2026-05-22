@@ -32,7 +32,8 @@ function readVersion(): string {
 
 function printHelp(): void {
   const lines: string[] = [];
-  lines.push("cue — agent profile manager for Claude Code and Codex");
+  lines.push("cue — Agent Profile Manager for Claude Code & Codex");
+  lines.push("Pick a profile, launch with the right skills, MCPs, and plugins.");
   lines.push("");
   lines.push("Usage: cue <command> [args...]");
   lines.push("");

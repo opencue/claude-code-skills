@@ -1,15 +1,20 @@
 # AGENTS — cue bootstrap contract
 
-If you are an AI coding agent (Claude Code, Codex, etc.) helping a human install cue on their machine, this file is your instruction sheet. Read it before touching the shell.
+If you are an AI coding agent (Claude Code, Codex, etc.) helping a human install
+cue on their machine, this file is your instruction sheet. Read it before
+touching the shell.
 
 ---
 
 ## What cue is
 
-An agent profile manager for Claude Code and Codex: pick a profile, get the
-right skills, MCPs, and plugins materialized into an isolated config dir, and
-launch. Profiles live under `profiles/`; the runtime is built on-demand under
-`~/.config/cue/runtime/`.
+**cue — Agent Profile Manager for Claude Code & Codex.**
+
+A thin layer between the user's shell and the real `claude` / `codex` binary.
+The user types `claude`, `cue` resolves which profile applies to their cwd,
+materializes a per-profile `CLAUDE_CONFIG_DIR` (or `CODEX_HOME`) with just that
+profile's skills, MCPs, and plugins, then exec's the real agent. Profiles live
+under `profiles/`; the runtime is built on-demand under `~/.config/cue/runtime/`.
 
 The repo also ships a library of pre-built resources:
 - `resources/skills/` — 110+ installable skills (slash-commands + runnable docs)

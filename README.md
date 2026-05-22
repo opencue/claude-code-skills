@@ -1,10 +1,13 @@
-# cue
+# cue — Agent Profile Manager for Claude Code & Codex
 
-Agent profile manager — pick a profile, exec Claude Code / Codex with the right skills, MCPs, and plugins. Cross-session memory, token compression, a persistent knowledge brain, and native Excel/Word skills. Plus a library of pre-built skills and MCP server configs.
+> Pick a profile. Launch with the right skills, MCPs, and plugins. Nothing else.
 
-- `skills/` — installable skills (slash-command surfaces, runnable docs)
-- `mcps/` — MCP server implementations and configs
-- `setup/` — per-OS setup prompts you can paste into Claude Code
+`cue` sits between your shell and the agent binary. Type `claude` or `codex` and `cue` intercepts: it resolves which profile applies in this directory, materializes an isolated `CLAUDE_CONFIG_DIR` (or `CODEX_HOME`) with just that profile's skills/MCPs/plugins, then exec's the real agent. Per-directory pins mean the right loadout follows your project, not your terminal session.
+
+- `profiles/` — one directory per profile; the YAML decides what loads
+- `resources/skills/` — local skill library composed into profiles
+- `resources/mcps/` — MCP server configs composed into profiles
+- `setup/` — per-OS install prompts you can paste into an agent session
 
 License: [MIT](./LICENSE).
 

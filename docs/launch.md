@@ -1,5 +1,12 @@
 # cue launch flow
 
+> **cue — Agent Profile Manager for Claude Code & Codex.** This doc explains the
+> resolve → materialize → exec hot path that runs every time you type `claude`
+> or `codex` in a shell where `cue shell install` has been run.
+
+---
+
+
 When you type `claude` or `codex` in a shell where `cue shell install` has
 been run, the shim at `~/.local/bin/claude` (or `codex`) delegates immediately
 to `cue launch <agent> "$@"`. This is the hot path:
