@@ -27,7 +27,50 @@ License: [MIT](./LICENSE).
 
 ---
 
-## Quick install — pick your OS
+## Install (one line)
+
+```bash
+gh repo clone recodeee/cue ~/Documents/cue && ~/Documents/cue/install.sh
+```
+
+…or, if you don't have `gh`:
+
+```bash
+git clone git@github.com:recodeee/cue.git ~/Documents/cue && ~/Documents/cue/install.sh
+```
+
+`install.sh` is interactive: it installs the `claude` shim by default and asks before touching `codex` (in case you already have a wrapper there). Non-interactive variants:
+
+```bash
+~/Documents/cue/install.sh --yes           # install claude shim, skip codex prompt
+~/Documents/cue/install.sh --yes --codex   # install both shims (clobbers existing codex on PATH)
+~/Documents/cue/install.sh --uninstall     # remove the symlinks, leave the repo
+```
+
+### What the installer does
+
+1. Verifies `git` and `bun` (Bun ≥ 1.0; install from https://bun.sh)
+2. Runs `bun install` inside the repo
+3. Self-checks `bin/cue --version`
+4. Symlinks `~/.local/bin/cue` → `<repo>/bin/cue`
+5. Checks that `~/.local/bin` is on your `$PATH` (warns if not)
+6. Writes the `~/.local/bin/claude` shim (and optionally `codex`)
+
+Idempotent. Safe to re-run on any machine that already has cue installed.
+
+### After install
+
+```bash
+cd ~/projects/q4-launch-campaign
+echo marketing > .cue-profile
+claude          # boots with the marketing profile's skills, MCPs, and plugins
+```
+
+See [docs/launch.md](./docs/launch.md) for the resolve → materialize → exec flow.
+
+---
+
+## Quick install — pick your OS (legacy soul flow)
 
 Two paths per OS:
 
