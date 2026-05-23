@@ -1,0 +1,8 @@
+[submodule "resources/mcps"]
+	path = resources/mcps
+	url = git@github.com:recodeee/mcps.git
+	branch = main
+[submodule "resources/skills"]
+	path = resources/skills
+	url = git@github.com:recodeee/skills.git
+	branch = soul-main
