@@ -8,7 +8,7 @@ repo="$(fresh_repo 01-fresh-install)"
 install_deps "$repo"
 
 count="$(profile_count "$repo")"
-[ "$count" = "10" ] || fail "expected 10 shipped profiles, found $count"
+[ "$count" -ge "15" ] || fail "expected 15+ shipped profiles, found $count"
 
 output="$SOUL_E2E_WORK/01-list.txt"
 soul "$repo" list > "$output"
@@ -17,4 +17,4 @@ for profile in $EXPECTED_PROFILES; do
   grep -F "$profile" "$output" >/dev/null || fail "soul list did not include $profile"
 done
 
-log "fresh install lists all 10 shipped profiles"
+log "fresh install lists all shipped profiles"

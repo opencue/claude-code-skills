@@ -17,7 +17,7 @@ export SOUL_E2E_WORK
 export SOUL_E2E_NPX_CACHE
 export BUN_INSTALL_CACHE_DIR
 
-EXPECTED_PROFILES="core medusa-dev fleet-control creative-media caveman-quick docs-writer research frontend backend full"
+EXPECTED_PROFILES="core medusa-dev fleet-control creative-media caveman-quick docs-writer research frontend backend full coolify hostinger nvidia marketing readme-writer-svg"
 
 log() {
   printf '[e2e] %s\n' "$*"
