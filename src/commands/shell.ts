@@ -183,6 +183,23 @@ exec "${cueBin}" launch codex "$@"
 
     process.stdout.write(`\nAdd the shell hook to auto-switch profiles on cd:\n`);
     process.stdout.write(`  echo 'eval "$(cue shell hook)"' >> ~/.bashrc\n`);
+
+    // Auto-install completions
+    const shell = process.env.SHELL ?? "/bin/bash";
+    const { completionScript } = await import("./completions");
+    if (shell.includes("zsh")) {
+      const compDir = join(homedir(), ".zsh", "completions");
+      mkdirSync(compDir, { recursive: true });
+      writeFileSync(join(compDir, "_cue"), completionScript("zsh"));
+      process.stdout.write(`✅ Installed zsh completions → ${compDir}/_cue\n`);
+      process.stdout.write(`   Add to .zshrc: fpath=(~/.zsh/completions $fpath); autoload -Uz compinit && compinit\n`);
+    } else if (shell.includes("bash")) {
+      const compDir = join(homedir(), ".local", "share", "bash-completion", "completions");
+      mkdirSync(compDir, { recursive: true });
+      writeFileSync(join(compDir, "cue"), completionScript("bash"));
+      process.stdout.write(`✅ Installed bash completions → ${compDir}/cue\n`);
+    }
+
     return 0;
   }
 

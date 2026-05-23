@@ -118,10 +118,10 @@ describe("materializeRuntime", () => {
     expect(Object.keys(settings.mcpServers)).toEqual(["claude-mem"]);
   });
 
-  test("credentialsSource: symlinks .credentials.json into runtime (token refreshes write back to source)", async () => {
+  test("credentialsSource: copies .credentials.json into runtime (token refreshes stay local)", async () => {
     const credSrc = join(root, "creds");
     const { mkdir, writeFile } = await import("node:fs/promises");
-    const { readlink } = await import("node:fs/promises");
+    const { lstat } = await import("node:fs/promises");
     await mkdir(credSrc, { recursive: true });
     await writeFile(join(credSrc, ".credentials.json"), '{"claudeAiOauth":{"token":"abc"}}');
 
@@ -135,10 +135,12 @@ describe("materializeRuntime", () => {
       credentialsSource: credSrc,
     });
 
-    // Should be a symlink to the source (so token refreshes propagate back)
-    const linkTarget = await readlink(join(out.runtimeDir, ".credentials.json"));
-    expect(linkTarget).toBe(join(credSrc, ".credentials.json"));
-    // And reading it returns the source contents
+    // Should be a regular file (copy), not a symlink — Claude Code's token
+    // refresh does atomic write (tmp → rename) which breaks symlinks.
+    const st = await lstat(join(out.runtimeDir, ".credentials.json"));
+    expect(st.isSymbolicLink()).toBe(false);
+    expect(st.isFile()).toBe(true);
+    // Contents match the source
     const contents = await readFile(join(out.runtimeDir, ".credentials.json"), "utf8");
     expect(contents).toBe('{"claudeAiOauth":{"token":"abc"}}');
   });
@@ -170,7 +172,13 @@ describe("materializeRuntime", () => {
     expect(await readlink(join(out.runtimeDir, "projects"))).toBe(join(credSrc, "projects"));
     expect(await readlink(join(out.runtimeDir, "history.jsonl"))).toBe(join(credSrc, "history.jsonl"));
     expect(await readlink(join(out.runtimeDir, ".session-stats.json"))).toBe(join(credSrc, ".session-stats.json"));
-    expect(await readlink(join(out.runtimeDir, ".credentials.json"))).toBe(join(credSrc, ".credentials.json"));
+
+    // .credentials.json is COPIED (not symlinked) because Claude Code's
+    // token refresh does atomic write which breaks symlinks.
+    const { lstat: lstatCred } = await import("node:fs/promises");
+    const credSt = await lstatCred(join(out.runtimeDir, ".credentials.json"));
+    expect(credSt.isSymbolicLink()).toBe(false);
+    expect(credSt.isFile()).toBe(true);
 
     // settings.json is cue-managed: NOT a symlink, but a real merged file.
     const { lstat } = await import("node:fs/promises");
@@ -246,18 +254,21 @@ describe("materializeRuntime", () => {
       userClaudeMd: "",
     };
 
-    // First launch with account A → builds runtime with A's symlinks + settings
+    // First launch with account A → builds runtime with A's creds + settings
     const first = await materializeRuntime({ ...args, credentialsSource: credSrcA });
     expect(first.rebuilt).toBe(true);
-    expect(await readlink(join(first.runtimeDir, ".credentials.json"))).toBe(join(credSrcA, ".credentials.json"));
+    // .credentials.json is a copy, not a symlink
+    const contentsA = await readFile(join(first.runtimeDir, ".credentials.json"), "utf8");
+    expect(contentsA).toBe('{"token":"A"}');
     let s1 = JSON.parse(await readFile(join(first.runtimeDir, "settings.json"), "utf8"));
     expect(s1.permissions.allow).toEqual(["A"]);
 
     // Second launch with account B (same profile) → hash matches → cache hit.
-    // Settings rebuilt from B; symlinks repointed to B.
+    // Settings rebuilt from B; .credentials.json re-copied from B.
     const second = await materializeRuntime({ ...args, credentialsSource: credSrcB });
     expect(second.rebuilt).toBe(false);
-    expect(await readlink(join(second.runtimeDir, ".credentials.json"))).toBe(join(credSrcB, ".credentials.json"));
+    const contentsB = await readFile(join(second.runtimeDir, ".credentials.json"), "utf8");
+    expect(contentsB).toBe('{"token":"B"}');
     let s2 = JSON.parse(await readFile(join(second.runtimeDir, "settings.json"), "utf8"));
     expect(s2.permissions.allow).toEqual(["B"]);
   });

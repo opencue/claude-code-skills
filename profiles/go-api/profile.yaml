@@ -1,0 +1,8 @@
+name: go-api
+icon: "🐹"
+description: Go API development — net/http, gin/echo/chi, GORM, migrations, testing
+inherits: core
+skills:
+  local:
+    - review/code-review
+mcps: []

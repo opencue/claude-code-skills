@@ -142,6 +142,19 @@ export async function run(args: string[]): Promise<number> {
   const yellow = (s: string) => `\x1b[33m${s}\x1b[0m`;
   const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
 
+  // First-run detection
+  const isFirstRun = !existsSync(RUNTIME_ROOT) && !hasProfile && totalSessions === 0;
+  if (isFirstRun) {
+    process.stdout.write("\n");
+    process.stdout.write(`  ${bold("Welcome to cue!")} Agent Profile Manager for Claude Code & Codex\n\n`);
+    process.stdout.write(`  Get started:\n`);
+    process.stdout.write(`    ${bold("cue init")}           Set up a profile for this project\n`);
+    process.stdout.write(`    ${bold("cue list")}           See all available profiles\n`);
+    process.stdout.write(`    ${bold("cue shell install")}  Install shims so \`claude\` uses cue\n`);
+    process.stdout.write(`\n  ${dim("Run cue --help for all commands.")}\n\n`);
+    return 0;
+  }
+
   process.stdout.write("\n");
 
   // Profile section
@@ -153,6 +166,7 @@ export async function run(args: string[]): Promise<number> {
     }
   } else {
     process.stdout.write(`  ${bold("Profile")}  ${dim("none pinned for this directory")}\n`);
+    process.stdout.write(`  ${dim("→ Run")} ${bold("cue init")} ${dim("to set up a profile for this project")}\n`);
   }
 
   process.stdout.write("\n");

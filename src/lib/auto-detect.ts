@@ -13,10 +13,15 @@ interface Signal {
 }
 
 const SIGNALS: Signal[] = [
-  // Frontend
-  { file: "next.config.js", weight: 5, profile: "frontend" },
-  { file: "next.config.ts", weight: 5, profile: "frontend" },
-  { file: "next.config.mjs", weight: 5, profile: "frontend" },
+  // Frontend / Next.js
+  { file: "next.config.js", weight: 5, profile: "nextjs" },
+  { file: "next.config.ts", weight: 5, profile: "nextjs" },
+  { file: "next.config.mjs", weight: 5, profile: "nextjs" },
+  { file: "app/layout.tsx", weight: 4, profile: "nextjs" },
+  { file: "app/page.tsx", weight: 3, profile: "nextjs" },
+  { file: "next.config.js", weight: 4, profile: "frontend" },
+  { file: "next.config.ts", weight: 4, profile: "frontend" },
+  { file: "next.config.mjs", weight: 4, profile: "frontend" },
   { file: "vite.config.ts", weight: 4, profile: "frontend" },
   { file: "vite.config.js", weight: 4, profile: "frontend" },
   { file: "tailwind.config.js", weight: 3, profile: "frontend" },
@@ -24,7 +29,7 @@ const SIGNALS: Signal[] = [
   { file: "postcss.config.js", weight: 2, profile: "frontend" },
   { file: "tsconfig.json", weight: 1, profile: "frontend" },
 
-  // Backend
+  // Backend (Node/TS)
   { file: "docker-compose.yml", weight: 3, profile: "backend" },
   { file: "docker-compose.yaml", weight: 3, profile: "backend" },
   { file: "Dockerfile", weight: 2, profile: "backend" },
@@ -33,6 +38,31 @@ const SIGNALS: Signal[] = [
   { file: "drizzle.config.ts", weight: 4, profile: "backend" },
   { file: "src/server.ts", weight: 3, profile: "backend" },
   { file: "src/index.ts", weight: 1, profile: "backend" },
+
+  // Python API
+  { file: "pyproject.toml", weight: 4, profile: "python-api" },
+  { file: "setup.py", weight: 3, profile: "python-api" },
+  { file: "requirements.txt", weight: 3, profile: "python-api" },
+  { file: "app/main.py", weight: 5, profile: "python-api" },
+  { file: "main.py", weight: 3, profile: "python-api" },
+  { file: "manage.py", weight: 5, profile: "python-api" },
+  { file: "uvicorn.ini", weight: 4, profile: "python-api" },
+  { file: "alembic.ini", weight: 4, profile: "python-api" },
+  { file: ".python-version", weight: 2, profile: "python-api" },
+
+  // Rust
+  { file: "Cargo.toml", weight: 5, profile: "rust" },
+  { file: "Cargo.lock", weight: 3, profile: "rust" },
+  { file: "src/main.rs", weight: 4, profile: "rust" },
+  { file: "src/lib.rs", weight: 3, profile: "rust" },
+  { file: ".cargo/config.toml", weight: 2, profile: "rust" },
+
+  // Go API
+  { file: "go.mod", weight: 5, profile: "go-api" },
+  { file: "go.sum", weight: 3, profile: "go-api" },
+  { file: "cmd/", weight: 3, profile: "go-api" },
+  { file: "internal/", weight: 2, profile: "go-api" },
+  { file: "main.go", weight: 4, profile: "go-api" },
 
   // Medusa
   { file: "medusa-config.js", weight: 5, profile: "medusa-dev" },
@@ -58,6 +88,9 @@ const SIGNALS: Signal[] = [
   // Research
   { file: "research/", weight: 3, profile: "research" },
   { file: "papers/", weight: 3, profile: "research" },
+
+  // Three.js
+  { file: "three.js", weight: 4, profile: "threejs" },
 ];
 
 export interface DetectionResult {

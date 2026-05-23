@@ -93,24 +93,28 @@ async function cmdImport(args: string[]): Promise<number> {
 async function cmdExport(args: string[]): Promise<number> {
   const profileName = args.find(a => !a.startsWith("-"));
   if (!profileName) {
-    process.stderr.write("Usage: cue export <profile> [--output <path>]\n");
+    process.stderr.write("Usage: cue export <profile> [--output <path>] [--portable]\n");
     return 1;
   }
 
   const outputIdx = args.indexOf("--output");
   const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : null;
+  const portable = args.includes("--portable");
 
   const profile = await loadProfile(profileName);
   const yaml = require("yaml");
 
-  const portable = {
+  const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
+
+  const base: Record<string, unknown> = {
     name: profile.name,
     description: profile.description,
     icon: profile.icon,
     _portable: {
       exported: new Date().toISOString(),
-      cue_version: "0.3.0",
+      cue_version: "0.4.1",
       inheritance_resolved: true,
+      self_contained: portable,
     },
     skills: { local: profile.skills.local.map(s => s.id) },
     mcps: profile.mcps.map(m => m.id),
@@ -118,11 +122,30 @@ async function cmdExport(args: string[]): Promise<number> {
     env: profile.env,
   };
 
-  const output = yaml.stringify(portable);
+  if (portable) {
+    // Bundle skill content inline
+    const skillContents: Record<string, string> = {};
+    for (const s of profile.skills.local) {
+      const skillPath = join(SKILLS_ROOT, s.id, "SKILL.md");
+      try {
+        skillContents[s.id] = readFileSync(skillPath, "utf8");
+      } catch { /* skill not on disk — skip */ }
+    }
+    if (Object.keys(skillContents).length > 0) {
+      (base as any)._skill_contents = skillContents;
+    }
+  }
+
+  const output = yaml.stringify(base);
 
   if (outputPath) {
     writeFileSync(outputPath, output);
-    process.stdout.write(`✅ Exported "${profileName}" to ${outputPath}\n`);
+    const size = (Buffer.byteLength(output) / 1024).toFixed(1);
+    process.stdout.write(`✅ Exported "${profileName}" to ${outputPath} (${size} KB)\n`);
+    if (portable) {
+      process.stdout.write(`   Self-contained: includes ${Object.keys((base as any)._skill_contents ?? {}).length} skill(s) inline\n`);
+      process.stdout.write(`   Share this file — recipient imports with: cue import ${outputPath}\n`);
+    }
   } else {
     process.stdout.write(output);
   }

@@ -10,16 +10,13 @@
  *   - cacheHit(key)         -> true iff a non-empty cache dir exists
  *   - cachePut(key, srcDir) -> atomic-ish move of an already-prepared
  *                              directory into the cache slot
+ *   - cacheEvict(layout)    -> prune LRU entries beyond MAX_CACHE_ENTRIES
  *
  * The cache root is injected so tests can use tmpdir() instead of touching
  * the real profiles/_cache/ tree.
- *
- * TODO(future): cache eviction policy. Today the cache grows unbounded until
- * a human runs `rm -rf profiles/_cache/npx/*`. A future iteration should add
- * LRU + a size budget + a `soul cache prune` subcommand.
  */
 
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync, utimesSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 export interface CacheLayout {
@@ -28,6 +25,9 @@ export interface CacheLayout {
 }
 
 const NPX_SUBDIR = "npx";
+
+/** Maximum number of cache entries before LRU eviction kicks in. */
+export const MAX_CACHE_ENTRIES = 20;
 
 /**
  * Resolve the absolute cache dir for a given key. Does NOT create it.
@@ -54,7 +54,10 @@ export function cacheHit(layout: CacheLayout, key: string): boolean {
     const st = statSync(dir);
     if (!st.isDirectory()) return false;
     const entries = readdirSync(dir);
-    return entries.length > 0;
+    if (entries.length === 0) return false;
+    // Touch atime to mark as recently used (LRU tracking).
+    try { utimesSync(dir, new Date(), st.mtime); } catch {}
+    return true;
   } catch {
     return false;
   }
@@ -78,6 +81,8 @@ export function cachePut(layout: CacheLayout, key: string, srcDir: string): stri
     rmSync(dest, { recursive: true, force: true });
   }
   renameSync(srcDir, dest);
+  // Evict oldest entries if over budget.
+  cacheEvict(layout);
   return dest;
 }
 
@@ -98,4 +103,40 @@ export function cacheChildren(layout: CacheLayout, key: string): string[] {
 /** Convenience: full path to a single skill inside a cache slot. */
 export function cacheSkillPath(layout: CacheLayout, key: string, skill: string): string {
   return join(cachePath(layout, key), skill);
+}
+
+/**
+ * LRU eviction: remove the least-recently-accessed entries when the cache
+ * exceeds MAX_CACHE_ENTRIES. Uses directory atime (updated on cacheHit).
+ * Non-fatal — eviction errors are silently ignored.
+ */
+export function cacheEvict(layout: CacheLayout, maxEntries = MAX_CACHE_ENTRIES): number {
+  const cacheRoot = resolve(layout.repoRoot, "profiles", "_cache", NPX_SUBDIR);
+  if (!existsSync(cacheRoot)) return 0;
+
+  let entries: { name: string; atime: number }[];
+  try {
+    entries = readdirSync(cacheRoot)
+      .map((name) => {
+        try {
+          const st = statSync(join(cacheRoot, name));
+          return st.isDirectory() ? { name, atime: st.atimeMs } : null;
+        } catch { return null; }
+      })
+      .filter((e): e is { name: string; atime: number } => e !== null);
+  } catch { return 0; }
+
+  if (entries.length <= maxEntries) return 0;
+
+  // Sort by atime ascending (oldest first), remove excess.
+  entries.sort((a, b) => a.atime - b.atime);
+  const toRemove = entries.slice(0, entries.length - maxEntries);
+  let removed = 0;
+  for (const entry of toRemove) {
+    try {
+      rmSync(join(cacheRoot, entry.name), { recursive: true, force: true });
+      removed++;
+    } catch {}
+  }
+  return removed;
 }

@@ -1,0 +1,10 @@
+name: video
+icon: "🎬"
+description: Video and GIF analysis — frame extraction, audio transcription, and visual understanding via ffmpeg + Claude Vision
+inherits: core
+skills:
+  local:
+    - design/headless-gif-demo
+plugins:
+  - claude-video-vision@jordanrendric
+mcps: []

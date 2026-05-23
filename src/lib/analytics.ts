@@ -15,16 +15,60 @@ const ANALYTICS_PATH = join(
 
 export interface SessionEvent {
   ts: string;
-  event: "start" | "end";
+  event: "start" | "end" | "skill_hit";
   profile: string;
   agent: "claude-code" | "codex";
   cwd: string;
   duration_s?: number;
+  skill?: string;
 }
 
 export function recordEvent(event: SessionEvent): void {
   mkdirSync(dirname(ANALYTICS_PATH), { recursive: true });
   appendFileSync(ANALYTICS_PATH, JSON.stringify(event) + "\n");
+}
+
+/**
+ * Record skill usage from session transcripts.
+ * Scans the most recent session for skill references and logs them.
+ */
+export function recordSkillUsage(profile: string, agent: "claude-code" | "codex"): void {
+  const projectsDir = join(homedir(), ".claude", "projects");
+  if (!existsSync(projectsDir)) return;
+
+  try {
+    const { readdirSync, statSync } = require("node:fs");
+    const dirs = readdirSync(projectsDir).filter((d: string) => {
+      try { return statSync(join(projectsDir, d)).isDirectory(); } catch { return false; }
+    });
+
+    // Find most recent session
+    let latestFile = "";
+    let latestMtime = 0;
+    for (const dir of dirs) {
+      const files = readdirSync(join(projectsDir, dir)).filter((f: string) => f.endsWith(".jsonl"));
+      for (const f of files) {
+        const p = join(projectsDir, dir, f);
+        const mt = statSync(p).mtimeMs;
+        if (mt > latestMtime) { latestMtime = mt; latestFile = p; }
+      }
+    }
+
+    if (!latestFile || Date.now() - latestMtime > 300_000) return; // only last 5 min
+
+    const content = readFileSync(latestFile, "utf8");
+    const skillRefs = content.match(/skills\/([a-z][a-z0-9-]*(?:\/[a-z][a-z0-9-]*)?)\/SKILL\.md/g);
+    if (!skillRefs) return;
+
+    const seen = new Set<string>();
+    const ts = new Date().toISOString();
+    for (const ref of skillRefs) {
+      const skill = ref.replace("skills/", "").replace("/SKILL.md", "");
+      if (seen.has(skill)) continue;
+      seen.add(skill);
+      recordEvent({ ts, event: "skill_hit", profile, agent, cwd: process.cwd(), skill });
+    }
+  } catch { /* non-fatal */ }
 }
 
 export function readEvents(since?: Date): SessionEvent[] {
@@ -76,4 +120,27 @@ export function computeStats(since?: Date): ProfileStats[] {
       last_used: d.last || null,
     }))
     .sort((a, b) => b.sessions - a.sessions);
+}
+
+export interface SkillUsageStats {
+  skill: string;
+  hits: number;
+  lastUsed: string | null;
+}
+
+export function skillStats(profile?: string, since?: Date): SkillUsageStats[] {
+  const events = readEvents(since).filter(e => e.event === "skill_hit" && e.skill);
+  const filtered = profile ? events.filter(e => e.profile === profile) : events;
+
+  const map = new Map<string, { hits: number; last: string }>();
+  for (const e of filtered) {
+    const entry = map.get(e.skill!) ?? { hits: 0, last: "" };
+    entry.hits++;
+    if (e.ts > entry.last) entry.last = e.ts;
+    map.set(e.skill!, entry);
+  }
+
+  return [...map.entries()]
+    .map(([skill, d]) => ({ skill, hits: d.hits, lastUsed: d.last || null }))
+    .sort((a, b) => b.hits - a.hits);
 }

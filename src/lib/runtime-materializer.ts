@@ -195,15 +195,34 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
   }
 
   // 6. Atomic swap: rm -rf old, rename tmp.
-  // Preserve .claude.json and backups/ — Claude Code writes session state here
-  // and resume depends on it surviving across rematerializations.
-  const preserveFiles = [".claude.json", "backups"];
+  //
+  // Preserve session/credential state from the OLD runtime so resume + auth
+  // survive across rematerializations:
+  //   - .claude.json      → session state, projects list, oauthAccount
+  //   - .credentials.json → OAuth tokens (refresh + access)
+  //   - backups/          → Claude Code's own .claude.json backup chain
+  //
+  // We MOVE these from the old runtime over whatever the overlay step (5)
+  // dropped into tmpDir — so a logged-in runtime stays logged in even when
+  // ~/.claude.json (the credentialsSource) is in a stale/half-logged-out
+  // state. Without this, an authmux account swap or a partial claude write
+  // to the source would propagate into every cue-materialized profile.
+  //
+  // Trade-off: to fresh-bootstrap a profile after deliberately switching
+  // accounts at the source, run:
+  //   rm ~/.config/cue/runtime/<profile>/claude/.credentials.json
+  //   rm ~/.config/cue/runtime/<profile>/claude/.claude.json
+  // Next launch will copy current source state.
+  const preserveFiles = [".claude.json", ".credentials.json", "backups"];
   for (const name of preserveFiles) {
     const oldPath = join(runtimeDir, name);
     const newPath = join(tmpDir, name);
     try {
       const st = await lstat(oldPath);
       if (st.isFile() || st.isDirectory()) {
+        // Remove whatever overlay put here (likely a symlink for .claude.json
+        // or a copy for .credentials.json) so rename can replace it cleanly.
+        await rm(newPath, { force: true, recursive: true });
         await rename(oldPath, newPath);
       }
     } catch { /* doesn't exist — skip */ }
@@ -260,9 +279,9 @@ async function overlaySourceState(targetDir: string, sourceDir: string): Promise
       existingType = st.isSymbolicLink() ? "symlink" : "other";
     } catch { /* missing */ }
 
-    if (existingType === "other") continue; // cue override — don't touch
+    if (existingType === "other" && name !== ".credentials.json") continue; // cue override — don't touch
 
-    if (existingType === "symlink") {
+    if (existingType === "symlink" || (existingType === "other" && name === ".credentials.json")) {
       // Replace if it points elsewhere (e.g. previous account on cache hit).
       try {
         await rm(targetPath, { force: true });

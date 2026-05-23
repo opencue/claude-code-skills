@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "updated": "2025-05-23T00:00:00Z",
+  "skills": [
+    {
+      "id": "video-perception",
+      "name": "Video Perception",
+      "description": "Extract frames from video/GIF via ffmpeg and analyze with Claude Vision",
+      "repo": "jordanrendric/claude-video-vision",
+      "path": "skills/video-perception",
+      "tags": ["video", "ffmpeg", "vision", "gif", "frames"],
+      "requires": ["ffmpeg"],
+      "profile": "video"
+    },
+    {
+      "id": "ffmpeg-analyse-video",
+      "name": "FFmpeg Video Analysis",
+      "description": "Analyze video content by extracting frames with ffmpeg and generating timestamped summaries",
+      "repo": "fabriqaai/ffmpeg-analyse-video-skill",
+      "path": "skill",
+      "tags": ["video", "ffmpeg", "analysis", "frames"],
+      "requires": ["ffmpeg"],
+      "profile": "video"
+    },
+    {
+      "id": "threejs-scene-builder",
+      "name": "Three.js Scene Builder",
+      "description": "Build 3D scenes with Three.js — geometry, materials, lighting, animation",
+      "repo": "CloudAI-X/threejs-skills",
+      "path": "skills/scene-builder",
+      "tags": ["threejs", "3d", "webgl", "animation"],
+      "requires": [],
+      "profile": "threejs"
+    },
+    {
+      "id": "code-review",
+      "name": "Code Review",
+      "description": "Structured code review with security, performance, and maintainability checks",
+      "repo": "recodeee/skills",
+      "path": "skills/review/code-review",
+      "tags": ["review", "security", "quality"],
+      "requires": [],
+      "profile": "backend"
+    },
+    {
+      "id": "building-with-medusa",
+      "name": "Building with Medusa",
+      "description": "Medusa v2 development — modules, workflows, API routes, admin extensions",
+      "repo": "recodeee/skills",
+      "path": "skills/medusa/building-with-medusa",
+      "tags": ["medusa", "ecommerce", "backend", "storefront"],
+      "requires": [],
+      "profile": "medusa-dev"
+    },
+    {
+      "id": "cybersecurity-pack",
+      "name": "Cybersecurity Skills Pack",
+      "description": "754 cybersecurity skills — red team, blue team, forensics, DFIR, pentesting",
+      "repo": "mukul975/Anthropic-Cybersecurity-Skills",
+      "path": "skills",
+      "tags": ["security", "pentest", "forensics", "dfir", "red-team", "blue-team"],
+      "requires": [],
+      "profile": "cybersecurity"
+    },
+    {
+      "id": "rtk-context-trim",
+      "name": "RTK Context Trim",
+      "description": "Trim shell output tokens using RTK — 60-90% savings on ls/git/cat",
+      "repo": "recodeee/skills",
+      "path": "skills/meta/rtk-context-trim",
+      "tags": ["tokens", "optimization", "rtk", "cost"],
+      "requires": ["rtk"],
+      "profile": "core"
+    },
+    {
+      "id": "coolify-deploy",
+      "name": "Coolify Deploy",
+      "description": "Deploy and manage apps on Coolify — env vars, domains, CI/CD",
+      "repo": "recodeee/skills",
+      "path": "skills/deployment/coolify-deploy",
+      "tags": ["deploy", "coolify", "docker", "ci"],
+      "requires": [],
+      "profile": "coolify"
+    },
+    {
+      "id": "fastapi-scaffold",
+      "name": "FastAPI Scaffold",
+      "description": "Scaffold FastAPI projects with SQLAlchemy, Alembic, Pydantic schemas",
+      "repo": "recodeee/skills",
+      "path": "skills/python/fastapi-scaffold",
+      "tags": ["python", "fastapi", "api", "sqlalchemy"],
+      "requires": ["uv"],
+      "profile": "python-api"
+    },
+    {
+      "id": "rust-cargo-best-practices",
+      "name": "Rust Cargo Best Practices",
+      "description": "Idiomatic Rust patterns — error handling, traits, async, cargo workspace",
+      "repo": "recodeee/skills",
+      "path": "skills/rust/cargo-best-practices",
+      "tags": ["rust", "cargo", "async", "traits"],
+      "requires": ["cargo"],
+      "profile": "rust"
+    }
+  ],
+  "mcps": [
+    {
+      "id": "gbrain",
+      "name": "gbrain",
+      "description": "Personal wiki with embeddings + backlinks — persistent memory across sessions",
+      "repo": "recodeee/mcps",
+      "install": "bun",
+      "tags": ["memory", "wiki", "embeddings", "knowledge"]
+    },
+    {
+      "id": "colony",
+      "name": "Colony",
+      "description": "Multi-agent coordination MCP — task claiming, file locks, handoffs",
+      "repo": "recodeee/colony",
+      "install": "npx",
+      "tags": ["multi-agent", "coordination", "parallel"]
+    },
+    {
+      "id": "excel-mcp",
+      "name": "Excel MCP",
+      "description": "Read and write .xlsx spreadsheets natively",
+      "repo": "recodeee/mcps",
+      "install": "uvx",
+      "tags": ["excel", "spreadsheet", "xlsx"]
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright",
+      "description": "Browser automation — screenshots, testing, scraping",
+      "repo": "anthropics/claude-code",
+      "install": "npx",
+      "tags": ["browser", "testing", "screenshots", "scraping"]
+    },
+    {
+      "id": "claude-video-vision",
+      "name": "Claude Video Vision",
+      "description": "Video frame extraction + audio transcription MCP for Claude",
+      "repo": "jordanrendric/claude-video-vision",
+      "install": "npx",
+      "tags": ["video", "vision", "ffmpeg", "whisper"]
+    }
+  ]
+}

@@ -14,11 +14,61 @@
 import { spawnSync } from "node:child_process";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readFileSync, existsSync } from "node:fs";
 
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const PROFILES_DIR = process.env.CUE_PROFILES_DIR ?? join(REPO_ROOT, "profiles");
+const REGISTRY_PATH = join(REPO_ROOT, "docs", "registry", "index.json");
+const REGISTRY_URL = "https://recodeee.github.io/cue/registry/index.json";
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
+
+interface RegistrySkill {
+  id: string; name: string; description: string;
+  repo: string; path: string; tags: string[];
+  requires: string[]; profile: string;
+}
+interface RegistryMcp {
+  id: string; name: string; description: string;
+  repo: string; install: string; tags: string[];
+}
+interface Registry {
+  version: number; skills: RegistrySkill[]; mcps: RegistryMcp[];
+}
+
+function loadRegistry(): Registry | null {
+  // Try local first, then fetch remote
+  if (existsSync(REGISTRY_PATH)) {
+    try { return JSON.parse(readFileSync(REGISTRY_PATH, "utf8")); } catch {}
+  }
+  // Try fetching remote (sync via spawnSync curl)
+  const res = spawnSync("curl", ["-sfL", "--max-time", "5", REGISTRY_URL], { encoding: "utf8" });
+  if (res.status === 0 && res.stdout) {
+    try { return JSON.parse(res.stdout); } catch {}
+  }
+  return null;
+}
+
+function searchRegistry(query: string, registry: Registry): { skills: RegistrySkill[]; mcps: RegistryMcp[] } {
+  const q = query.toLowerCase();
+  const skills = registry.skills.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.description.toLowerCase().includes(q) ||
+    s.tags.some(t => t.includes(q)) ||
+    s.id.includes(q)
+  );
+  const mcps = registry.mcps.filter(m =>
+    m.name.toLowerCase().includes(q) ||
+    m.description.toLowerCase().includes(q) ||
+    m.tags.some(t => t.includes(q)) ||
+    m.id.includes(q)
+  );
+  return { skills, mcps };
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -85,14 +135,49 @@ async function cmdSearchSkills(query: string, json: boolean): Promise<number> {
 }
 
 async function cmdSearch(query: string, json: boolean): Promise<number> {
-  if (!json) process.stdout.write(`🔍 Searching MCPs and skills for "${query}"...\n\n`);
+  if (!query) {
+    process.stderr.write("Usage: cue marketplace search <query>\n");
+    return 1;
+  }
 
+  // Search built-in registry first
+  const registry = loadRegistry();
+  if (registry) {
+    const results = searchRegistry(query, registry);
+    if (json) {
+      process.stdout.write(JSON.stringify(results, null, 2) + "\n");
+      return 0;
+    }
+    if (results.skills.length > 0) {
+      process.stdout.write("── Skills ──\n\n");
+      for (const s of results.skills) {
+        process.stdout.write(`  ${s.name}  (${s.repo})\n`);
+        process.stdout.write(`    ${s.description}\n`);
+        process.stdout.write(`    tags: ${s.tags.join(", ")}${s.requires.length ? `  requires: ${s.requires.join(", ")}` : ""}\n\n`);
+      }
+    }
+    if (results.mcps.length > 0) {
+      process.stdout.write("── MCPs ──\n\n");
+      for (const m of results.mcps) {
+        process.stdout.write(`  ${m.name}  (${m.install})\n`);
+        process.stdout.write(`    ${m.description}\n`);
+        process.stdout.write(`    tags: ${m.tags.join(", ")}\n\n`);
+      }
+    }
+    if (results.skills.length === 0 && results.mcps.length === 0) {
+      process.stdout.write(`No results for "${query}" in the registry.\n`);
+    } else {
+      process.stdout.write(`Install with: cue marketplace install-skill <repo>\n`);
+    }
+    return 0;
+  }
+
+  // Fallback to Smithery + npx
+  if (!json) process.stdout.write(`🔍 Searching MCPs and skills for "${query}"...\n\n`);
   if (!json) process.stdout.write("── MCPs (Smithery) ──\n\n");
   await cmdSearchMcps(query, json);
-
   if (!json) process.stdout.write("\n── Skills ──\n\n");
   await cmdSearchSkills(query, json);
-
   return 0;
 }
 

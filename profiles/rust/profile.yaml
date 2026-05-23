@@ -1,0 +1,8 @@
+name: rust
+icon: "🦀"
+description: Rust development — cargo, async, traits, error handling, CLI tools, systems programming
+inherits: core
+skills:
+  local:
+    - review/code-review
+mcps: []

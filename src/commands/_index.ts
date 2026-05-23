@@ -209,6 +209,10 @@ export const COMMANDS = {
     summary: "Self-update: git pull + bun install + sync",
     load: () => import("./update"),
   },
+  upgrade: {
+    summary: "Pull new skills/profiles from the registry",
+    load: () => import("./upgrade"),
+  },
   completions: {
     summary: "Output shell completion script (bash/zsh)",
     load: () => import("./completions"),
@@ -216,6 +220,10 @@ export const COMMANDS = {
   watch: {
     summary: "Auto-switch profile notification on cd (shell hook)",
     load: () => import("./watch"),
+  },
+  benchmark: {
+    summary: "Measure profile efficiency: tokens, skill usage, cost",
+    load: () => import("./benchmark"),
   },
   tree: {
     summary: "Visualize profile inheritance tree with resources",

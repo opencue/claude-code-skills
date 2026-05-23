@@ -124,7 +124,19 @@ function similarity(a: string, b: string): number {
 async function main(argv: string[]): Promise<number> {
   const args = argv.slice(2);
 
-  if (args.length === 0 || args[0] === "-h" || args[0] === "--help" || args[0] === "help") {
+  if (args.length === 0) {
+    // Show status dashboard by default (like `git status`)
+    const statusCmd = COMMANDS["status"];
+    try {
+      const mod = await statusCmd.load();
+      return await mod.run([]);
+    } catch {
+      printHelp();
+      return 0;
+    }
+  }
+
+  if (args[0] === "-h" || args[0] === "--help" || args[0] === "help") {
     printHelp();
     return 0;
   }

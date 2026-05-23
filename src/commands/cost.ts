@@ -6,7 +6,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { loadProfile } from "../lib/profile-loader";
+import { loadProfile, listProfiles } from "../lib/profile-loader";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -37,9 +37,60 @@ function getMcpToolCount(id: string): number {
   return 1;
 }
 
+async function runCompare(json: boolean): Promise<number> {
+  const profiles = await listProfiles();
+  const results: { name: string; skills: number; mcps: number; tokens: number; cost100: string }[] = [];
+
+  for (const name of profiles) {
+    try {
+      const profile = await loadProfile(name);
+      const skillIds = profile.skills.local.map((s: any) => s.id);
+      const skillTokens = skillIds.reduce((sum: number, id: string) => sum + getSkillTokens(id), 0);
+      const mcpIds = profile.mcps.map((m: any) => m.id);
+      const mcpToolCount = mcpIds.reduce((sum: number, id: string) => sum + getMcpToolCount(id), 0);
+      const total = skillTokens + (mcpToolCount * 50) + 200;
+      results.push({
+        name,
+        skills: skillIds.length,
+        mcps: mcpIds.length,
+        tokens: total,
+        cost100: (total * 0.000003 * 100).toFixed(2),
+      });
+    } catch { /* skip broken profiles */ }
+  }
+
+  results.sort((a, b) => a.tokens - b.tokens);
+
+  if (json) {
+    process.stdout.write(JSON.stringify(results, null, 2) + "\n");
+    return 0;
+  }
+
+  const maxTokens = results[results.length - 1]?.tokens ?? 1;
+
+  process.stdout.write("📊 Token budget comparison (all profiles)\n\n");
+  process.stdout.write(`  ${"Profile".padEnd(20)} ${"Skills".padStart(6)} ${"MCPs".padStart(5)} ${"Tokens".padStart(8)} ${"$/100msg".padStart(8)}  Budget\n`);
+  process.stdout.write(`  ${"─".repeat(20)} ${"─".repeat(6)} ${"─".repeat(5)} ${"─".repeat(8)} ${"─".repeat(8)}  ${"─".repeat(20)}\n`);
+
+  for (const r of results) {
+    const barLen = Math.max(1, Math.round((r.tokens / maxTokens) * 20));
+    const bar = "█".repeat(barLen) + "░".repeat(20 - barLen);
+    const level = r.tokens > 20000 ? "🔴" : r.tokens > 8000 ? "🟡" : "🟢";
+    process.stdout.write(`  ${r.name.padEnd(20)} ${String(r.skills).padStart(6)} ${String(r.mcps).padStart(5)} ${r.tokens.toLocaleString().padStart(8)} ${"$" + r.cost100.padStart(7)}  ${bar} ${level}\n`);
+  }
+
+  process.stdout.write(`\n  ${results.length} profiles compared. Cheapest: ${results[0]?.name}, most expensive: ${results[results.length - 1]?.name}\n`);
+  return 0;
+}
+
 export async function run(args: string[]): Promise<number> {
   const json = args.includes("--json");
+  const compare = args.includes("--compare");
   let profileName = args.find(a => !a.startsWith("-"));
+
+  if (compare) {
+    return runCompare(json);
+  }
 
   if (!profileName) {
     try { profileName = await resolveProfileForCwd(process.cwd()); } catch {

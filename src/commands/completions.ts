@@ -96,6 +96,10 @@ _cue "$@"
 `;
 }
 
+export function completionScript(shell: "bash" | "zsh"): string {
+  return shell === "zsh" ? zshCompletion() : bashCompletion();
+}
+
 export async function run(args: string[]): Promise<number> {
   const shell = args[0] ?? (process.env.SHELL?.includes("zsh") ? "zsh" : "bash");
 

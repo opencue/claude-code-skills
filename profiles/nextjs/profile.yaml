@@ -1,0 +1,8 @@
+name: nextjs
+icon: "▲"
+description: Next.js full-stack — App Router, Server Components, API routes, Vercel deploy
+inherits: frontend
+skills:
+  local:
+    - review/code-review
+mcps: []
