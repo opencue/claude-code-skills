@@ -100,7 +100,7 @@ install_deps() {
 soul() {
   local repo="$1"
   shift
-  (cd "$repo" && "$repo/bin/soul" "$@")
+  (cd "$repo" && "$repo/bin/cue" "$@")
 }
 
 profile_count() {
