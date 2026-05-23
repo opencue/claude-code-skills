@@ -71,6 +71,7 @@ sleep 0.6
 echo "▸ launching kitty in Xvfb (will attach to tmux)"
 DISPLAY=$DISPLAY_NUM kitty \
   --class cue-demo \
+  --start-as=fullscreen \
   --override font_family="JetBrainsMono Nerd Font" \
   --override font_size=14 \
   --override background="#0f0f1a" \
@@ -82,13 +83,25 @@ DISPLAY=$DISPLAY_NUM kitty \
   --override remember_window_size=no \
   --override initial_window_width=${WIDTH} \
   --override initial_window_height=${HEIGHT} \
+  --override hide_window_decorations=yes \
   -- tmux -L cue-demo attach -t demo >/dev/null 2>&1 &
 KITTY_PID=$!
-sleep 2.5
+sleep 2.8
 
-# Maximize the kitty window so it fills the virtual display
-DISPLAY=$DISPLAY_NUM xdotool search --class cue-demo windowsize 100% 100% windowmove 0 0 2>/dev/null || true
-sleep 0.5
+# Belt-and-suspenders: explicitly resize/move kitty window in case fullscreen needs a WM
+DISPLAY=$DISPLAY_NUM xdotool search --class cue-demo windowsize ${WIDTH} ${HEIGHT} windowmove 0 0 windowfocus 2>/dev/null || true
+sleep 0.4
+
+# ── Preflight: confirm kitty actually rendered to Xvfb ───────────────────────
+if command -v xwd >/dev/null && command -v convert >/dev/null; then
+  DISPLAY=$DISPLAY_NUM xwd -root | convert xwd:- /tmp/cue-preflight.png 2>/dev/null
+  mean=$(identify -format '%[mean]' /tmp/cue-preflight.png 2>/dev/null || echo "0")
+  size=$(stat -c%s /tmp/cue-preflight.png 2>/dev/null || echo "0")
+  echo "▸ preflight Xvfb screenshot: ${size} bytes, mean pixel intensity ${mean}"
+  if [[ "$size" -lt 5000 ]]; then
+    echo "  ⚠ preflight image is suspiciously small — kitty may not have rendered. Recording anyway."
+  fi
+fi
 
 # ── 6. Start ffmpeg recording ────────────────────────────────────────────────
 echo "▸ starting ffmpeg x11grab (recording ${RECORD_SECONDS}s)"

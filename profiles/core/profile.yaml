@@ -12,5 +12,7 @@ skills:
     - meta/kiro-powers
     - caveman/caveman
     - caveman/caveman-commit
+mcps:
+  - cue-tty-watch    # Claude's eyes inside X displays / tmux panes (screenshot, capture-pane, send-keys)
 plugins:
   - claude-mem@thedotmack

@@ -11,4 +11,4 @@ skills:
       skills: [fireworks-tech-graph]
     - repo: cathrynlavery/diagram-design
       skills: [diagram-design]
-mcps: []
+mcps: []   # cue-tty-watch comes from core via inheritance
