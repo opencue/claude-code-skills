@@ -1,18 +1,51 @@
 {
-  "name": "cue",
-  "version": "0.2.0",
+  "name": "cue-ai",
+  "version": "0.3.0",
   "description": "cue — Agent Profile Manager for Claude Code & Codex. Pick a profile, launch with the right skills, MCPs, and plugins.",
-  "private": true,
   "type": "module",
   "bin": {
     "cue": "bin/cue"
   },
   "engines": {
-    "bun": ">=1.0.0"
+    "bun": ">=1.0.0",
+    "node": ">=20.0.0"
   },
   "scripts": {
-    "cue": "bun src/index.ts"
+    "cue": "bun src/index.ts",
+    "test": "bun test",
+    "build": "bun build src/index.ts --no-bundle"
   },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "agent",
+    "profile",
+    "skills",
+    "mcp",
+    "ai",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "recodeee",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recodeee/cue.git"
+  },
+  "homepage": "https://github.com/recodeee/cue",
+  "bugs": {
+    "url": "https://github.com/recodeee/cue/issues"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "profiles/",
+    "resources/",
+    "plugins/",
+    "install.sh",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@clack/prompts": "^1.4.0",
     "ajv": "^8.17.1",

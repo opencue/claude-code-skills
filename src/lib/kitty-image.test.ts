@@ -1,5 +1,11 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { isKittyTerminal, renderKittyImage, _resetCache } from "./kitty-image";
+import {
+  isKittyTerminal,
+  kittyPlaceholderLabel,
+  renderKittyImage,
+  transmitKittyImage,
+  _resetCache,
+} from "./kitty-image";
 
 const SAVED_ENV = { ...process.env };
 function clearKittyEnv() {
@@ -9,8 +15,10 @@ function clearKittyEnv() {
   delete process.env.TMUX;
   delete process.env.TERM_PROGRAM;
   delete process.env.LC_TERMINAL;
+  delete process.env.CUE_KITTY;
   delete process.env.CUE_DISABLE_KITTY_IMAGES;
-  _resetCache();
+  // Override ancestor walk to return false — tests control detection via env vars only
+  _resetCache(() => false);
 }
 
 afterEach(() => {
@@ -101,5 +109,103 @@ describe("renderKittyImage", () => {
     const seq = renderKittyImage("/path/to/img.png", 2, 1, 1);
     const b64 = Buffer.from("/path/to/img.png", "utf8").toString("base64");
     expect(seq).toContain(b64);
+  });
+});
+
+
+describe("kittyPlaceholderLabel", () => {
+  test("encodes image ID via 256-color FG escape", () => {
+    const label = kittyPlaceholderLabel(42, 2, 1);
+    expect(label.startsWith("\x1b[38;5;42m")).toBe(true);
+    expect(label.endsWith("\x1b[39m")).toBe(true);
+  });
+
+  test("emits one U+10EEEE per cell with row+col diacritics", () => {
+    const label = kittyPlaceholderLabel(7, 2, 1);
+    // 2 cols × 1 row = 2 placeholder chars
+    const placeholderCount = [...label].filter((ch) => ch === "\u{10EEEE}").length;
+    expect(placeholderCount).toBe(2);
+    // Both share row 0 (U+0305); columns 0 (U+0305) and 1 (U+030D)
+    expect(label).toContain("\u{10EEEE}\u{0305}\u{0305}");
+    expect(label).toContain("\u{10EEEE}\u{0305}\u{030D}");
+  });
+
+  test("placeholder cells count as one display cell each, FG escape strips to zero", async () => {
+    // Verify the layout-engine sees the label as exactly `cols × rows` wide.
+    const stringWidth = (await import("fast-string-width")).default;
+    const label = kittyPlaceholderLabel(1, 2, 1);
+    expect(stringWidth(label)).toBe(2);
+    const wide = kittyPlaceholderLabel(1, 4, 1);
+    expect(stringWidth(wide)).toBe(4);
+  });
+
+  test("rejects out-of-range image IDs", () => {
+    expect(() => kittyPlaceholderLabel(0)).toThrow(/imageId/);
+    expect(() => kittyPlaceholderLabel(256)).toThrow(/imageId/);
+    expect(() => kittyPlaceholderLabel(-1)).toThrow(/imageId/);
+    expect(() => kittyPlaceholderLabel(1.5)).toThrow(/imageId/);
+  });
+
+  test("rejects rows/cols beyond the diacritic table", () => {
+    expect(() => kittyPlaceholderLabel(1, 33, 1)).toThrow(/diacritic/);
+    expect(() => kittyPlaceholderLabel(1, 1, 33)).toThrow(/diacritic/);
+  });
+
+  test("rejects non-positive dimensions", () => {
+    expect(() => kittyPlaceholderLabel(1, 0, 1)).toThrow(/>= 1/);
+    expect(() => kittyPlaceholderLabel(1, 1, 0)).toThrow(/>= 1/);
+  });
+});
+
+describe("transmitKittyImage", () => {
+  let writes: string[] = [];
+  let originalIsTTY: boolean | undefined;
+  let originalWrite: typeof process.stdout.write;
+
+  beforeEach(() => {
+    clearKittyEnv();
+    writes = [];
+    originalIsTTY = process.stdout.isTTY;
+    originalWrite = process.stdout.write.bind(process.stdout);
+    Object.defineProperty(process.stdout, "isTTY", { value: true, configurable: true });
+    process.stdout.write = ((chunk: unknown) => {
+      writes.push(typeof chunk === "string" ? chunk : String(chunk));
+      return true;
+    }) as typeof process.stdout.write;
+  });
+
+  afterEach(() => {
+    process.stdout.write = originalWrite;
+    Object.defineProperty(process.stdout, "isTTY", { value: originalIsTTY, configurable: true });
+  });
+
+  test("writes a=T,U=1 sequence with image id, dimensions, and base64 path", () => {
+    transmitKittyImage("/tmp/icon.png", 99, 2, 1);
+    expect(writes).toHaveLength(1);
+    const seq = writes[0]!;
+    expect(seq.startsWith("\x1b_G")).toBe(true);
+    expect(seq.endsWith("\x1b\\")).toBe(true);
+    expect(seq).toContain("a=T");
+    expect(seq).toContain("U=1");
+    expect(seq).toContain("i=99");
+    expect(seq).toContain("c=2,r=1");
+    const b64 = Buffer.from("/tmp/icon.png", "utf8").toString("base64");
+    expect(seq).toContain(b64);
+  });
+
+  test("wraps with tmux passthrough envelope when inside tmux", () => {
+    process.env.TMUX = "/tmp/tmux-1000/default,1234,0";
+    try {
+      transmitKittyImage("/tmp/icon.png", 5);
+      expect(writes[0]!.startsWith("\x1bPtmux;")).toBe(true);
+    } finally {
+      delete process.env.TMUX;
+    }
+  });
+
+  test("no-op when stdout is not a TTY", () => {
+    Object.defineProperty(process.stdout, "isTTY", { value: false, configurable: true });
+    transmitKittyImage("/tmp/icon.png", 1);
+    expect(writes).toHaveLength(0);
   });
 });

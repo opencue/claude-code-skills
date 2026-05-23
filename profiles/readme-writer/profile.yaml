@@ -1,0 +1,13 @@
+name: readme-writer
+icon: "🎨"
+description: "Beautiful README design with SVG diagrams — architecture flows, terminal mockups, and editorial visuals"
+inherits: core
+skills:
+  local:
+    - design/readme-svg-design
+  npx:
+    - repo: yizhiyanhua-ai/fireworks-tech-graph
+      skills: [fireworks-tech-graph]
+    - repo: cathrynlavery/diagram-design
+      skills: [diagram-design]
+mcps: []

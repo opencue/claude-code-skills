@@ -110,12 +110,75 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
     await writeFile(join(tmpDir, "config.toml"), tomlRender({ mcp_servers: mcpServers }));
   }
 
-  // 3. CLAUDE.md with stamp
+  // 3. CLAUDE.md with stamp + role identity
   const iconStr = profile.icon ?? "";
-  const stamp = `<!-- cue: profile=${profile.name} icon=${iconStr} -->\n` +
-                `# Active Profile: ${iconStr ? iconStr + " " : ""}${profile.name}\n` +
-                `> ${profile.description}\n` +
-                `> generated ${new Date().toISOString()} — do not hand-edit\n\n`;
+  const skillsList = (profile.skills?.local ?? [])
+    .map((s) => typeof s === "string" ? s : s.id)
+    .filter((s) => !s.includes("*"));
+  const mcpsList = (profile.mcps ?? [])
+    .map((m) => typeof m === "string" ? m : m.id);
+
+  let stamp = `<!-- cue: profile=${profile.name} icon=${iconStr} -->\n` +
+              `# Active Profile: ${iconStr ? iconStr + " " : ""}${profile.name}\n\n` +
+              `> ${profile.description}\n\n`;
+
+  // Role identity — tell Claude what it is
+  stamp += `## Your Role\n\n` +
+           `You are operating as **${profile.name}** — ${profile.description.toLowerCase()}.\n` +
+           `Focus on tasks within this domain. Use the skills loaded in this profile.\n\n`;
+
+  // Skills summary
+  if (skillsList.length > 0) {
+    stamp += `## Available Skills (${skillsList.length})\n\n`;
+    if (skillsList.length <= 20) {
+      stamp += skillsList.map((s) => `- \`${s.split("/").pop()}\``).join("\n") + "\n";
+    } else {
+      // Group by category
+      const groups = new Map<string, string[]>();
+      for (const s of skillsList) {
+        const parts = s.split("/");
+        const cat = parts.length > 1 ? parts[0]! : "other";
+        const list = groups.get(cat) ?? [];
+        list.push(parts.pop()!);
+        groups.set(cat, list);
+      }
+      for (const [cat, skills] of [...groups.entries()].sort()) {
+        stamp += `- **${cat}/** (${skills.length}): ${skills.slice(0, 5).join(", ")}${skills.length > 5 ? ` +${skills.length - 5} more` : ""}\n`;
+      }
+    }
+    stamp += "\n";
+  }
+
+  // MCPs
+  if (mcpsList.length > 0) {
+    stamp += `## MCP Servers: ${mcpsList.join(", ")}\n\n`;
+  }
+
+  // Profile fit monitoring
+  stamp += `## Profile Fit Monitor\n\n` +
+    `Track how well this profile matches the work being done. If you notice:\n` +
+    `- You're doing work outside this profile's domain (e.g. backend work in a frontend profile)\n` +
+    `- None of the loaded skills are relevant to what the user is asking\n` +
+    `- You keep needing tools/skills that aren't in this profile\n\n` +
+    `Then after completing the user's immediate request, suggest switching:\n\n` +
+    `> 💡 This session has been mostly [backend/infra/docs] work — your current profile is **${profile.name}**.\n` +
+    `> A better fit might be **[suggested]**. Switch with: \`/cue switch [name]\` or \`echo [name] > .cue-profile\`\n\n` +
+    `Only suggest once per session. Don't interrupt urgent work.\n\n`;
+
+  // #8: Warm-start context — last session summary
+  const lastSession = await getLastSessionSummary(profile.name);
+  if (lastSession) {
+    stamp += `## Last Session\n\n${lastSession}\n\n`;
+  }
+
+  // #9: Skill chaining hints — common workflows from usage patterns
+  const chains = await getSkillChains(skillsList);
+  if (chains) {
+    stamp += `## Common Workflows\n\n${chains}\n\n`;
+  }
+
+  stamp += `---\n*generated ${new Date().toISOString()} — do not hand-edit*\n\n`;
+
   await writeFile(join(tmpDir, agent === "claude-code" ? "CLAUDE.md" : "AGENTS.md"), stamp + input.userClaudeMd);
 
   // 4. hash (no trailing newline so /^[a-f0-9]{64}$/ matches directly)
@@ -241,4 +304,130 @@ function tomlRender(obj: { mcp_servers: Record<string, unknown> }): string {
     out.push("");
   }
   return out.join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// #8: Warm-start — summarize last session for this profile
+// ---------------------------------------------------------------------------
+
+import { homedir } from "node:os";
+import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+
+async function getLastSessionSummary(profileName: string): Promise<string | null> {
+  try {
+    const projectsDir = join(homedir(), ".claude", "projects");
+    if (!existsSync(projectsDir)) return null;
+
+    // Find the most recent session jsonl in the cwd-based project dir
+    const cwdKey = process.cwd().replace(/\//g, "-");
+    const projectDir = readdirSync(projectsDir)
+      .filter((d) => d.includes(cwdKey.slice(1, 30)))
+      .map((d) => join(projectsDir, d))
+      .find((d) => existsSync(d));
+
+    if (!projectDir) return null;
+
+    // Find most recent .jsonl
+    const sessions = readdirSync(projectDir)
+      .filter((f) => f.endsWith(".jsonl"))
+      .map((f) => ({ name: f, mtime: statSync(join(projectDir, f)).mtimeMs }))
+      .sort((a, b) => b.mtime - a.mtime);
+
+    if (sessions.length === 0) return null;
+
+    const lastFile = join(projectDir, sessions[0]!.name);
+    const lastMtime = new Date(sessions[0]!.mtime);
+    const ago = formatTimeAgo(lastMtime);
+
+    // Extract a quick summary: last few assistant messages
+    const res = spawnSync("tail", ["-50", lastFile], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    if (!res.stdout) return null;
+
+    const lines = res.stdout.split("\n").filter(Boolean);
+    const summaryParts: string[] = [];
+
+    for (const line of lines.reverse()) {
+      try {
+        const msg = JSON.parse(line);
+        if (msg.type === "assistant" && msg.message?.content) {
+          const text = Array.isArray(msg.message.content)
+            ? msg.message.content.find((c: any) => c.type === "text")?.text ?? ""
+            : typeof msg.message.content === "string" ? msg.message.content : "";
+          if (text.length > 20) {
+            // Take first sentence
+            const sentence = text.split(/[.!?\n]/)[0]?.trim();
+            if (sentence && sentence.length > 10) summaryParts.push(sentence);
+          }
+        }
+      } catch {}
+      if (summaryParts.length >= 3) break;
+    }
+
+    if (summaryParts.length === 0) return null;
+
+    return `Last session (${ago}): ${summaryParts.reverse().join(". ")}.`;
+  } catch {
+    return null;
+  }
+}
+
+function formatTimeAgo(date: Date): string {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+// ---------------------------------------------------------------------------
+// #9: Skill chaining — detect common skill sequences from usage
+// ---------------------------------------------------------------------------
+
+async function getSkillChains(skillsList: string[]): Promise<string | null> {
+  try {
+    const projectsDir = join(homedir(), ".claude", "projects");
+    if (!existsSync(projectsDir)) return null;
+
+    // Scan recent sessions for skill co-occurrence
+    const coOccurrence = new Map<string, Map<string, number>>();
+    const slugs = new Set(skillsList.map((s) => s.split("/").pop() ?? s));
+
+    const res = spawnSync("grep", ["-roh", "skills/[a-z][a-z0-9-]*/SKILL.md", projectsDir], {
+      stdio: ["ignore", "pipe", "pipe"],
+      encoding: "utf8",
+      timeout: 5000,
+    });
+
+    if (!res.stdout) return null;
+
+    // Group skill reads by session file (co-occurrence within same session)
+    const sessionSkills = new Map<string, string[]>();
+    // We can't easily get per-file grouping from grep -r, so use a simpler heuristic:
+    // just find which skills from THIS profile are most commonly used together
+    const skillCounts = new Map<string, number>();
+    for (const line of res.stdout.split("\n")) {
+      const match = line.match(/skills\/([a-z][a-z0-9-]*)\/SKILL\.md/);
+      if (match && slugs.has(match[1]!)) {
+        skillCounts.set(match[1]!, (skillCounts.get(match[1]!) ?? 0) + 1);
+      }
+    }
+
+    // Find top 3 most-used skills and present as a workflow hint
+    const topSkills = [...skillCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([s]) => s);
+
+    if (topSkills.length < 2) return null;
+
+    // Build a simple chain from the top skills
+    return `Based on your usage patterns, common skill sequences:\n` +
+      `- ${topSkills.slice(0, 3).join(" → ")}\n` +
+      (topSkills.length > 3 ? `- ${topSkills.slice(2, 5).join(" → ")}\n` : "");
+  } catch {
+    return null;
+  }
 }

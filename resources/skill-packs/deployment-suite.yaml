@@ -1,0 +1,13 @@
+name: deployment-suite
+description: Deployment tools — Docker, Coolify, CI/CD
+skills:
+  - deployment/coolify
+  - deployment/pnpm
+  - github/gh-fix-ci
+  - github/github
+requires_mcps:
+  - coolify
+tags:
+  - deployment
+  - ci
+  - devops

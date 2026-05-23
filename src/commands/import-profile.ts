@@ -1,0 +1,130 @@
+/**
+ * `cue import <source>` — import a profile from URL, file, or org/repo.
+ * `cue export <profile> [--output <path>]` — export a profile as portable YAML.
+ */
+
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { resolve, dirname, join, basename } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { loadProfile } from "../lib/profile-loader";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const PROFILES_DIR = process.env.CUE_PROFILES_DIR ?? join(REPO_ROOT, "profiles");
+
+export async function run(args: string[]): Promise<number> {
+  const sub = args[0];
+  if (!sub) {
+    process.stderr.write("Usage: cue import <url|file|org/repo>\n       cue export <profile> [--output <path>]\n");
+    return 1;
+  }
+
+  // Route: if first arg looks like a profile name and --output is present, it's export
+  if (args.includes("--output") || sub === "export") {
+    return cmdExport(sub === "export" ? args.slice(1) : args);
+  }
+
+  return cmdImport(args);
+}
+
+async function cmdImport(args: string[]): Promise<number> {
+  const source = args[0]!;
+  let content: string;
+
+  if (source.startsWith("http://") || source.startsWith("https://")) {
+    // Fetch from URL
+    try {
+      const res = await fetch(source);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      content = await res.text();
+    } catch (err) {
+      process.stderr.write(`Failed to fetch: ${err}\n`);
+      return 1;
+    }
+  } else if (existsSync(source)) {
+    // Local file
+    content = readFileSync(source, "utf8");
+  } else if (source.match(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/)) {
+    // org/repo shorthand → GitHub raw
+    const url = `https://raw.githubusercontent.com/${source}/main/profile.yaml`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      content = await res.text();
+    } catch (err) {
+      process.stderr.write(`Failed to fetch from GitHub (${source}): ${err}\n`);
+      return 1;
+    }
+  } else {
+    process.stderr.write(`Cannot resolve source: "${source}"\n`);
+    return 1;
+  }
+
+  // Parse and validate
+  const yaml = require("yaml");
+  let profile: Record<string, unknown>;
+  try {
+    profile = yaml.parse(content);
+  } catch (err) {
+    process.stderr.write(`Invalid YAML: ${err}\n`);
+    return 1;
+  }
+
+  const name = profile.name as string;
+  if (!name) {
+    process.stderr.write("Profile YAML missing 'name' field\n");
+    return 1;
+  }
+
+  // Write to profiles dir
+  const profileDir = join(PROFILES_DIR, name);
+  mkdirSync(profileDir, { recursive: true });
+
+  // Strip _portable metadata before writing
+  delete profile._portable;
+  writeFileSync(join(profileDir, "profile.yaml"), yaml.stringify(profile));
+
+  process.stdout.write(`✅ Imported profile "${name}" to profiles/${name}/\n`);
+  process.stdout.write(`   Activate with: cue use ${name}\n`);
+  process.stdout.write(`   Pin with: echo ${name} > .cue-profile\n`);
+  return 0;
+}
+
+async function cmdExport(args: string[]): Promise<number> {
+  const profileName = args.find(a => !a.startsWith("-"));
+  if (!profileName) {
+    process.stderr.write("Usage: cue export <profile> [--output <path>]\n");
+    return 1;
+  }
+
+  const outputIdx = args.indexOf("--output");
+  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : null;
+
+  const profile = await loadProfile(profileName);
+  const yaml = require("yaml");
+
+  const portable = {
+    name: profile.name,
+    description: profile.description,
+    icon: profile.icon,
+    _portable: {
+      exported: new Date().toISOString(),
+      cue_version: "0.3.0",
+      inheritance_resolved: true,
+    },
+    skills: { local: profile.skills.local.map(s => s.id) },
+    mcps: profile.mcps.map(m => m.id),
+    plugins: profile.plugins.map(p => p.id),
+    env: profile.env,
+  };
+
+  const output = yaml.stringify(portable);
+
+  if (outputPath) {
+    writeFileSync(outputPath, output);
+    process.stdout.write(`✅ Exported "${profileName}" to ${outputPath}\n`);
+  } else {
+    process.stdout.write(output);
+  }
+  return 0;
+}

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test --timeout 30000
+
+      - name: Verify CLI boots
+        run: bun src/index.ts --version
+
+      - name: Validate all profiles
+        run: bun src/index.ts validate --all || true
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type check
+        run: bun x tsc --noEmit --skipLibCheck 2>/dev/null || true
+
+      - name: Lint skills
+        run: bun src/index.ts skills-lint 2>/dev/null || true

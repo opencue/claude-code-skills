@@ -1,5 +1,5 @@
 name: nvidia
-icon: "🟢"
+icon: "🎮"
 iconImage: "logo.png"
 description: "NVIDIA cuOpt: routing, LP/MILP, GPU-accelerated optimization (12 skills)"
 inherits: core

@@ -30,13 +30,31 @@ License: [MIT](./LICENSE).
 ## Install (one line)
 
 ```bash
-gh repo clone recodeee/cue ~/Documents/cue && ~/Documents/cue/install.sh
+npm install -g cue-ai
 ```
 
-…or, if you don't have `gh`:
+Or via the install script:
 
 ```bash
-git clone git@github.com:recodeee/cue.git ~/Documents/cue && ~/Documents/cue/install.sh
+curl -fsSL https://raw.githubusercontent.com/recodeee/cue/main/get.sh | bash
+```
+
+This installs bun (if needed), clones the repo to `~/Documents/cue`, and runs the interactive installer.
+
+**Options:**
+
+```bash
+# Non-interactive (auto-yes)
+curl -fsSL https://raw.githubusercontent.com/recodeee/cue/main/get.sh | bash -s -- --yes
+
+# Custom install location
+CUE_DIR=~/dev/cue curl -fsSL https://raw.githubusercontent.com/recodeee/cue/main/get.sh | bash
+```
+
+**Or clone manually:**
+
+```bash
+git clone https://github.com/recodeee/cue.git ~/Documents/cue && ~/Documents/cue/install.sh
 ```
 
 `install.sh` is interactive: it installs the `claude` shim by default and asks before touching `codex` (in case you already have a wrapper there). Non-interactive variants:

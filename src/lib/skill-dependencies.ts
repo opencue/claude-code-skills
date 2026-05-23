@@ -1,0 +1,119 @@
+/**
+ * Skill → MCP dependency detection.
+ *
+ * Detects both explicit (requires_mcps frontmatter) and implicit
+ * (mcp__<server>__ tool references in skill body) dependencies.
+ */
+
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
+
+export interface SkillDependency {
+  skillId: string;
+  mcpId: string;
+  source: "explicit" | "implicit";
+}
+
+export interface MissingDependency extends SkillDependency {
+  profile: string;
+}
+
+/**
+ * Parse explicit requires_mcps from skill frontmatter.
+ */
+function parseExplicitDeps(content: string): string[] {
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!fmMatch) return [];
+  const mcpMatch = fmMatch[1]!.match(/^requires_mcps:\s*\[([^\]]*)\]/m);
+  if (!mcpMatch) return [];
+  return mcpMatch[1]!.split(",").map(t => t.trim().replace(/['"]/g, "")).filter(Boolean);
+}
+
+/**
+ * Detect implicit MCP dependencies from mcp__<server>__<tool> references.
+ */
+function parseImplicitDeps(content: string): string[] {
+  const refs = content.match(/mcp__([a-zA-Z][a-zA-Z0-9_-]*)__/g);
+  if (!refs) return [];
+  const servers = new Set<string>();
+  for (const ref of refs) {
+    const match = ref.match(/^mcp__([a-zA-Z][a-zA-Z0-9_-]*)__$/);
+    if (match) servers.add(match[1]!);
+  }
+  return [...servers];
+}
+
+/**
+ * Resolve the SKILL.md path for a skill ID.
+ * Handles both "category/slug" and bare "slug" formats.
+ */
+function findSkillContent(skillId: string): string | null {
+  // Try direct path (category/slug)
+  const direct = join(SKILLS_ROOT, skillId, "SKILL.md");
+  if (existsSync(direct)) {
+    return readFileSync(direct, "utf8");
+  }
+
+  // Search all categories for the slug
+  try {
+    const cats = readdirSync(SKILLS_ROOT, { withFileTypes: true });
+    for (const cat of cats) {
+      if (!cat.isDirectory() || cat.name.startsWith("_")) continue;
+      const p = join(SKILLS_ROOT, cat.name, skillId, "SKILL.md");
+      if (existsSync(p)) return readFileSync(p, "utf8");
+    }
+  } catch { /* skip */ }
+
+  return null;
+}
+
+/**
+ * Get all MCP dependencies for a skill (explicit + implicit).
+ */
+export function getSkillDependencies(skillId: string): SkillDependency[] {
+  const content = findSkillContent(skillId);
+  if (!content) return [];
+
+  const deps: SkillDependency[] = [];
+
+  for (const mcp of parseExplicitDeps(content)) {
+    deps.push({ skillId, mcpId: mcp, source: "explicit" });
+  }
+
+  for (const mcp of parseImplicitDeps(content)) {
+    // Avoid duplicates with explicit
+    if (!deps.some(d => d.mcpId === mcp)) {
+      deps.push({ skillId, mcpId: mcp, source: "implicit" });
+    }
+  }
+
+  return deps;
+}
+
+/**
+ * Check a profile's skills against its MCPs and return missing dependencies.
+ */
+export function detectMissingDependencies(
+  profileName: string,
+  skillIds: string[],
+  profileMcpIds: string[],
+): MissingDependency[] {
+  const mcpSet = new Set(profileMcpIds.map(id => id.toLowerCase()));
+  const missing: MissingDependency[] = [];
+
+  for (const skillId of skillIds) {
+    const deps = getSkillDependencies(skillId);
+    for (const dep of deps) {
+      // Case-insensitive match (MCP IDs can vary in casing)
+      if (!mcpSet.has(dep.mcpId.toLowerCase())) {
+        missing.push({ ...dep, profile: profileName });
+      }
+    }
+  }
+
+  return missing;
+}

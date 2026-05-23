@@ -1,0 +1,140 @@
+/**
+ * Skill conflict detection — find opposing directives between skills.
+ */
+
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
+
+interface Directive {
+  skillId: string;
+  text: string;
+  type: "prefer" | "avoid" | "always" | "never" | "use";
+  domain: string; // extracted from tags/category
+  subjectTokens: Set<string>; // normalized tokens of the directive's subject
+}
+
+export interface Conflict {
+  skillA: string;
+  skillB: string;
+  directiveA: string;
+  directiveB: string;
+  domain: string;
+}
+
+const DIRECTIVE_PATTERNS = [
+  { re: /\b(always|must)\s+(?:use\s+)?(.+?)(?:\.|,|$)/gim, type: "always" as const, subjectGroup: 2 },
+  { re: /\b(?:never|don't|do not|avoid)\s+(?:use\s+)?(.+?)(?:\.|,|$)/gim, type: "never" as const, subjectGroup: 1 },
+  { re: /\b(?:prefer)\s+(.+?)(?:\s+over\s+.+?)?(?:\.|,|$)/gim, type: "prefer" as const, subjectGroup: 1 },
+  { re: /\b(?:avoid)\s+(.+?)(?:\.|,|$)/gim, type: "avoid" as const, subjectGroup: 1 },
+  { re: /\buse\s+(.+?)\s+(?:instead of|over|rather than)\s+(.+?)(?:\.|,|$)/gim, type: "use" as const, subjectGroup: 1 },
+];
+
+// Strip leading YAML frontmatter — name/description metadata isn't a behavioral directive.
+function stripFrontmatter(content: string): string {
+  if (!content.startsWith("---\n")) return content;
+  const end = content.indexOf("\n---", 4);
+  return end === -1 ? content : content.slice(end + 4);
+}
+
+const STOPWORDS = new Set([
+  "a", "an", "the", "to", "of", "in", "on", "for", "with", "and", "or", "be",
+  "is", "are", "was", "were", "this", "that", "it", "them", "they", "you",
+  "your", "we", "our", "us", "i", "my", "me", "any", "all", "no", "not",
+  "only", "just", "do", "does", "doing", "done", "can", "may", "should",
+  "would", "could", "will", "shall", "must", "have", "has", "had", "but",
+  "if", "as", "at", "by", "from", "into", "than", "then", "so", "such",
+  "very", "also", "more", "most", "even", "still", "ever", "again", "use",
+  "using", "used", "when", "where", "what", "who", "how", "why", "via",
+  "skill", "skills", "rules", "rule", "active", "exceptions", "exception",
+  "silently", "always", "never", "thing", "things",
+]);
+
+function tokenize(subject: string): Set<string> {
+  return new Set(
+    subject
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, " ")
+      .split(/\s+/)
+      .filter(t => t.length > 2 && !STOPWORDS.has(t))
+      .slice(0, 8), // cap to first 8 meaningful tokens — anything beyond is preamble
+  );
+}
+
+function extractDirectives(skillId: string): Directive[] {
+  const skillPath = join(SKILLS_ROOT, skillId, "SKILL.md");
+  let content: string;
+  try { content = readFileSync(skillPath, "utf8"); } catch { return []; }
+  content = stripFrontmatter(content);
+
+  const category = skillId.split("/")[0] ?? "unknown";
+  const directives: Directive[] = [];
+
+  for (const { re, type, subjectGroup } of DIRECTIVE_PATTERNS) {
+    re.lastIndex = 0;
+    let match;
+    while ((match = re.exec(content)) !== null) {
+      const subject = match[subjectGroup] ?? "";
+      const subjectTokens = tokenize(subject);
+      if (subjectTokens.size === 0) continue; // no meaningful subject — skip
+      directives.push({
+        skillId,
+        text: match[0].trim().slice(0, 100),
+        type,
+        domain: category,
+        subjectTokens,
+      });
+    }
+  }
+  return directives;
+}
+
+function subjectsOverlap(a: Directive, b: Directive): boolean {
+  for (const t of a.subjectTokens) if (b.subjectTokens.has(t)) return true;
+  return false;
+}
+
+function areOpposing(a: Directive, b: Directive): boolean {
+  if (a.domain !== b.domain) return false;
+  // Subjects must share at least one meaningful token. "Always run tests" vs
+  // "Never run tests" overlaps on "run"/"tests"; "Always active" vs "Don't
+  // suggest the flag" shares nothing and is not a conflict.
+  if (!subjectsOverlap(a, b)) return false;
+  // "always X" vs "never X" or "avoid X"
+  if (a.type === "always" && (b.type === "never" || b.type === "avoid")) return true;
+  if (b.type === "always" && (a.type === "never" || a.type === "avoid")) return true;
+  // "prefer X" vs "avoid X"
+  if (a.type === "prefer" && b.type === "avoid") return true;
+  if (b.type === "prefer" && a.type === "avoid") return true;
+  return false;
+}
+
+export function detectConflicts(skillIds: string[]): Conflict[] {
+  const allDirectives: Directive[] = [];
+  for (const id of skillIds) {
+    allDirectives.push(...extractDirectives(id));
+  }
+
+  const conflicts: Conflict[] = [];
+  for (let i = 0; i < allDirectives.length; i++) {
+    for (let j = i + 1; j < allDirectives.length; j++) {
+      const a = allDirectives[i]!;
+      const b = allDirectives[j]!;
+      if (a.skillId === b.skillId) continue;
+      if (areOpposing(a, b)) {
+        conflicts.push({
+          skillA: a.skillId,
+          skillB: b.skillId,
+          directiveA: a.text,
+          directiveB: b.text,
+          domain: a.domain,
+        });
+      }
+    }
+  }
+  return conflicts;
+}

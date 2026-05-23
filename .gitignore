@@ -20,3 +20,4 @@ claude-plugins-official/
 
 # OMX agent state (per-session traces, not source-controlled)
 .omx/
+andrej-karpathy-skills/

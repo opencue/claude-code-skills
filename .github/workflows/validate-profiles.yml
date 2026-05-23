@@ -1,0 +1,35 @@
+name: Validate Profiles
+on:
+  pull_request:
+    paths:
+      - 'profiles/**'
+      - 'resources/skills/**'
+      - 'resources/mcps/**'
+      - 'resources/skill-packs/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Validate all profiles
+        run: bin/cue validate --all
+
+      - name: Run doctor checks
+        run: bin/cue doctor
+
+      - name: Lint all skills
+        run: bin/cue skills lint --all
+
+      - name: Run skill tests
+        run: bin/cue skills test --all

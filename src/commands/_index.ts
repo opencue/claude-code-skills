@@ -41,9 +41,37 @@ export const COMMANDS = {
     summary: "Schema + lint checks for a profile (or --all) (A13)",
     load: () => import("./validate"),
   },
+  security: {
+    summary: "Scan skills for prompt injection & secret exfiltration risks",
+    load: () => import("./security"),
+  },
   launch: {
     summary: "Resolve+materialize a profile then exec claude/codex (hot path)",
     load: () => import("./launch"),
+  },
+  quick: {
+    summary: "One-shot bare launch — no profile, no skills, fastest cold start",
+    load: () => import("./quick"),
+  },
+  login: {
+    summary: "Authenticate with cue cloud (GitHub OAuth)",
+    load: () => import("./cloud"),
+  },
+  logout: {
+    summary: "Clear cue cloud credentials",
+    load: () => import("./cloud"),
+  },
+  push: {
+    summary: "Upload a profile to cue cloud",
+    load: () => import("./cloud"),
+  },
+  pull: {
+    summary: "Download a profile from cue cloud",
+    load: () => import("./cloud"),
+  },
+  whoami: {
+    summary: "Show current cue cloud user",
+    load: () => import("./cloud"),
   },
   shell: {
     summary: "Install/uninstall ~/.local/bin/{claude,codex} shims",
@@ -53,6 +81,14 @@ export const COMMANDS = {
     summary: "Print the active profile and its resolved capability counts",
     load: () => import("./current"),
   },
+  ask: {
+    summary: "Show what a skill does — description, summary, size",
+    load: () => import("./ask"),
+  },
+  builtin: {
+    summary: "Manage built-in skills shared across all profiles",
+    load: () => import("./builtin"),
+  },
   icon: {
     summary: "Pick an emoji icon for a profile",
     load: () => import("./icon"),
@@ -60,6 +96,126 @@ export const COMMANDS = {
   "create-profile": {
     summary: "Create a new profile.yaml from skills/MCPs (interactive or from agent skill)",
     load: () => import("./create-profile"),
+  },
+  skills: {
+    summary: "Manage skills: list, search, add/remove from profiles",
+    load: () => import("./skills"),
+  },
+  mcps: {
+    summary: "Manage MCP servers: list, add, remove, health check",
+    load: () => import("./mcps"),
+  },
+  marketplace: {
+    summary: "Search and install skills from the remote registry",
+    load: () => import("./marketplace"),
+  },
+  stats: {
+    summary: "Profile usage analytics dashboard",
+    load: () => import("./stats"),
+  },
+  status: {
+    summary: "Single-glance overview: active profile, stats, and warnings",
+    load: () => import("./status"),
+  },
+  optimizer: {
+    summary: "Review profiles: skills, MCPs, and CLIs per profile",
+    load: () => import("./optimizer"),
+  },
+  "auto-detect": {
+    summary: "Detect project type and suggest a profile",
+    load: () => import("./auto-detect"),
+  },
+  diff: {
+    summary: "Compare two profiles side-by-side",
+    load: () => import("./diff"),
+  },
+  snapshot: {
+    summary: "Export/restore current profile state as portable YAML",
+    load: () => import("./snapshot"),
+  },
+  why: {
+    summary: "Trace why a skill/MCP/plugin is loaded (inheritance chain)",
+    load: () => import("./why"),
+  },
+  lock: {
+    summary: "Lock a profile to prevent modifications",
+    load: () => import("./lock"),
+  },
+  unlock: {
+    summary: "Unlock a previously locked profile",
+    load: () => import("./lock"),
+  },
+  packs: {
+    summary: "Manage skill packs (grouped skill bundles)",
+    load: () => import("./packs"),
+  },
+  init: {
+    summary: "Interactive project scanner + profile wizard",
+    load: () => import("./init"),
+  },
+  import: {
+    summary: "Import a profile from URL, file, or org/repo",
+    load: () => import("./import-profile"),
+  },
+  export: {
+    summary: "Export a profile as portable YAML",
+    load: () => import("./import-profile"),
+  },
+  "colony-dispatch": {
+    summary: "Resolve profile for a Colony task based on keywords",
+    load: () => import("./colony-dispatch"),
+  },
+  handoff: {
+    summary: "Multi-agent handoff protocol — pass skill context between agents",
+    load: () => import("./handoff"),
+  },
+  cost: {
+    summary: "Estimate token budget for a profile",
+    load: () => import("./cost"),
+  },
+  trace: {
+    summary: "Live session inspector — tail skill/MCP invocations",
+    load: () => import("./trace"),
+  },
+  replay: {
+    summary: "Replay a session with a different profile (capability diff)",
+    load: () => import("./replay"),
+  },
+  "skills-test": {
+    summary: "Run skill unit tests",
+    load: () => import("./skills-test"),
+  },
+  "skills-lint": {
+    summary: "Lint skills for quality issues",
+    load: () => import("./skills-lint"),
+  },
+  "skills-new": {
+    summary: "Scaffold a new skill with template",
+    load: () => import("./skills-new"),
+  },
+  "skills-pin": {
+    summary: "Pin/rollback/unpin a skill to a specific commit",
+    load: () => import("./skills-pin"),
+  },
+  update: {
+    summary: "Self-update: git pull + bun install + sync",
+    load: () => import("./update"),
+  },
+  completions: {
+    summary: "Output shell completion script (bash/zsh)",
+    load: () => import("./completions"),
+  },
+  watch: {
+    summary: "Auto-switch profile notification on cd (shell hook)",
+    load: () => import("./watch"),
+  },
+  tree: {
+    summary: "Visualize profile inheritance tree with resources",
+    load: () => import("./tree"),
+  },
+  sources: {
+    summary: "Show GitHub repos that provide skills for a profile",
+    load: () => import("./sources"),
   },
   "migrate-symlinks": {
     summary: "Rewrite ~/.codex and ~/.claude-accounts symlinks from soul/ to cue/",

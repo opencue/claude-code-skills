@@ -1,0 +1,20 @@
+rules:
+  - match: [review, audit, security, vulnerability, pentest]
+    profile: backend
+  - match: [blog, docs, write, content, documentation, readme]
+    profile: docs-writer
+  - match: [ui, frontend, component, css, tailwind, react, layout, responsive]
+    profile: frontend
+  - match: [deploy, ci, docker, coolify, hosting, infrastructure]
+    profile: backend
+  - match: [design, brand, image, video, creative, visual]
+    profile: creative-media
+  - match: [research, find, lookup, analyze, market, competitor]
+    profile: research
+  - match: [medusa, storefront, ecommerce, product, cart]
+    profile: medusa-dev
+  - match: [fleet, colony, orchestrate, parallel, multi-agent]
+    profile: fleet-control
+  - match: [marketing, seo, copy, campaign, growth]
+    profile: marketing
+default: full

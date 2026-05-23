@@ -1,0 +1,11 @@
+node_modules/
+.git/
+.omx/
+.omc/
+.deleted-stubs/
+profiles/_cache/
+test/
+*.test.ts
+draft.md
+agents-fleet/
+andrej-karpathy-skills/

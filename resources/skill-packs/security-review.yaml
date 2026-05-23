@@ -1,0 +1,11 @@
+name: security-review
+description: Full security review suite — code review + security best practices
+skills:
+  - review/security-review
+  - review/security-best-practices
+  - review/code-review
+requires_mcps: []
+tags:
+  - security
+  - review
+  - backend

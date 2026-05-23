@@ -1,0 +1,2 @@
+[test]
+pathIgnorePatterns = ["profiles/_cache/**", "resources/skills/skills/**"]

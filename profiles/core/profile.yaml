@@ -1,11 +1,14 @@
 name: core
 icon: "🐢"
-description: Baseline shared by every cue profile — meta skills + cross-session memory
+description: Baseline shared by every cue profile — essentials only
 skills:
   local:
+    - nvidia/aiq-research
+    # ── Built-in (shared across ALL profiles) ──
+    - nvidia/skill-evolution
     - meta/analyze
-    - meta/just
-    - meta/skill-suggestion
+    - meta/cue-usage
+    - meta/builtin-manager
     - caveman/caveman
     - caveman/caveman-commit
 plugins:

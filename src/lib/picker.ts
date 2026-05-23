@@ -44,6 +44,16 @@ export interface PickerInput {
   options: PickerOption[];
   /** Skip writing .cue-profile if true. */
   noPin?: boolean;
+  /**
+   * Optional hook invoked after the user picks a profile (and pin confirm),
+   * but before the outro line. Returned strings are emitted as `log.message`
+   * inside the picker box, so they line up visually with the rest of the
+   * prompt. Each string may contain its own newlines for multi-line entries.
+   *
+   * Failures inside the callback are caught and surfaced as a yellow warning
+   * line — the picker still completes and returns the chosen profile.
+   */
+  details?: (profile: string) => Promise<string[]> | string[];
 }
 
 export interface PickerOutput {
@@ -74,6 +84,17 @@ export async function runPicker(input: PickerInput): Promise<PickerOutput> {
     if (pinChoice === true) {
       await writeFile(join(input.cwd, ".cue-profile"), `${choice}\n`);
       pinned = true;
+    }
+  }
+
+  if (input.details) {
+    try {
+      const lines = await input.details(choice as string);
+      for (const line of lines) {
+        if (line.length > 0) p.log.message(line);
+      }
+    } catch (err) {
+      p.log.warn(`details unavailable: ${(err as Error).message}`);
     }
   }
 

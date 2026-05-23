@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cue — Agent Profile Manager for Claude Code & Codex</title>
+  <meta name="description" content="Pick a profile. Launch with the right skills, MCPs, and plugins. Nothing else.">
+  <style>
+    :root { --bg: #0d1117; --fg: #e6edf3; --accent: #f97316; --muted: #8b949e; --card: #161b22; --border: #30363d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    header { text-align: center; padding: 4rem 0 3rem; }
+    h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -0.03em; }
+    h1 span { color: var(--accent); }
+    .tagline { font-size: 1.3rem; color: var(--muted); margin-top: 0.5rem; }
+    .install-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin: 2rem auto; max-width: 600px; text-align: center; }
+    .install-box code { font-size: 1.1rem; color: var(--accent); font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    .install-box p { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 3rem 0; }
+    .feature { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+    .feature h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .feature p { color: var(--muted); font-size: 0.9rem; }
+    .demo { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin: 3rem 0; text-align: center; }
+    .demo h2 { margin-bottom: 1rem; }
+    .demo pre { text-align: left; background: #000; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.8; color: var(--fg); }
+    .demo pre .comment { color: #6a737d; }
+    .demo pre .cmd { color: var(--accent); }
+    .demo pre .output { color: #7ee787; }
+    .stats { display: flex; justify-content: center; gap: 3rem; margin: 2rem 0; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat .num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .stat .label { color: var(--muted); font-size: 0.85rem; }
+    footer { text-align: center; padding: 3rem 0; color: var(--muted); font-size: 0.85rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+    a { color: var(--accent); }
+    @media (max-width: 600px) { h1 { font-size: 2.5rem; } .features { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><span>cue</span></h1>
+      <p class="tagline">Agent Profile Manager for Claude Code & Codex</p>
+      <p style="color: var(--muted); margin-top: 0.3rem;">Pick a profile. Launch with the right skills, MCPs, and plugins. Nothing else.</p>
+    </header>
+
+    <div class="install-box">
+      <code>npm install -g @recodeee/cue</code>
+      <p>or: <code style="font-size: 0.85rem;">gh repo clone recodeee/cue && ~/Documents/cue/install.sh</code></p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">40+</div><div class="label">CLI commands</div></div>
+      <div class="stat"><div class="num">120+</div><div class="label">built-in skills</div></div>
+      <div class="stat"><div class="num">15</div><div class="label">profiles</div></div>
+      <div class="stat"><div class="num">100K+</div><div class="label">MCPs via Smithery</div></div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <h3>🎯 Per-Profile Isolation</h3>
+        <p>Skills, MCPs, and plugins scoped to the active profile. Marketing doesn't see backend's tools.</p>
+      </div>
+      <div class="feature">
+        <h3>📁 Directory-Aware</h3>
+        <p>Pin a profile to a directory with <code>.cue-profile</code>. Every launch from inside boots with that loadout.</p>
+      </div>
+      <div class="feature">
+        <h3>🛒 Marketplace</h3>
+        <p>Search 100K+ MCP servers via Smithery. Install skills from GitHub with one command.</p>
+      </div>
+      <div class="feature">
+        <h3>📊 Optimizer Dashboard</h3>
+        <p>Visual overview of all profiles with brand icons, usage stats, CLI dependencies, and token budgets.</p>
+      </div>
+      <div class="feature">
+        <h3>🔍 Smart Detection</h3>
+        <p><code>cue init</code> scans your project and suggests the right profile. Auto-detect Next.js, Docker, Medusa, etc.</p>
+      </div>
+      <div class="feature">
+        <h3>🏥 Doctor & Audit</h3>
+        <p>Detect drift, find unused skills, check CLI dependencies, lint skill quality. Keep profiles lean.</p>
+      </div>
+    </div>
+
+    <div class="demo">
+      <h2>How it works</h2>
+      <pre><span class="comment"># Set up cue in your project</span>
+<span class="cmd">$ cd ~/projects/my-app</span>
+<span class="cmd">$ cue init</span>
+<span class="output">Detected: TypeScript, Next.js, Prisma, Tailwind</span>
+<span class="output">Suggested: frontend (92% match)</span>
+<span class="output">✅ Pinned "frontend" to this directory.</span>
+
+<span class="comment"># Now just type claude — cue handles the rest</span>
+<span class="cmd">$ claude</span>
+<span class="output">cue: resolved profile "frontend" (10 skills, 0 MCPs)</span>
+<span class="output">launching claude with CLAUDE_CONFIG_DIR=~/.config/cue/runtime/frontend/claude</span>
+
+<span class="comment"># Search and install MCPs from Smithery</span>
+<span class="cmd">$ cue marketplace search-mcps "github"</span>
+<span class="output">github          4,008 uses  Connect your AI agents to GitHub</span>
+<span class="output">vercel/grep     1,474 uses  Search millions of public repos</span>
+
+<span class="cmd">$ cue marketplace install-mcp github</span>
+<span class="output">✅ Added "github" to profile "frontend"</span></pre>
+    </div>
+
+    <footer>
+      <p>
+        <a href="https://github.com/recodeee/cue">GitHub</a> ·
+        <a href="https://github.com/recodeee/cue/blob/main/docs/launch.md">Docs</a> ·
+        <a href="https://smithery.ai/skills/recodeee/cue">Smithery</a> ·
+        MIT License
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
