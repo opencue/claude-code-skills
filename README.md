@@ -590,24 +590,44 @@ Projects and teams using `.cue-profile` in production:
 
 ---
 
-## Who uses cue
-
-Projects and teams using `.cue-profile` in production:
-
-| Project | Profile | What they do |
-|---------|---------|-------------|
-| [recodeee/cue](https://github.com/recodeee/cue) | `full`, `readme-writer` | This repo — dogfooding cue on itself |
-| [recodeee/colony](https://github.com/recodeee/colony) | `fleet-control` | Multi-agent coordination MCP |
-| [recodeee/gitguardex](https://github.com/recodeee/gitguardex) | `backend` | Branch + worktree isolation for parallel agents |
-
-> **Using cue?** Add your project — open a PR or drop a link in [Discussions](https://github.com/recodeee/cue/discussions).
-
----
-
 ## Contributing
 
-Each skill is a folder with `SKILL.md` (frontmatter + body). The frontmatter `description` is what the LLM matches against — write it as `"when user says X, do Y"`. Copy an existing skill as a template, drop it under `resources/skills/skills/<category>/<slug>/`, and the catalog regenerates on the next sync.
+We welcome contributions! Here's how to get involved:
 
-The SVGs in this README live in [`docs/assets/`](./docs/assets/) — edit the XML directly or regenerate from the `readme-writer` profile.
+### Add a skill
+
+```bash
+cue skills-new my-skill                       # scaffold template
+# edit resources/skills/skills/<category>/my-skill/SKILL.md
+cue skills-lint my-skill                      # check quality
+cue skills-test my-skill                      # run tests
+```
+
+The frontmatter `description` is what the LLM matches against — write it as `"when user says X, do Y"`. Copy an existing skill as a template.
+
+### Add a profile
+
+```bash
+cue new my-profile                            # scaffold profile.yaml
+cue validate my-profile                       # check schema
+cue score --profile my-profile                # verify efficiency
+```
+
+### Other ways to contribute
+
+- **Report bugs** — [open an issue](https://github.com/recodeee/cue/issues)
+- **Share your profile** — `cue share publish --profile <name>`
+- **Add to the registry** — PR to `docs/registry/index.json`
+- **Improve docs** — SVGs live in `docs/assets/`, edit XML directly
+- **Add agent adapters** — see `src/lib/agent-adapters.ts`
+
+### Development
+
+```bash
+git clone https://github.com/recodeee/cue.git
+cd cue && bun install
+bun test                                      # 168 tests
+bun run src/index.ts --help                   # run locally
+```
 
 License: [MIT](./LICENSE).
