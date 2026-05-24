@@ -132,8 +132,74 @@ function similarity(a: string, b: string): number {
   return (2 * matches) / (a.length - 1 + b.length - 1);
 }
 
+// ---------------------------------------------------------------------------
+// Auto-update check — runs at most once per 24h, non-blocking
+// ---------------------------------------------------------------------------
+
+async function checkForUpdate(currentVersion: string): Promise<void> {
+  const { existsSync, readFileSync: rf, writeFileSync: wf, mkdirSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { homedir } = await import("node:os");
+
+  const configDir = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "cue");
+  const checkFile = join(configDir, ".last-update-check");
+
+  // Only check once per 24 hours
+  if (existsSync(checkFile)) {
+    const last = parseInt(rf(checkFile, "utf8").trim(), 10) || 0;
+    if (Date.now() - last < 86400000) return;
+  }
+
+  // Fetch latest version from npm
+  const res = await fetch("https://registry.npmjs.org/cue-ai/latest", { signal: AbortSignal.timeout(3000) });
+  if (!res.ok) return;
+  const data = await res.json() as { version?: string };
+  const latest = data.version;
+  if (!latest) return;
+
+  // Save check timestamp
+  mkdirSync(configDir, { recursive: true });
+  wf(checkFile, String(Date.now()));
+
+  // Compare versions
+  if (latest === currentVersion) return;
+  const [cMaj, cMin, cPatch] = currentVersion.split(".").map(Number);
+  const [lMaj, lMin, lPatch] = latest.split(".").map(Number);
+  if (lMaj! < cMaj! || (lMaj === cMaj && lMin! < cMin!) || (lMaj === cMaj && lMin === cMin && lPatch! <= cPatch!)) return;
+
+  // Prompt user
+  process.stderr.write(`\n  ⬆️  Update available: ${currentVersion} → ${latest}\n`);
+  process.stderr.write(`     Run: npm install -g cue-ai\n\n`);
+
+  // Auto-install prompt (only in interactive TTY)
+  if (process.stdin.isTTY && process.stdout.isTTY) {
+    const readline = await import("node:readline");
+    const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
+    const answer = await new Promise<string>((resolve) => {
+      rl.question("     Install now? [Y/n] ", (a) => { rl.close(); resolve(a); });
+      // Auto-accept after 5 seconds
+      setTimeout(() => { rl.close(); resolve("y"); }, 5000);
+    });
+    if (!answer || answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
+      process.stderr.write("     📦 Updating...\n");
+      const { spawnSync } = await import("node:child_process");
+      const result = spawnSync("npm", ["install", "-g", "cue-ai"], { encoding: "utf8", timeout: 60000, stdio: ["ignore", "pipe", "pipe"] });
+      if (result.status === 0) {
+        process.stderr.write(`     ✅ Updated to ${latest}\n\n`);
+      } else {
+        process.stderr.write(`     ⚠️  Update failed. Run manually: npm install -g cue-ai\n\n`);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+
 async function main(argv: string[]): Promise<number> {
   const args = argv.slice(2);
+
+  // Non-blocking update check (runs in background, shows prompt if outdated)
+  checkForUpdate(readVersion()).catch(() => {});
 
   if (args.length === 0) {
     // Show status dashboard by default (like `git status`)
