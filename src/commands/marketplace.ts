@@ -296,6 +296,75 @@ async function cmdFindTools(query: string, json: boolean): Promise<number> {
 // Router
 // ---------------------------------------------------------------------------
 
+async function cmdDiscover(profileFilter: string, json: boolean): Promise<number> {
+  const profile = profileFilter || (await resolveProfileForCwd(process.cwd()).catch(() => null));
+
+  process.stderr.write("🔍 Discovering popular skills on GitHub...\n\n");
+
+  // Search GitHub for claude-code skills repos with high stars
+  const searches = [
+    "claude-code skill SKILL.md",
+    "claude skill agent",
+    "claude-code-skills",
+  ];
+
+  const seen = new Set<string>();
+  const results: { repo: string; stars: number; description: string }[] = [];
+
+  for (const q of searches) {
+    const res = spawnSync("gh", [
+      "search", "repos", q,
+      "--sort", "stars", "--limit", "10",
+      "--json", "fullName,stargazersCount,description",
+    ], { encoding: "utf8", timeout: 15000 });
+
+    if (res.status !== 0) continue;
+    try {
+      const repos = JSON.parse(res.stdout) as { fullName: string; stargazersCount: number; description: string }[];
+      for (const r of repos) {
+        if (seen.has(r.fullName)) continue;
+        if (r.stargazersCount < 50) continue;
+        seen.add(r.fullName);
+        results.push({ repo: r.fullName, stars: r.stargazersCount, description: r.description ?? "" });
+      }
+    } catch { /* skip */ }
+  }
+
+  results.sort((a, b) => b.stars - a.stars);
+  const top = results.slice(0, 15);
+
+  if (json) {
+    process.stdout.write(JSON.stringify(top, null, 2) + "\n");
+    return 0;
+  }
+
+  // Check which ones we already have
+  const { loadProfile, listProfiles } = await import("../lib/profile-loader");
+  const allProfiles = await listProfiles();
+  const allNpxRepos = new Set<string>();
+  for (const name of allProfiles) {
+    try {
+      const p = await loadProfile(name);
+      for (const n of p.skills.npx) allNpxRepos.add((n as any).source?.repo ?? "");
+    } catch {}
+  }
+
+  process.stdout.write("  ⭐  Repository                              Description\n");
+  process.stdout.write("  ──  ────────────────────────────────────────  ───────────\n");
+
+  for (const r of top) {
+    const installed = allNpxRepos.has(r.repo) ? " ✓" : "  ";
+    const stars = String(r.stars).padStart(5);
+    const name = r.repo.padEnd(40);
+    const desc = r.description.slice(0, 60);
+    process.stdout.write(`${installed} ${stars}  ${name}  ${desc}\n`);
+  }
+
+  process.stdout.write(`\n  Install: cue marketplace install-skill <repo>\n`);
+  process.stdout.write(`  Example: cue marketplace install-skill AgriciDaniel/claude-ads\n\n`);
+  return 0;
+}
+
 export async function run(args: string[]): Promise<number> {
   if (args.includes("-h") || args.includes("--help")) {
     process.stdout.write(`cue marketplace — search and install MCPs + skills
@@ -306,6 +375,7 @@ Subcommands:
   search <query>         Search MCPs (Smithery) + skills
   search-mcps <query>    Search MCPs only
   search-skills <query>  Search skills only
+  discover [profile]     Find popular GitHub skills not yet in your profiles
   install-mcp <id>       Install MCP via Smithery
   install-skill <repo>   Install skill from GitHub
   list-mcps              List connected Smithery MCPs
@@ -341,6 +411,8 @@ Examples:
       return cmdListTools(rest[1] ?? "", json);
     case "find-tools":
       return cmdFindTools(rest.slice(1).join(" ") || "", json);
+    case "discover":
+      return cmdDiscover(rest[1] ?? "", json);
     default:
       // If no subcommand matches, treat as search query
       return cmdSearch(rest.join(" "), json);
