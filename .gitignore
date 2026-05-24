@@ -23,3 +23,8 @@ claude-plugins-official/
 andrej-karpathy-skills/
 agentshield/
 awesome-clis/
+
+# Locally-cloned third-party skills (have their own .git/ — keep out of cue's tree)
+.claude/skills/hirelens-showcase/
+.claude/skills/jdfit/
+.claude/skills/job-hunter/
