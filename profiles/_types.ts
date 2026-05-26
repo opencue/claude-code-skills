@@ -72,6 +72,28 @@ export interface Profile {
   // "for task X this profile should be able to handle it". `cue eval-behavior`
   // checks structural fit.
   evals?: string[];
+  // Phase 5: Skill router overrides — hand-tuned rows the auto-built router
+  // can't (or shouldn't) produce. Merged into the materialized CLAUDE.md
+  // router section under a "Skill overrides (manual)" sub-section so it's
+  // obvious which rows are author-edited vs auto-parsed. Use sparingly —
+  // the auto-router covers most cases.
+  persona_routing?: PersonaRoutingEntry[];
+}
+
+/**
+ * One hand-tuned router entry. Either `phrase` (reactive — user-said
+ * trigger) or `capability` (proactive — "when you're about to do X"), plus
+ * the skill to route to. `note` is rendered alongside as context for Claude.
+ */
+export interface PersonaRoutingEntry {
+  /** Trigger phrase the user might say verbatim. */
+  phrase?: string;
+  /** Task shape this skill handles — proactive routing. */
+  capability?: string;
+  /** Skill slug to route to (must be in this profile's resolved skill list). */
+  skill: string;
+  /** Optional short context line rendered with the row. */
+  note?: string;
 }
 
 // In the resolved (post-inherit) form every ref is normalized to its object shape.
@@ -97,6 +119,7 @@ export interface ResolvedProfile extends Omit<Profile, "skills" | "mcps" | "plug
   evals: string[];
   recommends: string[];
   inheritanceChain: string[];
+  personaRouting: PersonaRoutingEntry[];
 }
 
 export interface LinkPlan {

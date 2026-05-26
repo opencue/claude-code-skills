@@ -9,6 +9,9 @@
  * W3: inheritance chain depth is greater than 2.
  * W4: a skill slug appears in both `skills.local` and `skills.npx`.
  * W5: a referenced plugin is not installed locally (environmental, not a profile bug).
+ * W6: a skill's description has no parseable trigger phrases (reactive routing won't work).
+ * W7: a skill has no capability summary the router can infer (proactive routing won't work).
+ * W8: a skill has a capability but no explicit `when_to_invoke:` (proactive routing falls back to a single generic row).
  * E1: profile `name:` collides with another profile.
  * E2: inheritance chain contains a cycle.
  * E3: referenced skill or MCP cannot be resolved.
@@ -40,6 +43,7 @@ import {
   type NpxFetchFn,
 } from "./resolver-npx";
 import { PluginNotInstalled, resolvePlugins } from "./resolver-plugins";
+import { parseSkillFromPath } from "./skill-router";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(HERE, "..", "..");
@@ -50,7 +54,9 @@ const DEFAULT_RULES_ROOT = join(REPO_ROOT, "resources", "rules");
 const DEFAULT_COMMANDS_ROOT = join(REPO_ROOT, "resources", "commands");
 const DEFAULT_HOOKS_ROOT = join(REPO_ROOT, "resources", "hooks");
 
-export type LintRuleId = "W1" | "W2" | "W3" | "W4" | "W5" | "E1" | "E2" | "E3";
+export type LintRuleId =
+  | "W1" | "W2" | "W3" | "W4" | "W5" | "W6" | "W7" | "W8"
+  | "E1" | "E2" | "E3";
 export type DiagnosticRuleId = LintRuleId | "SCHEMA" | "LOAD";
 export type LintSeverity = "warning" | "error";
 
@@ -85,6 +91,21 @@ export const PROFILE_LINT_RULES: Record<LintRuleId, RuleDoc> = {
     severity: "warning",
     title: "plugin not installed locally",
     description: "A referenced plugin is not installed under ~/.claude/plugins (environmental — install with `/plugin marketplace add <name>`).",
+  },
+  W6: {
+    severity: "warning",
+    title: "skill has no trigger phrases",
+    description: "Skill description doesn't include quoted phrases after 'Use when user says/asks/...'. Claude can't reactive-route to this skill from user phrasing.",
+  },
+  W7: {
+    severity: "warning",
+    title: "skill has no capability summary",
+    description: "Skill description has no inferable capability blurb. Claude can't proactively reach for this skill during its own reasoning.",
+  },
+  W8: {
+    severity: "warning",
+    title: "skill missing when_to_invoke",
+    description: "Skill has a capability but no explicit `when_to_invoke:` frontmatter — proactive routing falls back to a single generic row. Add `when_to_invoke:` with task-shape bullets for richer routing.",
   },
   E1: {
     severity: "error",
@@ -211,8 +232,73 @@ export async function lintProfile(
   await checkPlugins(resolved, result, opts);
   await checkMcps(resolved, result, opts);
   await checkResourceRefs(resolved, result, opts);
+  await checkSkillDescriptions(resolved, result, opts);
 
   return result;
+}
+
+/**
+ * Lint each local skill's SKILL.md frontmatter for router-friendliness.
+ * Emits W6 (no triggers), W7 (no capability), W8 (capability but no
+ * when_to_invoke). Only inspects local skills — npx/plugin skills live
+ * outside the repo and may be out-of-tree.
+ */
+async function checkSkillDescriptions(
+  profile: ResolvedProfile,
+  result: ProfileLintResult,
+  opts: ProfileLinterOptions,
+): Promise<void> {
+  const refs = profile.skills.local;
+  if (refs.length === 0) return;
+
+  const skillsRoot = opts.skillsRoot ?? DEFAULT_SKILLS_ROOT;
+  let weakTriggers = 0;
+  let weakCapability = 0;
+  let missingWhenTo = 0;
+
+  for (const ref of refs) {
+    if (ref.id.includes("*")) continue;
+    const parsed = await parseSkillFromPath(ref.id, skillsRoot);
+    if (parsed.missing) continue; // E3 already reports missing files
+
+    if (parsed.triggers.length === 0) {
+      addIssue(
+        result,
+        "W6",
+        "warning",
+        `skill "${ref.id}" has no parseable trigger phrases — add quoted phrases to its description (e.g. \`Use when user says "X", "Y"...\`)`,
+        { subject: ref.id },
+      );
+      weakTriggers++;
+    }
+    if (!parsed.capability) {
+      addIssue(
+        result,
+        "W7",
+        "warning",
+        `skill "${ref.id}" has no capability summary — add prose after the trigger phrases, or set \`capability:\` in frontmatter`,
+        { subject: ref.id },
+      );
+      weakCapability++;
+    } else if (parsed.capabilityExplicit && parsed.whenToInvoke.length === 0) {
+      // W8 only fires when the skill has explicitly opted into the new
+      // framework (capability: in frontmatter) but didn't finish the upgrade
+      // (no when_to_invoke:). Skills using only inferred capability from
+      // prose are exempt — they're a backwards-compat case.
+      addIssue(
+        result,
+        "W8",
+        "warning",
+        `skill "${ref.id}" has explicit \`capability:\` but no \`when_to_invoke:\` — add task-shape bullets to enable richer proactive routing`,
+        { subject: ref.id },
+      );
+      missingWhenTo++;
+    }
+  }
+
+  if (weakTriggers === 0 && weakCapability === 0 && missingWhenTo === 0) {
+    addCheck(result, "skill descriptions", `${refs.length} skills routed cleanly`);
+  }
 }
 
 async function checkResourceRefs(

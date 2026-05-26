@@ -1,5 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { lint, applyFixes, buildPrBody } from "./skill-linter";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import {
+  lint,
+  applyFixes,
+  buildPrBody,
+  scoreDiagnostics,
+  buildBaseline,
+  applyBaseline,
+  checkZombie,
+  findOverlap,
+} from "./skill-linter";
 
 const cleanSkill = `---
 name: example-skill
@@ -58,6 +71,16 @@ describe("skill-linter rules", () => {
     expect(lint(md).diagnostics.find((d) => d.rule === "R004")).toBeUndefined();
   });
 
+  test("R004: frontmatter `triggers:` list also passes", () => {
+    const md = `---\nname: x\ndescription: A parser.\ntriggers:\n  - "parse this"\n  - "tokenize"\n---\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R004")).toBeUndefined();
+  });
+
+  test("R004: empty triggers field still flags missing trigger", () => {
+    const md = `---\nname: x\ndescription: A parser.\ntriggers:\n---\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R004")).toBeDefined();
+  });
+
   test("R005: bare allowed-tools is flagged + fixed to Bash(name:*) form", () => {
     const md = `---\nname: x\ndescription: Use when X.\nallowed-tools: nmap, curl\n---\n# X\n`;
     const r005 = lint(md).diagnostics.find((d) => d.rule === "R005");
@@ -93,6 +116,355 @@ describe("skill-linter rules", () => {
     const r008 = lint(md).diagnostics.find((d) => d.rule === "R008");
     expect(r008?.severity).toBe("warning");
     expect(r008?.message).toContain("missing-section");
+  });
+
+  test("R009: em dash in prose is flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThis is a thing — and another thing.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009.length).toBeGreaterThan(0);
+    expect(r009[0]!.severity).toBe("warning");
+    expect(r009[0]!.message.toLowerCase()).toContain("em dash");
+  });
+
+  test("R009: em dash inside a code block is NOT flagged", () => {
+    const md = "---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n```\nfoo — bar\n```\n";
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: em dash inside inline code is NOT flagged", () => {
+    const md = "---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThe `foo — bar` token is literal.\n";
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: banned AI vocabulary in prose is flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThis is a robust and comprehensive solution.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009.length).toBeGreaterThan(0);
+    expect(r009[0]!.message).toContain("robust");
+    expect(r009[0]!.message).toContain("comprehensive");
+  });
+
+  test("R009: banned vocabulary inside code is NOT flagged", () => {
+    const md = "---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThe variable `robust_check` is fine.\n";
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: banned phrase is flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nLet's do a deep dive into this topic.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009.some((d) => d.message.includes("deep dive"))).toBe(true);
+  });
+
+  test("R009: 'leverage' as verb is flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nWe can leverage this library.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009.some((d) => d.message.includes("leverage"))).toBe(true);
+  });
+
+  test("R009: 'leverage' as noun is NOT flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThe leverage ratio is 2:1.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: frontmatter is exempt from voice rules", () => {
+    const md = `---\nname: x\ndescription: A robust and comprehensive skill — use when X.\n---\n\n# X\n\nBody is fine.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: clean skill passes", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThis skill does the thing. It runs fast.\n`;
+    const r009 = lint(md).diagnostics.filter((d) => d.rule === "R009");
+    expect(r009).toEqual([]);
+  });
+
+  test("R009: has no auto-fix (voice needs human judgment)", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nThis is robust.\n`;
+    const r009 = lint(md).diagnostics.find((d) => d.rule === "R009");
+    expect(r009?.fix).toBeUndefined();
+  });
+
+  test("R010: bash block with 8+ command lines is flagged", () => {
+    const block = Array.from({ length: 10 }, (_, i) => `cmd${i} --flag`).join("\n");
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nDo this:\n\n\`\`\`bash\n${block}\n\`\`\`\n`;
+    const r010 = lint(md).diagnostics.find((d) => d.rule === "R010");
+    expect(r010?.severity).toBe("info");
+    expect(r010?.message).toMatch(/scripts\//);
+    expect(r010?.fix).toBeUndefined();
+  });
+
+  test("R010: short bash block is NOT flagged", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n\`\`\`bash\nfoo\nbar\nbaz\n\`\`\`\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R010")).toBeUndefined();
+  });
+
+  test("R010: long JSON block is NOT flagged (not a shell language)", () => {
+    const block = Array.from({ length: 12 }, (_, i) => `  "key${i}": ${i},`).join("\n");
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n\`\`\`json\n{\n${block}\n}\n\`\`\`\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R010")).toBeUndefined();
+  });
+
+  test("R010: untagged code block is NOT flagged", () => {
+    const block = Array.from({ length: 10 }, (_, i) => `cmd${i} --flag`).join("\n");
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n\`\`\`\n${block}\n\`\`\`\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R010")).toBeUndefined();
+  });
+
+  test("R010: reports correct line number and counts additional blocks", () => {
+    const block = Array.from({ length: 8 }, (_, i) => `cmd${i}`).join("\n");
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n\`\`\`bash\n${block}\n\`\`\`\n\nAnd:\n\n\`\`\`sh\n${block}\n\`\`\`\n`;
+    const r010 = lint(md).diagnostics.find((d) => d.rule === "R010");
+    expect(r010).toBeDefined();
+    expect(r010?.message).toContain("+1 other block");
+  });
+
+  test("R011: skill with no example is flagged (info)", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nBody text only.\n`;
+    const r011 = lint(md).diagnostics.find((d) => d.rule === "R011");
+    expect(r011?.severity).toBe("info");
+  });
+
+  test("R011: <example> tag passes", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n<example>\nDo this.\n</example>\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R011")).toBeUndefined();
+  });
+
+  test("R011: ## Examples heading passes", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n## Examples\n\n- foo\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R011")).toBeUndefined();
+  });
+
+  test("R011: 'Example:' lead-in passes", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nExample: run \`foo\` then \`bar\`.\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R011")).toBeUndefined();
+  });
+
+  test("R013: stale description with no body overlap is flagged", () => {
+    const md = `---\nname: x\ndescription: Use when extracting metadata from PDF documents using OCR pipelines.\n---\n\n# X\n\nThis skill compiles rust crates and runs cargo tests.\n`;
+    const r013 = lint(md).diagnostics.find((d) => d.rule === "R013");
+    expect(r013?.severity).toBe("info");
+    expect(r013?.message).toMatch(/overlap is \d+%/);
+  });
+
+  test("R013: matching description and body passes", () => {
+    const md = `---\nname: pdf-extract\ndescription: Use when extracting metadata from PDF documents using OCR pipelines.\n---\n\n# PDF Extract\n\nThis skill extracts PDF metadata via OCR pipelines. Documents go through the pipeline; extracted fields surface as JSON.\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R013")).toBeUndefined();
+  });
+
+  test("R013: short description (<5 content words) is exempt", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nUnrelated body text about other topics entirely.\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R013")).toBeUndefined();
+  });
+});
+
+describe("ignore directives", () => {
+  test("frontmatter `lint-ignore: R009` suppresses R009 file-wide", () => {
+    const md = `---\nname: x\ndescription: Use when X.\nlint-ignore: R009\n---\n\n# X\n\nThis is robust and comprehensive.\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R009")).toBeUndefined();
+  });
+
+  test("frontmatter `lint-ignore: [R009, R011]` suppresses multiple rules", () => {
+    const md = `---\nname: x\ndescription: Use when X.\nlint-ignore: [R009, R011]\n---\n\n# X\n\nThis is robust.\n`;
+    const diags = lint(md).diagnostics.map((d) => d.rule);
+    expect(diags).not.toContain("R009");
+    expect(diags).not.toContain("R011");
+  });
+
+  test("frontmatter `lint-ignore: *` suppresses everything", () => {
+    const md = `---\nname: x\ndescription: A library.\nlint-ignore: "*"\n---\n\n# X\n\nThis is robust.\n`;
+    expect(lint(md).diagnostics).toEqual([]);
+  });
+
+  test("inline <!-- lint-ignore --> suppresses on next line", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n<!-- lint-ignore R009 -->\nThis is robust.\n`;
+    expect(lint(md).diagnostics.find((d) => d.rule === "R009")).toBeUndefined();
+  });
+
+  test("inline ignore does NOT suppress unrelated rules", () => {
+    const md = `---\nname: x\ndescription: A library.\n---\n\n# X\n\n<!-- lint-ignore R009 -->\nThis is robust.\n`;
+    // R004 still fires because description has no trigger phrase
+    expect(lint(md).diagnostics.find((d) => d.rule === "R004")).toBeDefined();
+  });
+});
+
+describe("em dash auto-fix (R009)", () => {
+  test("em dash in prose is auto-fixed to comma+space", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nDo this — then that.\n`;
+    const { fixed, applied } = applyFixes(md);
+    expect(applied).toContain("R009");
+    expect(fixed).toContain("Do this, then that.");
+    expect(fixed).not.toContain("—");
+  });
+
+  test("em dash inside code block is NOT touched", () => {
+    const md = "---\nname: x\ndescription: Use when X.\n---\n\n# X\n\n```\nfoo — bar\n```\n";
+    const { fixed } = applyFixes(md);
+    expect(fixed).toContain("foo — bar");
+  });
+
+  test("em-dash fix is idempotent", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nA — B — C.\n`;
+    const once = applyFixes(md).fixed;
+    const twice = applyFixes(once).fixed;
+    expect(twice).toBe(once);
+  });
+});
+
+describe("score", () => {
+  test("clean diagnostics = 100", () => {
+    expect(scoreDiagnostics([])).toBe(100);
+  });
+
+  test("single warning = 95", () => {
+    expect(scoreDiagnostics([{ rule: "R009", severity: "warning", message: "x" }])).toBe(95);
+  });
+
+  test("single error = 80", () => {
+    expect(scoreDiagnostics([{ rule: "R002", severity: "error", message: "x" }])).toBe(80);
+  });
+
+  test("score clamps to 0", () => {
+    const diags = Array.from({ length: 10 }, () => ({ rule: "R002", severity: "error" as const, message: "x" }));
+    expect(scoreDiagnostics(diags)).toBe(0);
+  });
+
+  test("lint() returns score on result", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n\n# X\n\nExample: foo.\n`;
+    const result = lint(md);
+    expect(typeof result.score).toBe("number");
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(100);
+  });
+});
+
+describe("baseline", () => {
+  test("buildBaseline collects unique rule ids per file", () => {
+    const b = buildBaseline([
+      { path: "a/SKILL.md", diagnostics: [
+        { rule: "R002", severity: "error", message: "x" },
+        { rule: "R002", severity: "error", message: "x" },
+        { rule: "R009", severity: "warning", message: "x" },
+      ]},
+      { path: "b/SKILL.md", diagnostics: [] },
+    ]);
+    expect(b.version).toBe(1);
+    expect(b.files["a/SKILL.md"]).toEqual(["R002", "R009"]);
+    expect(b.files["b/SKILL.md"]).toBeUndefined();
+  });
+
+  test("applyBaseline filters out rules listed in the baseline", () => {
+    const baseline = buildBaseline([
+      { path: "a/SKILL.md", diagnostics: [{ rule: "R009", severity: "warning", message: "x" }] },
+    ]);
+    const filtered = applyBaseline("a/SKILL.md", [
+      { rule: "R009", severity: "warning", message: "x" },
+      { rule: "R011", severity: "info", message: "y" },
+    ], baseline);
+    expect(filtered.map((d) => d.rule)).toEqual(["R011"]);
+  });
+
+  test("applyBaseline leaves un-baselined files untouched", () => {
+    const baseline = buildBaseline([
+      { path: "a/SKILL.md", diagnostics: [{ rule: "R009", severity: "warning", message: "x" }] },
+    ]);
+    const filtered = applyBaseline("b/SKILL.md", [
+      { rule: "R009", severity: "warning", message: "x" },
+    ], baseline);
+    expect(filtered.length).toBe(1);
+  });
+
+  test("applyBaseline with null baseline is a no-op", () => {
+    const diags = [{ rule: "R009", severity: "warning" as const, message: "x" }];
+    expect(applyBaseline("a/SKILL.md", diags, null)).toEqual(diags);
+  });
+});
+
+describe("R012 overlap", () => {
+  const pdfA = `---\nname: pdf-extract-a\ndescription: Use when extracting PDF metadata via OCR pipelines.\ntags: [pdf, ocr, metadata, extract]\n---\n# A\n`;
+  const pdfB = `---\nname: pdf-extract-b\ndescription: Use when extracting PDF metadata using OCR pipelines.\ntags: [pdf, ocr, metadata, extract]\n---\n# B\n`;
+  const unrelated = `---\nname: rust-build\ndescription: Use when compiling rust crates and running cargo tests.\ntags: [rust, cargo, build]\n---\n# R\n`;
+
+  test("findOverlap flags two near-duplicate skills", () => {
+    const diags = findOverlap("a/SKILL.md", pdfA, [
+      { path: "b/SKILL.md", content: pdfB },
+      { path: "c/SKILL.md", content: unrelated },
+    ]);
+    expect(diags.length).toBe(1);
+    expect(diags[0]!.rule).toBe("R012");
+    expect(diags[0]!.message).toContain("b/SKILL.md");
+    expect(diags[0]!.message).not.toContain("c/SKILL.md");
+  });
+
+  test("findOverlap suppresses self-match by path", () => {
+    const diags = findOverlap("a/SKILL.md", pdfA, [{ path: "a/SKILL.md", content: pdfA }]);
+    expect(diags).toEqual([]);
+  });
+
+  test("findOverlap skips skills with too few keywords", () => {
+    const tiny = `---\nname: x\ndescription: Use when X.\n---\n`;
+    const diags = findOverlap("a/SKILL.md", tiny, [{ path: "b/SKILL.md", content: pdfB }]);
+    expect(diags).toEqual([]);
+  });
+
+  test("findOverlap returns empty corpus → no diagnostics", () => {
+    expect(findOverlap("a/SKILL.md", pdfA, [])).toEqual([]);
+  });
+});
+
+describe("R014 zombie skill", () => {
+  function withTempAnalytics(events: object[], fn: (path: string) => void): void {
+    const dir = mkdtempSync(join(tmpdir(), "cue-r014-"));
+    const path = join(dir, "analytics.jsonl");
+    writeFileSync(path, events.map((e) => JSON.stringify(e)).join("\n") + "\n");
+    try { fn(path); } finally { rmSync(dir, { recursive: true, force: true }); }
+  }
+
+  test("flags a skill with 0 invocations in the window", () => {
+    const md = `---\nname: my-skill\ndescription: Use when X.\n---\n# x\n`;
+    withTempAnalytics([
+      { ts: new Date().toISOString(), event: "skill_invoked", skill: "other-skill" },
+    ], (path) => {
+      const diags = checkZombie(md, { analyticsPath: path, windowDays: 30 });
+      expect(diags.length).toBe(1);
+      expect(diags[0]!.rule).toBe("R014");
+      expect(diags[0]!.severity).toBe("info");
+    });
+  });
+
+  test("passes a skill with at least one invocation", () => {
+    const md = `---\nname: my-skill\ndescription: Use when X.\n---\n# x\n`;
+    withTempAnalytics([
+      { ts: new Date().toISOString(), event: "skill_invoked", skill: "my-skill" },
+    ], (path) => {
+      expect(checkZombie(md, { analyticsPath: path, windowDays: 30 })).toEqual([]);
+    });
+  });
+
+  test("ignores invocations older than the window", () => {
+    const md = `---\nname: stale-skill\ndescription: Use when X.\n---\n# x\n`;
+    const oldTs = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
+    withTempAnalytics([
+      { ts: oldTs, event: "skill_invoked", skill: "stale-skill" },
+    ], (path) => {
+      const diags = checkZombie(md, { analyticsPath: path, windowDays: 30 });
+      expect(diags.length).toBe(1);
+    });
+  });
+
+  test("silent no-op when analytics file is missing", () => {
+    const md = `---\nname: x\ndescription: Use when X.\n---\n# x\n`;
+    expect(checkZombie(md, { analyticsPath: "/tmp/definitely-not-a-real-path-12345.jsonl" })).toEqual([]);
+  });
+
+  test("silent no-op when frontmatter has no name", () => {
+    const md = `---\ndescription: A library.\n---\n# X\n`;
+    withTempAnalytics([], (path) => {
+      expect(checkZombie(md, { analyticsPath: path })).toEqual([]);
+    });
   });
 });
 

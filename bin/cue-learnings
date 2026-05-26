@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# cue-learnings — log and search project learnings across sessions
+#
+# Storage: ~/.cue/projects/<slug>/learnings.jsonl  (append-only)
+# Schema:  one JSON object per line with fields:
+#   ts          ISO-8601 UTC timestamp (auto-added)
+#   slug        project slug (auto-added)
+#   branch      git branch (auto-added)
+#   type        pattern | pitfall | preference | architecture | tool | operational
+#   key         short-kebab slug for grouping related learnings
+#   insight     one-line human-readable description
+#   confidence  1-10 honesty score (10 = verified, 4-5 = guess)
+#   source      observed | user-stated | inferred | cross-model
+#   files       optional comma-separated list of related file paths
+#
+# Usage:
+#   cue-learnings log --type <T> --key <K> --insight <S> --confidence <N> \
+#                     --source <S> [--files <comma,list>]
+#   cue-learnings search [pattern]    # most-recent first; jq if present, grep otherwise
+#   cue-learnings list                # same as search with no pattern
+#   cue-learnings path                # print the jsonl path for this project
+#
+# Only log genuine discoveries. Conventions:
+#   resources/skills/skills/meta/skill-reviewer/references/learnings.md
+set -euo pipefail
+
+# Resolve cue-slug — same directory as this script.
+SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SLUG_BIN="$SCRIPT_DIR/cue-slug"
+
+if [[ ! -x "$SLUG_BIN" ]]; then
+  echo "cue-learnings: missing dependency $SLUG_BIN" >&2
+  exit 2
+fi
+
+eval "$("$SLUG_BIN")"
+PROJECT_DIR="$HOME/.cue/projects/$SLUG"
+LEARNINGS_FILE="$PROJECT_DIR/learnings.jsonl"
+
+cmd="${1:-}"
+case "$cmd" in
+  log)
+    shift
+    TYPE="" KEY="" INSIGHT="" CONFIDENCE="" SOURCE="" FILES=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --type)        TYPE="$2"; shift 2 ;;
+        --key)         KEY="$2"; shift 2 ;;
+        --insight)     INSIGHT="$2"; shift 2 ;;
+        --confidence)  CONFIDENCE="$2"; shift 2 ;;
+        --source)      SOURCE="$2"; shift 2 ;;
+        --files)       FILES="$2"; shift 2 ;;
+        *) echo "cue-learnings log: unknown flag $1" >&2; exit 1 ;;
+      esac
+    done
+
+    # Validation — fail fast with clear messages
+    case "$TYPE" in
+      pattern|pitfall|preference|architecture|tool|operational) ;;
+      "") echo "cue-learnings log: --type required (pattern|pitfall|preference|architecture|tool|operational)" >&2; exit 1 ;;
+      *)  echo "cue-learnings log: invalid --type '$TYPE'" >&2; exit 1 ;;
+    esac
+    [[ -z "$KEY" ]]        && { echo "cue-learnings log: --key required" >&2; exit 1; }
+    [[ -z "$INSIGHT" ]]    && { echo "cue-learnings log: --insight required" >&2; exit 1; }
+    [[ -z "$CONFIDENCE" ]] && { echo "cue-learnings log: --confidence required (1-10)" >&2; exit 1; }
+    case "$SOURCE" in
+      observed|user-stated|inferred|cross-model) ;;
+      "") echo "cue-learnings log: --source required (observed|user-stated|inferred|cross-model)" >&2; exit 1 ;;
+      *)  echo "cue-learnings log: invalid --source '$SOURCE'" >&2; exit 1 ;;
+    esac
+    if ! [[ "$CONFIDENCE" =~ ^[0-9]+$ ]] || (( CONFIDENCE < 1 || CONFIDENCE > 10 )); then
+      echo "cue-learnings log: --confidence must be 1-10" >&2; exit 1
+    fi
+
+    # Sanitize key — JSONL is line-delimited; newlines break the format
+    KEY=$(printf '%s' "$KEY" | tr -cd 'a-zA-Z0-9._-')
+    INSIGHT=$(printf '%s' "$INSIGHT" | tr -d '\n\r')
+    FILES=$(printf '%s' "$FILES" | tr -d '\n\r')
+
+    mkdir -p "$PROJECT_DIR"
+    TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+    # Build JSON via printf, escape backslashes and quotes in user fields
+    esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+    FILES_JSON="null"
+    if [[ -n "$FILES" ]]; then
+      # comma-separated → JSON array
+      FILES_JSON='['
+      IFS=',' read -ra _FA <<< "$FILES"
+      for i in "${!_FA[@]}"; do
+        f="${_FA[$i]## }"; f="${f%% }"
+        FILES_JSON+="\"$(esc "$f")\""
+        (( i < ${#_FA[@]} - 1 )) && FILES_JSON+=","
+      done
+      FILES_JSON+=']'
+    fi
+
+    printf '{"ts":"%s","slug":"%s","branch":"%s","type":"%s","key":"%s","insight":"%s","confidence":%d,"source":"%s","files":%s}\n' \
+      "$TS" \
+      "$(esc "$SLUG")" \
+      "$(esc "$BRANCH")" \
+      "$TYPE" \
+      "$(esc "$KEY")" \
+      "$(esc "$INSIGHT")" \
+      "$CONFIDENCE" \
+      "$SOURCE" \
+      "$FILES_JSON" \
+      >> "$LEARNINGS_FILE"
+
+    echo "logged: $TYPE/$KEY ($CONFIDENCE/10) → $LEARNINGS_FILE"
+    ;;
+
+  search|list)
+    shift
+    pattern="${1:-}"
+    if [[ ! -f "$LEARNINGS_FILE" ]]; then
+      echo "no learnings logged yet for $SLUG"
+      exit 0
+    fi
+
+    if command -v jq >/dev/null 2>&1; then
+      # Most recent first; filter by pattern (matches key or insight) if given
+      if [[ -n "$pattern" ]]; then
+        tac "$LEARNINGS_FILE" 2>/dev/null \
+          | jq -c "select(.key | test(\"$pattern\"; \"i\")) // select(.insight | test(\"$pattern\"; \"i\"))" \
+          | jq -r '"[\(.confidence)/10] \(.type)/\(.key) — \(.insight) (\(.ts))"'
+      else
+        tac "$LEARNINGS_FILE" 2>/dev/null \
+          | jq -r '"[\(.confidence)/10] \(.type)/\(.key) — \(.insight) (\(.ts))"'
+      fi
+    else
+      # jq fallback — grep + sed, less pretty but works
+      if [[ -n "$pattern" ]]; then
+        grep -i "$pattern" "$LEARNINGS_FILE" | tac
+      else
+        tac "$LEARNINGS_FILE"
+      fi
+    fi
+    ;;
+
+  path)
+    echo "$LEARNINGS_FILE"
+    ;;
+
+  ""|-h|--help|help)
+    sed -n '2,/^set -e/p' "$0" | sed 's/^# \{0,1\}//; s/^set -.*//'
+    ;;
+
+  *)
+    echo "cue-learnings: unknown subcommand '$cmd' (try 'log', 'search', 'path', or '--help')" >&2
+    exit 1
+    ;;
+esac

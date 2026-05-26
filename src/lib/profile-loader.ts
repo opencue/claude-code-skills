@@ -430,6 +430,7 @@ function foldChain(chain: Profile[]): ResolvedProfile {
       qualityGates: dedupePrimitiveArray(acc.qualityGates, child.qualityGates),
       evals: dedupePrimitiveArray(acc.evals, child.evals),
       recommends: dedupePrimitiveArray(acc.recommends, child.recommends),
+      personaRouting: [...acc.personaRouting, ...(child.persona_routing ?? [])],
       inheritanceChain: [...acc.inheritanceChain, child.name],
     };
   }
@@ -466,6 +467,7 @@ function normalizeToResolved(p: Profile, chain: string[]): ResolvedProfile {
     qualityGates: [...(p.qualityGates ?? [])],
     evals: [...(p.evals ?? [])],
     recommends: [...(p.recommends ?? [])],
+    personaRouting: [...(p.persona_routing ?? [])],
     inheritanceChain: chain,
   };
 }
@@ -542,6 +544,7 @@ function foldComposite(selector: string, parts: ResolvedProfile[]): ResolvedProf
     qualityGates: [...head.qualityGates],
     evals: [...head.evals],
     recommends: [...head.recommends],
+    personaRouting: [...head.personaRouting],
     inheritanceChain: [head.inheritanceChain.join("+")],
   };
 
@@ -572,6 +575,7 @@ function foldComposite(selector: string, parts: ResolvedProfile[]): ResolvedProf
       qualityGates: dedupePrimitiveArray(acc.qualityGates, next.qualityGates),
       evals: dedupePrimitiveArray(acc.evals, next.evals),
       recommends: dedupePrimitiveArray(acc.recommends, next.recommends),
+      personaRouting: [...acc.personaRouting, ...next.personaRouting],
       inheritanceChain: [...acc.inheritanceChain, next.inheritanceChain.join("+")],
     };
   }

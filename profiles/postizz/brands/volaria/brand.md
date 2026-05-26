@@ -49,16 +49,32 @@ brands can reuse them.
 Composite-voice articles MUST include the standard composite-voices
 disclaimer in frontmatter (see article-writer SKILL.md, Phase 2).
 
-## Card template — 4:5 vertical meme news card
+## Templates (rotate per post)
 
-Use this as the system prompt for image-gen calls when posting a
-VOLARIA take. Adapt the headline and middle-image subject to the topic;
-the layout/palette/logo placement is fixed.
+VOLARIA cards rotate through four named templates. All share: real logo
+post-composited via ImageMagick (see `feedback-volaria-logo-composite`
+memory — 220px black band, logo `-resize x180 -gravity north -geometry
++0+20`), white uppercase Druk/Bebas Neue headline (3 lines exact, tight
+leading), jet-black palette, single warm amber spotlight, teal-and-amber
+color grade, 50mm macro feel. All output 4:5 vertical (928×1152 from
+`nano_banana_pro` at 1k).
+
+Across every template, the **top header band must be EMPTY in the
+generation prompt** (a real logo is composited post-gen) and the headline
+is left-aligned with breathing margin. Pick one template per thread for
+visual coherence — don't mix mid-thread.
+
+### Template 1 — `tri-band-cinematic` (default)
+
+Best for: trade ideas, single-stock movers, announcements where the
+subject is a clear hero object on black. The bordered/banded look.
 
 ```
-LAYOUT — three stacked horizontal bands:
+LAYOUT — three stacked horizontal bands.
 
-1) TOP HEADER BAR (10%): solid jet-black, logo centered, unchanged.
+1) TOP HEADER BAR (10%): solid jet-black, completely empty (logo
+   composited post-generation — do not place any logo, wordmark, or
+   text in this band).
 
 2) MIDDLE IMAGE (55%): Cinematic editorial close-up of <SUBJECT>,
    single dramatic warm spotlight, deep black space, subtle red glow
@@ -68,20 +84,127 @@ LAYOUT — three stacked horizontal bands:
    dramatic, inviting.
 
 3) BOTTOM TEXT BLOCK (35%): solid jet-black. Massive bold white
-   uppercase condensed sans-serif headline (Druk / Bebas Neue style),
-   perfectly kerned, tight leading, three lines exactly, left-aligned:
+   #FFFFFF uppercase condensed sans-serif headline (Druk Wide / Bebas
+   Neue), perfectly kerned, tight leading, three lines exactly,
+   left-aligned with breathing margin:
 
    <LINE 1>
    <LINE 2>
    <LINE 3>
 
-Under headline, small thin white uppercase label: <CTA, e.g. ENGAGE>
+Under headline, small thin white uppercase label letter-spaced: <CTA>
 
-All three lines FULLY VISIBLE, breathing margin.
-
-Style: Apple Keynote precision, viral X meme energy. Hyper-sharp text.
-Logo unchanged. No emoji.
+All three lines FULLY VISIBLE. Apple Keynote precision. Hyper-sharp
+text. No emoji, no hashtags.
 ```
+
+### Template 2 — `billboard` (movie-poster)
+
+Best for: bold single statements, sentiment posts, macro reactions, mood
+pieces. Fewer borders, more immersive.
+
+```
+LAYOUT — top logo band + one large image with overlaid headline.
+
+1) TOP HEADER BAR (10%): solid jet-black, completely empty (logo
+   composited post-generation — no logo, wordmark, or text here).
+
+2) MAIN IMAGE (90%): Full-bleed cinematic editorial scene of <SUBJECT>,
+   single dramatic warm spotlight, deep black, teal-and-amber color
+   grade, 50mm macro lens, deep cinematic shadows. Composition leaves
+   the BOTTOM THIRD in deeper shadow so a large white text block reads
+   cleanly over it.
+
+Overlay text on the bottom third, left-aligned with breathing margin —
+massive bold white #FFFFFF uppercase condensed sans-serif headline
+(Druk Wide / Bebas Neue), perfectly kerned, tight leading, three lines
+exactly:
+
+<LINE 1>
+<LINE 2>
+<LINE 3>
+
+Small thin white uppercase CTA label letter-spaced below: <CTA>
+
+Apple Keynote precision. Hyper-sharp text. No emoji, no hashtags.
+```
+
+### Template 3 — `ticker-tape` (Bloomberg terminal)
+
+Best for: macro / multi-asset takes, market recaps, "here's what the
+tape said today" posts. Adds a data-rich strip between subject and
+headline.
+
+```
+LAYOUT — four stacked bands.
+
+1) TOP HEADER BAR (10%): solid jet-black, empty (logo composited
+   post-generation).
+
+2) CINEMATIC SUBJECT (60%): Editorial close-up of <SUBJECT> on deep
+   black, single warm amber spotlight, teal-and-amber color grade,
+   50mm macro lens, deep shadows. No people, no other text.
+
+3) TICKER STRIP (5%): Horizontal band, solid black background, single
+   row of bold amber #FFA500 monospaced uppercase ticker text reading
+   left to right with subtle motion blur on the right edge as if
+   scrolling:
+
+   <TICKER STRIP TEXT, e.g. "▶ $BRAI +141%   •   S&P 7,535   •   SQQQ
+   3X INV   •   NDX 26,684 +1.29%">
+
+4) BOTTOM TEXT BLOCK (25%): Solid jet-black. Massive bold white
+   #FFFFFF uppercase condensed sans-serif headline (Druk Wide / Bebas
+   Neue), perfectly kerned, tight leading, three lines exactly,
+   left-aligned:
+
+<LINE 1>
+<LINE 2>
+<LINE 3>
+
+Small thin white uppercase CTA label letter-spaced beneath: <CTA>
+
+Apple Keynote precision. Hyper-sharp text. No emoji, no hashtags.
+```
+
+### Template 4 — `magazine` (split-vertical cover)
+
+Best for: op-eds, sector analyses, "issue cover" framing where the
+headline IS the visual. Vanity Fair / The Atlantic feel.
+
+```
+LAYOUT — top logo band + 50-50 vertical split below.
+
+1) TOP HEADER BAR (10%): solid jet-black, empty (logo composited
+   post-generation).
+
+2) LEFT HALF (45% width × 90% height): Editorial cinematic portrait of
+   <SUBJECT> on deep black, warm amber spotlight, teal-amber grade,
+   50mm macro. Subject crops tight, occupies most of the left column.
+
+3) RIGHT HALF (55% width × 90% height): Solid jet-black. Massive bold
+   white #FFFFFF uppercase condensed sans-serif headline (Druk Wide /
+   Bebas Neue), perfectly kerned, tight leading, three lines exactly,
+   left-aligned, vertically centered with breathing margin:
+
+<LINE 1>
+<LINE 2>
+<LINE 3>
+
+Small thin white uppercase CTA label letter-spaced beneath the headline,
+also left-aligned: <CTA>
+
+Apple Keynote precision. Hyper-sharp text. No emoji, no hashtags.
+```
+
+### Picking a template
+
+| Post type | Template |
+|---|---|
+| Trade idea / single-stock mover / announcement | `tri-band-cinematic` |
+| Bold one-line sentiment / macro mood | `billboard` |
+| Multi-asset recap / market wrap / cross-asset take | `ticker-tape` |
+| Op-ed / sector analysis / cover-story framing | `magazine` |
 
 ## Subject / headline examples
 

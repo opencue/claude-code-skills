@@ -1,0 +1,41 @@
+# Workspaces — per-website/client configurations for the google-analytics profile.
+#
+# Each workspace pre-configures the GA4 property ID, website URL,
+# and any context the agent needs for that specific client/site.
+#
+# Usage:
+#   cue workspace                    — pick a workspace interactively
+#   cue workspace teherguminet       — switch directly
+#   cue workspace --list             — show all workspaces
+#
+# The selected workspace's env vars override the profile's defaults,
+# and its `context:` block is injected into the persona.
+
+workspaces:
+  teherguminet:
+    name: "Teherguminet.hu"
+    url: "https://teherguminet.hu"
+    description: "Tehergumi webshop — teherautó, kisteherautó, mezőgazdasági gumik"
+    env:
+      GA4_PROPERTY_ID: "${TEHERGUMINET_GA4_PROPERTY_ID}"
+    context: |
+      Active workspace: teherguminet.hu
+      Industry: E-commerce / Automotive parts (truck tires)
+      Market: Hungary (HU)
+      Language: Hungarian
+      Currency: HUF
+      Key products: tehergumi, kisteherautó gumi, mezőgazdasági gumi, munkagép gumi
+      Seasonality: peak in spring (March-May) and autumn (Sept-Nov)
+      Default GA4 property: "properties/${TEHERGUMINET_GA4_PROPERTY_ID}"
+
+  # --- Add more workspaces below ---
+  # example:
+  #   name: "Example.com"
+  #   url: "https://example.com"
+  #   description: "Example site description"
+  #   env:
+  #     GA4_PROPERTY_ID: "123456789"
+  #   context: |
+  #     Industry: ...
+  #     Market: ...
+  #     Default GA4 property: "properties/123456789"

@@ -45,6 +45,10 @@ export const COMMANDS = {
     summary: "Schema + lint checks for a profile (or --all) (A13)",
     load: () => import("./validate"),
   },
+  router: {
+    summary: "Preview the auto-built skill router for a profile, or --audit cross-profile",
+    load: () => import("./router"),
+  },
   security: {
     summary: "Scan skills for prompt injection & secret exfiltration risks",
     load: () => import("./security"),
@@ -341,6 +345,10 @@ export const COMMANDS = {
   "submit-profile": {
     summary: "Fork opencue/cue, branch, commit your profile.yaml, open PR (community contribution)",
     load: () => import("./submit-profile"),
+  },
+  telemetry: {
+    summary: "Opt-in local activation telemetry (enable/disable/status/purge/ingest/report)",
+    load: () => import("./telemetry"),
   },
 } as const satisfies Record<string, Command>;
 

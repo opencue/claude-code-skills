@@ -24,12 +24,12 @@ function configDir(): string {
     : join(homedir(), ".config", "cue");
 }
 
-interface Warning {
+export interface Warning {
   code: string;
   message: string;
 }
 
-function quickDiagnose(profileName: string, profile: any): Warning[] {
+export function quickDiagnose(profileName: string, profile: any): Warning[] {
   const warnings: Warning[] = [];
 
   // Check skills exist on disk

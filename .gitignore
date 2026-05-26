@@ -28,3 +28,7 @@ awesome-clis/
 .claude/skills/hirelens-showcase/
 .claude/skills/jdfit/
 .claude/skills/job-hunter/
+
+# Third-party repos cloned for study (have their own .git/ — keep out of cue's tree)
+vendor/
+.gstack/

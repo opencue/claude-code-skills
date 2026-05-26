@@ -1,0 +1,58 @@
+name: supercomputer
+icon: "🧠"
+description: "All-in-one video production powerhouse — cinematic AI, UGC, product photoshoots, motion design, TV ads, podcasts, Amazon listings, and video adaptation. Bundles Higgsfield Cinema Studio, Seedance, Kling, Argil flows, and every creative skill."
+inherits: core
+
+persona: |
+  You are a cinematic AI video production director. You command every video
+  generation tool available — Higgsfield Cinema Studio 3.5, Seedance 2.0,
+  Kling 3.0, and Argil flows. You think in shots, scenes, and sequences.
+  You know MCSLA formula, Soul ID consistency, motion control, and the
+  DISCIPLINE framework. You default to production-quality output.
+
+skills:
+  local:
+    # ── Higgsfield Cinema Studio (existing) ──
+    - higgsfield/higgsfield-generate
+    - higgsfield/higgsfield-product-photoshoot
+    - higgsfield/higgsfield-marketplace-cards
+    - higgsfield/higgsfield-soul-id
+    # ── Video flows (Argil-style) ──
+    - video/video-adapt
+    - video/ugc-flow
+    - video/cinematic-flow
+    - video/motion-design-flow
+    - video/tv-ad
+    - video/amazon-product-listing
+    - video/podcast-flow
+    # ── Video production tools ──
+    - design/headless-gif-demo
+    - design/remotion-best-practices
+    - design/kitty-visualize
+    - design/png-alpha-cleaner
+    - design/high-end-visual-design
+    - design/brandkit
+    # ── Creative & design ──
+    - design/imagegen-frontend-web
+    - design/imagegen-frontend-mobile
+    - design/gpt-taste
+    - design/stitch-design-taste
+    - design/image-to-code
+    # ── Content & marketing ──
+    - content/article-to-everywhere
+    - content/trend-to-thread
+    - medusa/higgsfield-to-medusa-products
+  npx:
+    # ── OSideMedia: Higgsfield Cinema Studio 3.5 + Seedance + Kling (20 sub-skills) ──
+    - repo: OSideMedia/higgsfield-ai-prompt-skill
+      skills:
+        - higgsfield-ai-prompt-skill
+    # ── Seedance Product Video ──
+    - repo: op7418/Seedance-Product-Video
+      skills:
+        - seedance-product-video
+mcps:
+  - Higgsfield
+  - marva-blog
+plugins:
+  - claude-video-vision@jordanrendric

@@ -7,6 +7,8 @@ import { appendFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 
+import { isEnabled as telemetryEnabled } from "./telemetry-consent";
+
 /**
  * Resolve the analytics log path. Lazy — read XDG_CONFIG_HOME on every call so
  * tests (and any caller that mutates the env at runtime) get the current value.
@@ -57,17 +59,38 @@ function readSessionLog(since?: Date): SessionLogEntry[] {
   return out;
 }
 
+/**
+ * SessionEvent — superset shape used by every emitter. Discriminated by
+ * `event`. Most fields are optional because they only apply to specific
+ * variants:
+ *
+ *   - `start` / `end`: profile, agent, cwd, duration_s (end only)
+ *   - `skill_hit` (legacy regex match from transcript): profile, agent, cwd, skill
+ *   - `skill_invoked` (structured `Skill` tool_use): skill, session_id, tool_use_id
+ *   - `skill_miss` (trigger matched but skill wasn't fired): session_id,
+ *     prompt_redacted (first 80 chars, secret-masked), matched_skills
+ */
 export interface SessionEvent {
   ts: string;
-  event: "start" | "end" | "skill_hit";
-  profile: string;
-  agent: "claude-code" | "codex";
-  cwd: string;
+  event: "start" | "end" | "skill_hit" | "skill_invoked" | "skill_miss";
+  profile?: string;
+  agent?: "claude-code" | "codex";
+  cwd?: string;
   duration_s?: number;
   skill?: string;
+  session_id?: string;
+  tool_use_id?: string;
+  prompt_redacted?: string;
+  matched_skills?: string[];
 }
 
+/**
+ * Append an event to the local analytics log. Silently skipped when the
+ * user hasn't opted in via `cue telemetry enable`. The consent check is
+ * cheap (single existsSync) so per-call overhead is negligible.
+ */
 export function recordEvent(event: SessionEvent): void {
+  if (!telemetryEnabled()) return;
   mkdirSync(dirname(analyticsPath()), { recursive: true });
   appendFileSync(analyticsPath(), JSON.stringify(event) + "\n");
 }

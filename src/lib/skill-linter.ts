@@ -75,6 +75,23 @@ export interface Diagnostic {
 export interface LintResult {
   diagnostics: Diagnostic[];
   fixable: number;
+  /** 0–100 quality score: 100 - (20*errors + 5*warnings + 1*infos), clamped. */
+  score: number;
+}
+
+/**
+ * Compute a 0–100 quality score from a diagnostics list. Weighted so a single
+ * error has more weight than five warnings. The score is not the goal; it's a
+ * sortable proxy for "which skills need triage first."
+ */
+export function scoreDiagnostics(diagnostics: Diagnostic[]): number {
+  let s = 100;
+  for (const d of diagnostics) {
+    if (d.severity === "error") s -= 20;
+    else if (d.severity === "warning") s -= 5;
+    else s -= 1;
+  }
+  return Math.max(0, Math.min(100, s));
 }
 
 // ---------------------------------------------------------------------------
@@ -111,6 +128,65 @@ function insertFrontmatterField(content: string, key: string, value: string): st
 /** Slugify a string → kebab-case for derived `name:` values. */
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
+}
+
+// ---------------------------------------------------------------------------
+// Ignore directives
+//
+// Two forms suppress lint diagnostics:
+//   - Frontmatter: `lint-ignore: R009, R010` (or `[R009, R010]`)
+//     Suppresses those rules across the whole file.
+//   - Inline HTML comment: `<!-- lint-ignore R009 -->`
+//     Suppresses R009 on the comment's own line and the next line. Use
+//     `lint-ignore *` to suppress every rule on that line.
+// ---------------------------------------------------------------------------
+
+interface IgnoreSet {
+  fileRules: Set<string>;
+  /** Map of 1-based line number → set of suppressed rule ids ("*" = all). */
+  lineRules: Map<number, Set<string>>;
+}
+
+function parseRuleList(raw: string): string[] {
+  return raw
+    .replace(/^\[|\]$/g, "")
+    .split(/[,\s]+/)
+    .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+    .filter(Boolean);
+}
+
+function parseIgnores(content: string): IgnoreSet {
+  const fileRules = new Set<string>();
+  const fm = getFrontmatter(content);
+  if (fm) {
+    const raw = fmField(fm.yaml, "lint-ignore");
+    if (raw) for (const r of parseRuleList(raw)) fileRules.add(r);
+  }
+
+  const lineRules = new Map<number, Set<string>>();
+  const commentRe = /<!--\s*lint-ignore\s+([^\-]+?)\s*-->/g;
+  for (const m of content.matchAll(commentRe)) {
+    if (m.index === undefined) continue;
+    const rules = parseRuleList(m[1] ?? "");
+    if (rules.length === 0) continue;
+    const commentLine = lineOf(content, m.index);
+    for (const ln of [commentLine, commentLine + 1]) {
+      const existing = lineRules.get(ln) ?? new Set<string>();
+      for (const r of rules) existing.add(r);
+      lineRules.set(ln, existing);
+    }
+  }
+
+  return { fileRules, lineRules };
+}
+
+function isIgnored(diag: Diagnostic, ignores: IgnoreSet): boolean {
+  if (ignores.fileRules.has(diag.rule) || ignores.fileRules.has("*")) return true;
+  if (diag.line !== undefined) {
+    const lineSet = ignores.lineRules.get(diag.line);
+    if (lineSet && (lineSet.has(diag.rule) || lineSet.has("*"))) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,12 +245,16 @@ function ruleR003(content: string): Diagnostic[] {
 }
 
 /**
- * R004 — description must contain a trigger phrase. The strongest signals
- * for Claude's discovery are second-person verbs ("Use when …", "Triggers …",
- * "When the user …"). Descriptions that are pure noun phrases ("A Python
- * library for X") fire much less reliably.
+ * R004 — description must contain a trigger phrase OR frontmatter must
+ * declare a `triggers:` list. The strongest signals for Claude's discovery
+ * are second-person verbs ("Use when …", "Triggers …", "When the user …"),
+ * and explicit structured triggers are an equally good signal.
  */
 function ruleR004(content: string): Diagnostic[] {
+  const fm = getFrontmatter(content);
+  // Explicit `triggers:` field with any content counts as a trigger signal.
+  if (fm && /^triggers:\s*(\n\s+-\s+\S|\S)/m.test(fm.yaml)) return [];
+
   const meta = parseMetadataFromContent(content);
   if (!meta.description) return [];
   const lower = meta.description.toLowerCase();
@@ -183,7 +263,7 @@ function ruleR004(content: string): Diagnostic[] {
   return [{
     rule: "R004",
     severity: "warning",
-    message: 'Description has no trigger phrase (e.g. "Use when ...", "When the user ..."). Without one, Claude may not discover this skill reliably.',
+    message: 'Description has no trigger phrase (e.g. "Use when ...", "When the user ..."). Add a prose trigger or set `triggers:` in frontmatter.',
   }];
 }
 
@@ -296,18 +376,490 @@ function ruleR008(content: string): Diagnostic[] {
 }
 
 // ---------------------------------------------------------------------------
+// R009 — voice rules
+// ---------------------------------------------------------------------------
+
+const BANNED_WORDS = [
+  "delve", "crucial", "robust", "comprehensive", "nuanced", "multifaceted",
+  "furthermore", "moreover", "additionally", "pivotal", "landscape", "tapestry",
+  "underscore", "foster", "showcase", "intricate", "vibrant", "fundamental",
+  "significant",
+] as const;
+
+const BANNED_PHRASES = [
+  "here's the kicker", "the bottom line", "deep dive", "unpack this",
+  "in today's fast-paced world",
+] as const;
+
+/**
+ * Strip frontmatter, fenced code blocks (```...```), and inline code (`...`)
+ * so voice checks only run on prose. Preserves line count by replacing
+ * stripped regions with newlines, keeping reported line numbers accurate.
+ */
+function stripCodeAndFrontmatter(content: string): string {
+  const fm = getFrontmatter(content);
+  let s = content;
+  if (fm) {
+    const fmText = s.slice(0, fm.end);
+    s = fmText.replace(/[^\n]/g, " ") + s.slice(fm.end);
+  }
+  s = s.replace(/```[\s\S]*?```/g, (m) => m.replace(/[^\n]/g, " "));
+  s = s.replace(/`[^`\n]*`/g, (m) => " ".repeat(m.length));
+  return s;
+}
+
+function lineOf(content: string, offset: number): number {
+  let line = 1;
+  for (let i = 0; i < offset && i < content.length; i++) {
+    if (content[i] === "\n") line++;
+  }
+  return line;
+}
+
+/**
+ * Replace every em dash in prose (skipping frontmatter, fenced code blocks,
+ * and inline code) with ", ". Surrounding whitespace is collapsed so
+ * `foo — bar` becomes `foo, bar`, not `foo,  bar`. Idempotent.
+ */
+function fixEmDashesInProse(content: string): string {
+  const masked = stripCodeAndFrontmatter(content);
+  const out: string[] = [];
+  let i = 0;
+  while (i < content.length) {
+    const idx = masked.indexOf("—", i);
+    if (idx === -1) {
+      out.push(content.slice(i));
+      break;
+    }
+    let start = idx;
+    let end = idx + 1;
+    while (start > i && /[ \t]/.test(masked[start - 1] ?? "")) start--;
+    while (end < masked.length && /[ \t]/.test(masked[end] ?? "")) end++;
+    out.push(content.slice(i, start));
+    out.push(", ");
+    i = end;
+  }
+  return out.join("");
+}
+
+/**
+ * R009 — voice rules. Flags em dashes and AI-vocabulary words/phrases in
+ * skill prose. Code blocks, inline code, and frontmatter are exempt. No
+ * auto-fix: voice rewrites need human judgment. One diagnostic per banned
+ * term (not per occurrence) to avoid spam.
+ */
+function ruleR009(content: string): Diagnostic[] {
+  const prose = stripCodeAndFrontmatter(content);
+  const diagnostics: Diagnostic[] = [];
+
+  const emDashIdx = prose.indexOf("—");
+  if (emDashIdx !== -1) {
+    diagnostics.push({
+      rule: "R009",
+      severity: "warning",
+      message: "Em dash found in prose. Voice rules ban it; use commas, periods, or \"...\". Wrap legitimate uses in backticks to exempt.",
+      line: lineOf(content, emDashIdx),
+      fix: fixEmDashesInProse,
+    });
+  }
+
+  const lowerProse = prose.toLowerCase();
+  const flaggedWords: Array<{ word: string; line: number }> = [];
+  for (const word of BANNED_WORDS) {
+    const re = new RegExp(`\\b${word}\\b`, "i");
+    const m = re.exec(prose);
+    if (m && m.index !== undefined) {
+      flaggedWords.push({ word, line: lineOf(content, m.index) });
+    }
+  }
+  if (flaggedWords.length > 0) {
+    const sample = flaggedWords.slice(0, 5).map((f) => `"${f.word}" (line ${f.line})`).join(", ");
+    const more = flaggedWords.length > 5 ? `, +${flaggedWords.length - 5} more` : "";
+    diagnostics.push({
+      rule: "R009",
+      severity: "warning",
+      message: `AI vocabulary found: ${sample}${more}. See voice rules — wrap legit technical uses in backticks.`,
+      line: flaggedWords[0]!.line,
+    });
+  }
+
+  for (const phrase of BANNED_PHRASES) {
+    const idx = lowerProse.indexOf(phrase);
+    if (idx !== -1) {
+      diagnostics.push({
+        rule: "R009",
+        severity: "warning",
+        message: `Banned phrase "${phrase}" — voice rules call this hype. Cut or rewrite.`,
+        line: lineOf(content, idx),
+      });
+    }
+  }
+
+  // "leverage" as a verb is banned; "leverage" as a noun (financial,
+  // mechanical) is fine. We can't disambiguate syntactically, but a useful
+  // heuristic: verb form follows "to ", "we ", "you ", "I ", etc.
+  const leverageVerb = /\b(?:to|we|you|i|they|will|can|should|would|could|may|might|must|let's|lets)\s+leverage\b/i;
+  const lv = leverageVerb.exec(prose);
+  if (lv) {
+    diagnostics.push({
+      rule: "R009",
+      severity: "warning",
+      message: '"leverage" used as a verb — voice rules ban it. Use "use" or "rely on".',
+      line: lineOf(content, lv.index),
+    });
+  }
+
+  return diagnostics;
+}
+
+// ---------------------------------------------------------------------------
+// R010 — extractable shell sequences
+// ---------------------------------------------------------------------------
+
+/**
+ * Count "command lines" inside a code-block body: non-empty lines that look
+ * like shell commands (not comments, not output, not `$`/`>` prompts alone).
+ * Comments (`# ...`) DO count because they typically annotate steps inside a
+ * script.
+ */
+function countCommandLines(blockBody: string): number {
+  let count = 0;
+  for (const raw of blockBody.split("\n")) {
+    const line = raw.trim();
+    if (line.length === 0) continue;
+    if (line === "$" || line === ">") continue;
+    // Output lines starting with whitespace after a prompt — heuristic: skip
+    // lines that look like terminal output (no shell metachar, no command at
+    // start). For simplicity, only skip pure ASCII art separators.
+    if (/^[-=]{3,}$/.test(line)) continue;
+    count++;
+  }
+  return count;
+}
+
+/**
+ * R010 — flag skills with a fenced bash/sh block containing 8+ command lines.
+ * Signal: the skill is describing a multi-step shell workflow inline. A
+ * helper script under `scripts/` would reduce copy-paste errors for users
+ * and make the steps reproducible. No auto-fix (script design needs human
+ * judgment about parameters, error handling, idempotency).
+ */
+function ruleR010(content: string): Diagnostic[] {
+  const fm = getFrontmatter(content);
+  const body = fm ? content.slice(fm.end) : content;
+  const blockRe = /^```(bash|sh|zsh|shell)?\s*\n([\s\S]*?)\n```/gm;
+  const candidates: Array<{ lines: number; offset: number }> = [];
+  for (const m of body.matchAll(blockRe)) {
+    const lang = (m[1] ?? "").toLowerCase();
+    // Untagged code blocks are too often non-shell (json, log, etc.) to
+    // include reliably. Only count explicit shell-tagged blocks.
+    if (lang === "" || (lang !== "bash" && lang !== "sh" && lang !== "zsh" && lang !== "shell")) continue;
+    const lines = countCommandLines(m[2] ?? "");
+    if (lines >= 8) {
+      candidates.push({ lines, offset: m.index ?? 0 });
+    }
+  }
+  if (candidates.length === 0) return [];
+
+  const biggest = candidates.reduce((a, b) => (a.lines >= b.lines ? a : b));
+  const fmOffset = fm ? fm.end : 0;
+  const blockLine = lineOf(content, fmOffset + biggest.offset);
+  const more = candidates.length > 1 ? ` (+${candidates.length - 1} other ${candidates.length - 1 === 1 ? "block" : "blocks"})` : "";
+  return [{
+    rule: "R010",
+    severity: "info",
+    message: `Shell block at line ${blockLine} has ${biggest.lines} command lines${more}. Extract to \`scripts/<name>.sh\` next to SKILL.md so users run one command, not eight.`,
+    line: blockLine,
+  }];
+}
+
+// ---------------------------------------------------------------------------
+// R014 — zombie skill (no invocations in the telemetry window)
+//
+// Off by default. Opt-in via lint-skill --check-zombie <analytics.jsonl>.
+// Reads structured `skill_invoked` events and flags skills with zero hits
+// in the last 30 days. Silent no-op when the file is missing or the user
+// hasn't enabled telemetry.
+// ---------------------------------------------------------------------------
+
+export interface ZombieCheckOptions {
+  /** Path to ~/.config/cue/analytics.jsonl (or compatible JSONL log). */
+  analyticsPath: string;
+  /** Days back to consider; default 30. */
+  windowDays?: number;
+}
+
+/**
+ * Check a single skill against the analytics log. Returns an R014 diagnostic
+ * if no `skill_invoked` event names this skill in the window. Lives outside
+ * the per-file ALL_RULES set because it needs a path argument; the CLI opts
+ * in via a flag.
+ */
+export function checkZombie(content: string, opts: ZombieCheckOptions): Diagnostic[] {
+  const fm = getFrontmatter(content);
+  if (!fm) return [];
+  const name = fmField(fm.yaml, "name");
+  if (!name) return [];
+
+  const windowDays = opts.windowDays ?? 30;
+  const cutoffMs = Date.now() - windowDays * 24 * 3600 * 1000;
+
+  let analyticsRaw: string;
+  try {
+    const { readFileSync, existsSync } = require("node:fs") as typeof import("node:fs");
+    if (!existsSync(opts.analyticsPath)) return [];
+    analyticsRaw = readFileSync(opts.analyticsPath, "utf8");
+  } catch {
+    return [];
+  }
+
+  let invocations = 0;
+  let lastInvocationTs: string | null = null;
+  for (const line of analyticsRaw.split("\n")) {
+    if (!line.trim()) continue;
+    let parsed: { event?: string; skill?: string; ts?: string };
+    try { parsed = JSON.parse(line) as typeof parsed; } catch { continue; }
+    if (parsed.event !== "skill_invoked") continue;
+    if (parsed.skill !== name) continue;
+    if (parsed.ts) {
+      const ts = Date.parse(parsed.ts);
+      if (!Number.isNaN(ts) && ts < cutoffMs) continue;
+      if (!lastInvocationTs || parsed.ts > lastInvocationTs) lastInvocationTs = parsed.ts;
+    }
+    invocations++;
+  }
+
+  if (invocations > 0) return [];
+
+  return [{
+    rule: "R014",
+    severity: "info",
+    message: `Zombie skill: 0 invocations in last ${windowDays} day(s) per local telemetry. Consider removing or tightening the description/triggers.`,
+  }];
+}
+
+// ---------------------------------------------------------------------------
+// R013 — description/body coherence
+// ---------------------------------------------------------------------------
+
+const COHERENCE_STOPWORDS = new Set([
+  "the", "and", "for", "with", "this", "that", "these", "those", "from",
+  "into", "onto", "over", "under", "than", "then", "they", "them", "their",
+  "your", "yours", "user", "users", "use", "uses", "used", "using", "when",
+  "what", "how", "where", "why", "who", "which", "asks", "ask", "asking",
+  "mentions", "mention", "mentioning", "needs", "need", "needed", "needing",
+  "triggers", "trigger", "triggered", "triggering", "phrases", "phrase",
+  "like", "also", "only", "any", "all", "some", "each", "every", "such",
+  "very", "much", "more", "less", "most", "least", "many", "few", "lot",
+  "lots", "well", "rather", "quite", "just", "still", "yet", "already",
+  "should", "could", "would", "might", "must", "will", "can", "may",
+  "does", "doing", "done", "make", "makes", "making", "made", "get",
+  "gets", "getting", "got", "have", "has", "had", "having", "be", "is",
+  "are", "was", "were", "been", "being", "do", "did",
+  "skill", "skills", "claude", "agent", "agents", "input", "inputs",
+  "output", "outputs", "set", "sets", "setting",
+]);
+
+function coherenceWords(text: string): Set<string> {
+  const matches = text.toLowerCase().match(/[a-z][a-z0-9-]{2,}/g) ?? [];
+  return new Set(matches.filter((w) => !COHERENCE_STOPWORDS.has(w) && w.length >= 3));
+}
+
+/**
+ * R013 — flag skills whose description doesn't mention key nouns from the
+ * body (or vice versa). Signal: stale description. Computes Jaccard-style
+ * overlap; if the description has 5+ content words and <30% of them appear
+ * in the body, flag info. No auto-fix.
+ */
+function ruleR013(content: string): Diagnostic[] {
+  const fm = getFrontmatter(content);
+  if (!fm) return [];
+  const desc = fmField(fm.yaml, "description");
+  if (!desc) return [];
+
+  const body = bodyAfterFrontmatter(content);
+  // Strip code blocks from body before extracting words — code identifiers
+  // shouldn't count toward conceptual coherence.
+  const bodyProse = stripCodeAndFrontmatter(content).slice(fm.end);
+  const descWords = coherenceWords(desc);
+  if (descWords.size < 5) return [];
+
+  const bodyWords = coherenceWords(bodyProse);
+  if (bodyWords.size === 0) return [];
+
+  let overlap = 0;
+  const missing: string[] = [];
+  for (const w of descWords) {
+    if (bodyWords.has(w)) overlap++;
+    else missing.push(w);
+  }
+  const ratio = overlap / descWords.size;
+  if (ratio >= 0.3) return [];
+
+  const sample = missing.slice(0, 5).join(", ");
+  return [{
+    rule: "R013",
+    severity: "info",
+    message: `Description/body overlap is ${Math.round(ratio * 100)}% (${overlap}/${descWords.size} words). Description mentions: ${sample}. Body doesn't. Possible stale description.`,
+  }];
+}
+
+// ---------------------------------------------------------------------------
+// R011 — example block missing
+// ---------------------------------------------------------------------------
+
+/**
+ * R011 — skills without at least one example block get poor discovery. Per
+ * the profile principles, examples lift activation from ~50% to ~90%.
+ * Accepts any of: `<example>` tag, `## Example` / `## Examples` heading,
+ * `### Example(s)` heading, or `Example:` lead-in line. Info-level: a tiny
+ * single-purpose skill can sometimes get away without one. No auto-fix
+ * (example content needs human authorship).
+ */
+function ruleR011(content: string): Diagnostic[] {
+  const body = bodyAfterFrontmatter(content);
+  if (/<example[\s>]/i.test(body)) return [];
+  if (/^#{2,3}\s+Examples?\b/im.test(body)) return [];
+  if (/^Examples?\s*:/im.test(body)) return [];
+  return [{
+    rule: "R011",
+    severity: "info",
+    message: "No `<example>` tag, `## Example` heading, or `Example:` lead-in. Examples lift Claude's activation rate from ~50% to ~90%.",
+  }];
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
-const ALL_RULES = [ruleR001, ruleR002, ruleR003, ruleR004, ruleR005, ruleR006, ruleR007, ruleR008];
+const ALL_RULES = [ruleR001, ruleR002, ruleR003, ruleR004, ruleR005, ruleR006, ruleR007, ruleR008, ruleR009, ruleR010, ruleR011, ruleR013];
 
 /** Run every rule against the SKILL.md content. */
 export function lint(content: string): LintResult {
+  const ignores = parseIgnores(content);
   const diagnostics: Diagnostic[] = [];
   for (const rule of ALL_RULES) {
-    diagnostics.push(...rule(content));
+    for (const diag of rule(content)) {
+      if (!isIgnored(diag, ignores)) diagnostics.push(diag);
+    }
   }
-  return { diagnostics, fixable: diagnostics.filter((d) => d.fix).length };
+  return {
+    diagnostics,
+    fixable: diagnostics.filter((d) => d.fix).length,
+    score: scoreDiagnostics(diagnostics),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// R012 — cross-skill overlap detection.
+//
+// Lives outside the per-file rule set because it needs a corpus of OTHER
+// skills to compare against. Callers (the lint-skill CLI) opt in via a
+// dedicated flag and pre-load the corpus.
+// ---------------------------------------------------------------------------
+
+const OVERLAP_STOPWORDS = new Set([
+  ...COHERENCE_STOPWORDS,
+  "name", "description", "tags", "category", "version", "yes", "no",
+]);
+
+function overlapKeywords(content: string): Set<string> {
+  const fm = getFrontmatter(content);
+  if (!fm) return new Set();
+  const desc = fmField(fm.yaml, "description");
+  const tags = fmField(fm.yaml, "tags");
+  const name = fmField(fm.yaml, "name");
+  const text = [name, desc, tags].join(" ");
+  const matches = text.toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) ?? [];
+  return new Set(matches.filter((w) => !OVERLAP_STOPWORDS.has(w) && w.length >= 4));
+}
+
+export interface OverlapCorpusEntry {
+  path: string;
+  content: string;
+}
+
+/**
+ * R012 — find skills in the corpus whose keyword set overlaps the target's
+ * by ≥50% (Sorensen-Dice). Skills with fewer than 4 keywords are exempt
+ * (too noisy). Self-match suppressed by path equality.
+ */
+export function findOverlap(
+  targetPath: string,
+  targetContent: string,
+  corpus: OverlapCorpusEntry[],
+): Diagnostic[] {
+  const targetKeywords = overlapKeywords(targetContent);
+  if (targetKeywords.size < 4) return [];
+
+  const matches: Array<{ path: string; ratio: number; shared: string[] }> = [];
+  for (const entry of corpus) {
+    if (entry.path === targetPath) continue;
+    const other = overlapKeywords(entry.content);
+    if (other.size < 4) continue;
+    const intersection = [...targetKeywords].filter((w) => other.has(w));
+    if (intersection.length === 0) continue;
+    const dice = (2 * intersection.length) / (targetKeywords.size + other.size);
+    if (dice >= 0.5) {
+      matches.push({ path: entry.path, ratio: dice, shared: intersection });
+    }
+  }
+  if (matches.length === 0) return [];
+
+  matches.sort((a, b) => b.ratio - a.ratio);
+  const top = matches.slice(0, 3);
+  const lines = top.map((m) => `${m.path} (${Math.round(m.ratio * 100)}%, shared: ${m.shared.slice(0, 5).join(", ")})`).join("; ");
+  return [{
+    rule: "R012",
+    severity: "warning",
+    message: `Possible duplicate of ${matches.length} skill(s): ${lines}. Review for overlap before shipping; "overlap kills" is a profile principle.`,
+  }];
+}
+
+// ---------------------------------------------------------------------------
+// Baseline support: snapshot current diagnostics so subsequent runs only
+// surface NEW issues. Used to adopt new rules without big-bang cleanup.
+// ---------------------------------------------------------------------------
+
+export interface LintBaseline {
+  version: 1;
+  generatedAt: string;
+  /** Per-file ledger of rules currently accepted as baseline. */
+  files: Record<string, string[]>;
+}
+
+/**
+ * Build a baseline from a list of (relative-file-path, diagnostics) pairs.
+ * Stores the unique set of rule ids per file. Sorted for deterministic diffs.
+ */
+export function buildBaseline(
+  entries: Array<{ path: string; diagnostics: Diagnostic[] }>,
+): LintBaseline {
+  const files: Record<string, string[]> = {};
+  for (const { path, diagnostics } of entries) {
+    const rules = [...new Set(diagnostics.map((d) => d.rule))].sort();
+    if (rules.length > 0) files[path] = rules;
+  }
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b))),
+  };
+}
+
+/**
+ * Filter diagnostics through a baseline. Any (file, rule) pair listed in the
+ * baseline is suppressed. New rule ids on a baselined file still surface.
+ */
+export function applyBaseline(
+  filePath: string,
+  diagnostics: Diagnostic[],
+  baseline: LintBaseline | null,
+): Diagnostic[] {
+  if (!baseline) return diagnostics;
+  const allowed = new Set(baseline.files[filePath] ?? []);
+  if (allowed.size === 0) return diagnostics;
+  return diagnostics.filter((d) => !allowed.has(d.rule));
 }
 
 /** Apply every fixable diagnostic. Idempotent if rules are well-behaved. */
@@ -354,6 +906,12 @@ const RULE_SUMMARIES: Record<string, string> = {
   R006: "Added `## Prerequisites` section listing CLI dependencies",
   R007: "Flagged missing `tags:` / `domain:` (hurts discoverability)",
   R008: "Flagged broken in-document anchor link(s)",
+  R009: "Flagged voice-rule violations (AI vocabulary, em dashes, banned phrases)",
+  R010: "Flagged large shell blocks as script-extraction candidates",
+  R011: "Flagged missing example block (hurts Claude's activation rate)",
+  R012: "Flagged possible duplicate skill (high keyword overlap with another skill)",
+  R013: "Flagged description/body word-overlap mismatch (possible stale description)",
+  R014: "Flagged zombie skill (0 invocations in telemetry window)",
 };
 
 const RULE_TITLE_PHRASES: Record<string, string> = {
@@ -365,6 +923,12 @@ const RULE_TITLE_PHRASES: Record<string, string> = {
   R006: "add `Prerequisites` section",
   R007: "flag missing `tags:`/`domain:`",
   R008: "flag broken anchor links",
+  R009: "flag voice-rule violations",
+  R010: "flag script-extraction candidates",
+  R011: "flag missing example block",
+  R012: "flag possible duplicate skills",
+  R013: "flag stale description (low body overlap)",
+  R014: "flag zombie skill (no telemetry invocations)",
 };
 
 /**
@@ -475,6 +1039,9 @@ ${leftList}
 | R005 \`allowed-tools\` syntax | Malformed tool declarations get silently ignored |
 | R006 Prerequisites | Users don't know which CLIs to install otherwise |
 | R007 tags/domain | Required for skill marketplace indexing |
+| R009 voice rules | Bans AI vocabulary + em dashes; voice rules live in resources/skills/skills/meta/skill-reviewer/references/voice.md |
+| R010 script extraction | Long inline shell sequences should live in \`scripts/\` so users run one command, not many |
+| R011 example block | Skills with examples activate ~90% of the time; without, ~50% |
 
 ## How to opt out
 

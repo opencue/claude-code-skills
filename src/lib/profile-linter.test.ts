@@ -68,10 +68,20 @@ async function writeProfile(name: string, body: string): Promise<void> {
   await writeFile(join(dir, "profile.yaml"), body, "utf8");
 }
 
-async function writeLocalSkill(ref: string): Promise<void> {
+async function writeLocalSkill(ref: string, opts?: { description?: string | null }): Promise<void> {
   const dir = join(skillsRoot, ref);
   await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, "SKILL.md"), `# ${ref}\n`, "utf8");
+  // Default to a router-clean description so tests don't accidentally trip
+  // W6/W7. Pass `description: null` to test the bare-bones case explicitly.
+  const slug = ref.split("/").pop() ?? ref;
+  const description =
+    opts?.description === undefined
+      ? `Use when user says "${slug}", "do ${slug}", or "run ${slug}". Wraps the ${slug} tool with house-style defaults.`
+      : opts.description;
+  const frontmatter = description
+    ? `---\nname: ${slug}\ndescription: >-\n  ${description}\n---\n`
+    : "";
+  await writeFile(join(dir, "SKILL.md"), `${frontmatter}# ${ref}\n`, "utf8");
 }
 
 async function writePlugin(name: string, slugs: string[]): Promise<void> {

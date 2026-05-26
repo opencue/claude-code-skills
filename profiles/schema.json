@@ -139,6 +139,12 @@
       "items": { "type": "string", "minLength": 1 },
       "default": [],
       "description": "Phase 4: eval scenario refs (relative to resources/evals/) declaring 'for task X this profile should be able to handle it'. `cue eval-behavior` runs structural checks."
+    },
+    "persona_routing": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PersonaRoutingEntry" },
+      "default": [],
+      "description": "Phase 5: hand-tuned skill router rows merged into CLAUDE.md alongside the auto-built tables. Use sparingly — most routing should come from skill descriptions, not overrides."
     }
   },
   "$defs": {
@@ -170,6 +176,36 @@
         "agents": {
           "type": "array",
           "items": { "$ref": "#/$defs/AgentKind" }
+        }
+      }
+    },
+    "PersonaRoutingEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill"],
+      "anyOf": [
+        { "required": ["phrase"] },
+        { "required": ["capability"] }
+      ],
+      "properties": {
+        "phrase": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verbatim user-said trigger phrase. Reactive routing."
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Task shape — 'when you're about to do X'. Proactive routing."
+        },
+        "skill": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Skill slug to route to. Must exist in this profile's resolved skill list (validator W9)."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional short context line rendered next to the row."
         }
       }
     },

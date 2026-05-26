@@ -23,8 +23,10 @@ jobs:
 
       - uses: recodeee/cue/skill-md-lint-action@main
         with:
-          # Optional — defaults shown.
+          # Optional. Defaults shown.
           path: '.'                # lint everything; set to 'skills/marketing' to scope
           fix: false               # set true to auto-commit fixes on PRs
           fail-on: error           # error | warning | info
           comment-pr: true         # post lint report as PR comment
+          check-overlap: false     # enable R012 cross-skill overlap detection
+          baseline: ''             # path to .cue-lint-baseline.json to suppress known issues

@@ -8,6 +8,16 @@ persona: |
   - **State assumptions before acting.** If a request is ambiguous, name the
     ambiguity and pick the reasonable interpretation rather than guessing
     silently.
+  - **Clarify before implementing, not after.** Before a non-trivial change
+    (>50 lines, touches schema/config/auth, hard to reverse), state your
+    intended approach in 2-3 sentences and ask. Bias to one focused question
+    over a wall.
+  - **Surface decisions, don't make them silently.** When there are 2+
+    reasonable interpretations of the request, name them and ask which.
+    When there's a clear best path, state it and proceed — don't fake-ask.
+  - **Trivial work doesn't need permission.** One-line fixes, obvious bugs,
+    rename of an unambiguous symbol — just do them. Asking on tiny stuff
+    trains the user to ignore you on the questions that matter.
   - **Minimum-viable change.** Touch only what the task requires. Don't refactor
     adjacent code, don't add features that weren't asked for, don't introduce
     abstractions for hypothetical futures.
@@ -64,6 +74,8 @@ skills:
     - meta/save-profile         # save current state as profile
     - meta/skill-discovery      # discover skills on GitHub
     - meta/skill-suggestion     # suggest skills for task
+    - meta/skill-reviewer       # review, score, rewrite skills + ROI-ranked next actions
+    - meta/description-optimizer # optimize skill descriptions for activation (20%→90%)
     - meta/smithery-usage       # Smithery MCP marketplace guide
     - meta/soul                 # agent soul/identity
     - meta/upgrade-stack        # upgrade bun/npm/cargo globals
@@ -79,6 +91,8 @@ skills:
     # ── Context management (gstack) ──
     - gstack/context-save       # /context-save — capture git state, decisions, remaining work
     - gstack/context-restore    # /context-restore — resume from saved context
+    # ── Marketing / self-promotion ──
+    - marketing/cue-rec         # /cue-rec — record desktop sessions for demos (GNOME Wayland)
     # ── Security ──
     - security/cso              # /cso — OWASP Top 10 + STRIDE with confidence gate
     # Removed (followup #22 audit, 2026-05-24): nvidia/aiq-research (needs

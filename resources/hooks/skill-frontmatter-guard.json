@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_CONFIG_DIR}/hooks/skill-frontmatter-guard.sh",
+            "description": "Validate SKILL.md frontmatter has required fields (name, description, tags) before write",
+            "id": "cue:pre:write:skill-frontmatter-guard"
+          }
+        ]
+      }
+    ]
+  }
+}

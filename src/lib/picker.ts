@@ -10,14 +10,29 @@
  */
 
 import * as p from "@clack/prompts";
+import { MultiSelectPrompt } from "@clack/core";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { styleText } from "node:util";
 
 export interface PickerOption {
   value: string;
   label: string;
   hint: string;
+  /** When true, sort this option above every other (used for the Default entry). */
+  top?: boolean;
+  /** When true, this is a non-selectable visual header. Selecting it re-prompts. */
+  divider?: boolean;
+  /**
+   * Other profile `value`s that pair well with this one. Drives the post-pick
+   * multiselect ("combine google-analytics with…"). Only names that resolve to
+   * real options in the same list are offered.
+   */
+  recommends?: string[];
 }
+
+/** Sentinel-value prefix used by divider options (see `divider`). */
+export const DIVIDER_PREFIX = "__divider_";
 
 export interface RenderOptions {
   cwd: string;
@@ -61,46 +76,136 @@ export interface PickerOutput {
   pinned: boolean;
 }
 
-export async function runPicker(input: PickerInput): Promise<PickerOutput> {
-  p.intro(`cue · pick a profile for ${input.cwd}`);
+// clack's built-in multiselect uses U+25FB/U+25FC squares for the toggle box,
+// which render as blanks in some fonts under kitty/tmux — the user can't see
+// what's on or off. This wraps @clack/core's MultiSelectPrompt with an ASCII
+// render so the state is visible everywhere.
+type AsciiMSOption = {
+  value: string;
+  label: string;
+  hint?: string;
+  /** "action" rows (e.g. the skip-combine escape hatch) render distinct: no
+   *  checkbox, a dim divider above, dim glyph when unselected. */
+  kind?: "action";
+};
+async function asciiMultiselect(opts: {
+  message: string;
+  options: AsciiMSOption[];
+  initialValues?: string[];
+  required?: boolean;
+}): Promise<string[] | symbol> {
+  const BAR = styleText("gray", "│");
+  const prompt = new MultiSelectPrompt<AsciiMSOption>({
+    options: opts.options,
+    initialValues: opts.initialValues,
+    required: opts.required ?? false,
+    render() {
+      const selected = new Set(this.value ?? []);
+      const lines: string[] = [];
+      lines.push(`${BAR}`);
+      lines.push(`${BAR}  ${opts.message}`);
+      this.options.forEach((o, idx) => {
+        const isCursor = idx === this.cursor;
+        const isSel = selected.has(o.value);
+        const arrow = isCursor ? styleText("cyan", "›") : " ";
 
-  const first = await p.select({
-    message: "Profile",
-    options: input.options.map((o) => ({ value: o.value, label: o.label, hint: o.hint })),
+        if (o.kind === "action") {
+          const prev = this.options[idx - 1];
+          if (prev && prev.kind !== "action") {
+            lines.push(`${BAR}  ${styleText("dim", "─".repeat(28))}`);
+          }
+          const glyph = styleText(isSel ? "cyan" : "dim", "↩");
+          const labelStyled = isSel
+            ? styleText("cyan", o.label)
+            : isCursor
+              ? o.label
+              : styleText("dim", o.label);
+          const marker = isSel ? styleText("cyan", "  ← will skip combining") : "";
+          lines.push(`${BAR}  ${arrow} ${glyph}  ${labelStyled}${marker}`);
+          return;
+        }
+
+        const box = isSel ? styleText("green", "[x]") : styleText("dim", "[ ]");
+        const labelStyled = isSel || isCursor ? o.label : styleText("dim", o.label);
+        const hint = o.hint && isCursor ? styleText("dim", ` (${o.hint})`) : "";
+        lines.push(`${BAR}  ${arrow} ${box} ${labelStyled}${hint}`);
+      });
+      lines.push(
+        `${BAR}  ${styleText("dim", "↑↓ move · space toggle · enter confirm · esc cancel")}`,
+      );
+      return lines.join("\n");
+    },
   });
+  return (await prompt.prompt()) as string[] | symbol;
+}
 
-  if (p.isCancel(first)) {
+async function selectSkipDividers(
+  opts: PickerOption[],
+  message: string,
+): Promise<string> {
+  // `disabled: true` makes clack render the option (gray) but skip it during
+  // arrow/j-k navigation, so the user can't land on a divider.
+  const result = await p.select({
+    message,
+    options: opts.map((o) => ({
+      value: o.value,
+      label: o.label,
+      hint: o.hint,
+      disabled: o.divider === true,
+    })),
+  });
+  if (p.isCancel(result)) {
     p.cancel("cancelled");
     process.exit(130);
   }
+  return result as string;
+}
 
-  const picks: string[] = [first as string];
+export async function runPicker(input: PickerInput): Promise<PickerOutput> {
+  p.intro(`cue · pick a profile for ${input.cwd}`);
 
-  // Optional composite: let the user stack more profiles on top of the first.
-  // Empty selection ends the loop and produces a plain single-profile pin.
-  const remaining = () => input.options.filter((o) => !picks.includes(o.value));
-  while (remaining().length > 0) {
-    const more = await p.confirm({
-      message: picks.length === 1
-        ? "Combine with another profile?"
-        : "Add one more?",
-      initialValue: false,
-    });
-    if (p.isCancel(more)) {
-      p.cancel("cancelled");
-      process.exit(130);
-    }
-    if (more !== true) break;
+  const first = await selectSkipDividers(input.options, "Profile");
+  const picks: string[] = [first];
 
-    const extra = await p.select({
-      message: "Additional profile",
-      options: remaining().map((o) => ({ value: o.value, label: o.label, hint: o.hint })),
+  // Suggested companions: the picked profile's `recommends:` list, filtered to
+  // entries that actually exist as options. Skips composite values (anything
+  // containing `+`) — they can't be stacked further. Empty selection = plain
+  // single-profile pin. The picker no longer offers arbitrary combine; users
+  // who want non-recommended combos can `cue use a+b+c` directly.
+  const firstOpt = input.options.find((o) => o.value === first);
+  const recommends = (firstOpt?.recommends ?? []).filter((r) => {
+    if (r === first) return false;
+    const target = input.options.find((o) => o.value === r);
+    return target !== undefined && target.divider !== true;
+  });
+  if (recommends.length > 0) {
+    // Sentinel for the first option ("skip combining"). Picking it — even
+    // alongside others — means "use the primary profile alone." Pressing
+    // enter with nothing checked has the same effect; the explicit row is
+    // there so users who don't realize that have a visible escape hatch.
+    const SKIP = "__skip_combine__";
+    const firstLabel = firstOpt?.label ?? first;
+    const companionOptions: AsciiMSOption[] = [
+      ...recommends
+        .map((r) => input.options.find((o) => o.value === r)!)
+        .map((o) => ({ value: o.value, label: o.label, hint: o.hint })),
+      { value: SKIP, label: `use ${firstLabel} alone`, hint: "", kind: "action" },
+    ];
+    const extra = await asciiMultiselect({
+      message: `Combine ${first} with…`,
+      options: companionOptions,
+      required: false,
     });
     if (p.isCancel(extra)) {
       p.cancel("cancelled");
       process.exit(130);
     }
-    picks.push(extra as string);
+    const selected = extra as string[];
+    if (!selected.includes(SKIP)) {
+      for (const v of selected) {
+        if (!picks.includes(v)) picks.push(v);
+      }
+    }
   }
 
   const choice = picks.join("+");

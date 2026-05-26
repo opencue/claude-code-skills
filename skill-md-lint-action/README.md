@@ -1,6 +1,6 @@
-# cue SKILL.md Linter — GitHub Action
+# cue SKILL.md Linter, GitHub Action
 
-Lint every `SKILL.md` in your repo against the [Claude Code skill spec](https://github.com/recodeee/cue/blob/main/src/lib/skill-linter.ts#L1) on every push or pull request. Catches frontmatter spec violations, missing `Prerequisites`, malformed `allowed-tools`, missing trigger phrases, and broken anchor links.
+Lint every `SKILL.md` in your repo against the [Claude Code skill spec](https://github.com/recodeee/cue/blob/main/src/lib/skill-linter.ts#L1) on every push or pull request. Catches frontmatter spec violations, missing `Prerequisites`, malformed `allowed-tools`, missing trigger phrases, broken anchor links, voice-rule violations, large extractable shell blocks, missing examples, possible duplicate skills, and stale descriptions.
 
 **Why:** Anthropic's skill discovery is unforgiving. Missing fields and malformed syntax cause your skill to silently fail in some contexts. This action runs locally on your repo with zero side effects.
 
@@ -39,6 +39,8 @@ That's it. On every PR you'll get a comment with the lint report; on push to mai
 | `fix` | `false` | Auto-fix issues and commit back to the branch (PR only). |
 | `fail-on` | `error` | Lowest severity to fail on: `error`, `warning`, or `info`. |
 | `comment-pr` | `true` | Post the report as a PR comment. |
+| `check-overlap` | `false` | Enable R012 cross-skill overlap detection across every SKILL.md under `path`. |
+| `baseline` | _(unset)_ | Path to a baseline JSON file (from `cue lint-skill --baseline-write`). Issues listed there are suppressed. |
 
 ## Example: auto-fix on PR
 
@@ -54,14 +56,19 @@ That's it. On every PR you'll get a comment with the lint report; on push to mai
 
 | Rule | Severity | Auto-fix |
 |---|---|---|
-| R001 | error | ✅ — derives `name:` from first H1 |
-| R002 missing `description:` | error | — (needs your judgment) |
-| R003 description >200 chars | warning | — |
-| R004 description lacks trigger phrase | warning | — |
-| R005 malformed `allowed-tools` | error | ✅ — wraps in `Bash(name:*)` |
-| R006 missing `Prerequisites` | warning | ✅ — adds section with real install commands per platform |
-| R007 missing `tags:`/`domain:` | info | — |
-| R008 broken in-doc anchor links | warning | — |
+| R001 missing `name:` | error | yes, derives from first H1 |
+| R002 missing `description:` | error | no, needs author judgment |
+| R003 description >200 chars | warning | no |
+| R004 description lacks trigger phrase or `triggers:` | warning | no |
+| R005 malformed `allowed-tools` | error | yes, wraps in `Bash(name:*)` |
+| R006 missing `Prerequisites` | warning | yes, adds section with real install commands |
+| R007 missing `tags:`/`domain:` | info | no |
+| R008 broken in-doc anchor links | warning | no |
+| R009 voice-rule violation (em dash, AI vocab, banned phrases) | warning | yes for em dashes; vocab needs judgment |
+| R010 large shell block | info | no, extraction to `scripts/` needs design |
+| R011 missing example block | info | no |
+| R012 possible duplicate skill (needs `check-overlap: true`) | warning | no |
+| R013 description/body word-overlap mismatch | info | no |
 
 ## Outputs
 

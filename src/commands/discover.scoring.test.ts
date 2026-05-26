@@ -165,6 +165,30 @@ const FIXTURES: Array<{ label: string; repo: GemRepo; min: number; max: number; 
     }),
     min: 3, max: 8,
   },
+
+  // --- Niche / regional-vertical penalty ---
+  {
+    label: "Niche: 倪海厦 TCM skill — high stars + SKILL.md, demoted by penalty",
+    repo: gem({
+      owner: "jangviktor-web", name: "nihaixia",
+      description: "倪海厦视角的中医Agent Skill，基于倪海厦教学资料开发，蒸馏倪师伤寒论、金匮要略、黄帝内经、神农本草经、针灸篇",
+      stars: 28, forks: 2, created_at: iso(180), pushed_at: iso(10),
+      topics: ["claude-skill"], has_skill_md: true,
+    }),
+    // Without penalty this would score ~13. With -2 it lands in the 8-12 band —
+    // still visible but no longer outranking real fleet/MCP gems.
+    min: 7, max: 12,
+  },
+  {
+    label: "Niche: dating-coach skill — should score below default tier ceiling",
+    repo: gem({
+      owner: "outmansay", name: "devil-chat-coach",
+      description: "🧠 AI Agent Skill: 实战恋爱聊天教练，贴对方消息按「阶段+温度」给你能用的回复 | AI agent skill for dating chat coach",
+      stars: 0, forks: 0, created_at: iso(40), pushed_at: iso(10),
+      topics: ["claude-skill"], has_skill_md: true,
+    }),
+    min: 4, max: 10,
+  },
 ];
 
 // ---- Tests ----------------------------------------------------------------

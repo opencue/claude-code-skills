@@ -16,6 +16,7 @@ import type { AgentKind, ResolvedProfile } from "../../profiles/_types";
 import { normalizeUvxGitServers } from "./uvx-installer";
 import { evaluateCondition } from "./conditional-skills";
 import { hasWorkspaces, getActiveWorkspace, computeOverrides } from "./workspaces";
+import { parseSkillFromDir, renderRouter, type ParsedSkill } from "./skill-router";
 
 const REPO_ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const RESOURCES_RULES = join(REPO_ROOT, "resources", "rules");
@@ -284,6 +285,32 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
       }
     }
   }
+
+  // Skill router — auto-built capability + trigger tables that prime Claude
+  // to reach for skills proactively (capability) and reactively (triggers)
+  // instead of freestyling. Parsed from each skill's SKILL.md frontmatter;
+  // skills with weak descriptions land in the "Other skills" tail and are
+  // flagged by the linter (W6/W7/W8).
+  const routerParsed: ParsedSkill[] = [];
+  for (const id of skillsList) {
+    try {
+      const dir = await input.skillSourceLookup(id);
+      routerParsed.push(await parseSkillFromDir(id, dir));
+    } catch {
+      // Skill source not on disk (e.g. plugin skill resolved at runtime) —
+      // include a placeholder so it surfaces in "Other skills" rather than
+      // silently vanishing.
+      const fallbackName = id.split("/").pop() ?? id;
+      routerParsed.push({
+        id, name: fallbackName, triggers: [], capability: "",
+        capabilityExplicit: false, whenToInvoke: [], notFor: "",
+        rawDescription: "", quality: "none", missing: true,
+      });
+    }
+  }
+  const routerOverrides = (profile as { personaRouting?: { phrase?: string; capability?: string; skill: string; note?: string }[] }).personaRouting ?? [];
+  const routerBlock = renderRouter(routerParsed, { overrides: routerOverrides });
+  if (routerBlock) stamp += routerBlock;
 
   // Role identity — tell Claude what it is
   stamp += `## Your Role\n\n` +

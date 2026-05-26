@@ -165,6 +165,91 @@ export interface ScoreComponent {
   delta: number;
 }
 
+// ---------------------------------------------------------------------------
+// Niche / regional-vertical detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Regex hits for repos whose primary subject is a regional product, narrow
+ * consumer vertical, or non-software niche. These repos commonly score high
+ * (stars + SKILL.md + topic tags) but are irrelevant to cue's mainstream
+ * developer users — they shouldn't crowd out fleet/MCP/code-intel gems in the
+ * `core` bucket.
+ *
+ * Match scope: description + repo name. CJK script ranges included so we catch
+ * `造价大师`, `倪海厦`, `恋爱聊天` even when the English desc is empty.
+ */
+const NICHE_VERTICALS: RegExp[] = [
+  // Traditional Chinese medicine / acupuncture / herbal / TCM teachers
+  /\b(tcm|traditional chinese medicine|acupuncture|herbology|chinese herbal)\b/i,
+  /(中医|针灸|经方|伤寒论|金匮要略|黄帝内经|神农本草经|倪海厦|针灸篇|人纪|医案)/,
+  // Chinese construction cost engineering / 造价
+  /(造价|GB\/T 50500|定额|广联达|建设工程造价)/,
+  // BOSS 直聘 / job-board niche
+  /(直聘|招聘者|BOSS直聘)/,
+  // Religion / theology / Bible-only tooling
+  /\b(bible[- ]?study|biblical|theology|concordance|hebrew[- ]?aramaic|true[- ]?gospel)\b/i,
+  // Dating / relationship coach
+  /\b(dating[- ]?coach|relationship[- ]?coach|romance[- ]?coach|love[- ]?coach)\b/i,
+  /(恋爱聊天|恋爱教练|相亲|追女生|追男生)/,
+  // K-pop / Korean cosmetics / Korean dermatology booking / K-retail
+  /\b(k[- ]?pop[- ]?booking|k[- ]?beauty|korea[n]?[- ]?(retail|dermatology|cosmetics|booking|store))\b/i,
+  /(韩流|韩剧|韩国美容|韩国整形)/,
+  // Hospital / cinema / store local-retail lookups (Daiso, Don Quijote, FamilyMart…)
+  /\b(daiso|don[- ]?quijote|family[- ]?mart|seven[- ]?eleven[- ]?japan)\b/i,
+  // App-store deployment automation (Apple Connect / TencentAS / Huawei niche)
+  /\b(app[- ]?store[- ]?(connect|deployment)[- ]?automation|tencent[- ]?appstore|huawei[- ]?gallery)\b/i,
+  // Region-specific privacy / legal templates (Korean, Japanese, EU-specific)
+  /\b(korean[- ]?privacy|korean[- ]?law|japan[- ]?privacy|china[- ]?compliance)\b/i,
+  // Embedded hobby firmware (ESP32, Pico, Arduino IoT toys)
+  /\b(esp32|esp8266|raspberry[- ]?pi[- ]?pico|arduino[- ]?nano)\b/i,
+  /(xiaozhi|小智|esp32-server)/i,
+  // Niche regional design-tool importers
+  /\b(mockplus|摹客|sketch[- ]?importer|figma[- ]?taobao)\b/i,
+  // China-grant / China-specific funding helpers
+  /\b(china[- ]?grant|cn[- ]?biology[- ]?grant|grant[- ]?thinking)\b/i,
+  // Slang / colloquial niche
+  /(devil[- ]?chat[- ]?coach|chat[- ]?coach[- ]?bot)/i,
+  // Strict reading / niche literary distillations
+  /(machiavelli[- ]?skill|马基雅维利|论语|孟子|庄子)/i,
+];
+
+/**
+ * True iff the repo is locale-bound or vertical-niche by:
+ *   (a) Hitting any NICHE_VERTICALS regex on description+name, OR
+ *   (b) Description is >40% CJK chars AND contains no English keyword from
+ *       any cue profile (escape hatch: a Chinese-described AI router that
+ *       mentions e.g. "openai/proxy/mcp" still counts as a generic tool).
+ *
+ * Pure / deterministic. Used by scoreGemBreakdown (penalty) and
+ * suggestProfiles (routes to `niche` bucket instead of `core`).
+ */
+export function hasNicheTopicSignal(repo: GemRepo): boolean {
+  const desc = repo.description ?? "";
+  const name = repo.name ?? "";
+  const subject = `${desc} ${name}`;
+
+  for (const re of NICHE_VERTICALS) {
+    if (re.test(subject)) return true;
+  }
+
+  // CJK density: any of Han (Chinese), Hiragana/Katakana (Japanese),
+  // Hangul (Korean), or CJK fullwidth punctuation.
+  const cjkChars = (desc.match(/[　-鿿가-힯＀-￯]/g) ?? []).length;
+  const cjkDensity = desc.length > 0 ? cjkChars / desc.length : 0;
+  if (cjkDensity >= 0.4) {
+    const descLower = desc.toLowerCase();
+    // Escape hatch: any English profile-keyword OR generic AI-tool words.
+    const allKeywords = Object.values(PROFILE_KEYWORDS).flat();
+    const aiToolWords = ["claude", "openai", "gemini", "anthropic", "mcp", "agent", "skill", "proxy", "router", "gateway"];
+    const escapes = [...allKeywords, ...aiToolWords];
+    const hasEnglishSignal = escapes.some(kw => descLower.includes(kw));
+    if (!hasEnglishSignal) return true;
+  }
+
+  return false;
+}
+
 /**
  * Returns score + per-factor breakdown. Pure: no I/O, deterministic.
  *
@@ -240,6 +325,12 @@ export function scoreGemBreakdown(repo: GemRepo): { score: number; components: S
 
   // Stale penalty
   if (daysSincePush > 365) add("stale (>1yr no push)", -3);
+
+  // Niche/regional vertical penalty — keeps locale-bound repos out of the
+  // premium tier (score ≥12) without erasing them entirely. Gated at <500★
+  // so genuinely massive cross-locale projects aren't punished for having a
+  // Chinese-language description.
+  if (repo.stars < 500 && hasNicheTopicSignal(repo)) add("niche/regional vertical", -2.5);
 
   const raw = cs.reduce((s, c) => s + c.delta, 0);
   const score = Math.max(0, Math.round(raw * 10) / 10);
@@ -519,6 +610,17 @@ export function suggestProfiles(repo: GemRepo): string[] {
   // Sort by score, take top 2
   scored.sort((a, b) => b.score - a.score);
   const top = scored.slice(0, 2).map(s => s.profile);
+
+  // Niche/regional vertical: keep non-stack matches if any (e.g. a TCM-themed
+  // pentest skill still belongs in cybersecurity); otherwise route to the
+  // dedicated `niche` bucket instead of falling through to `core`. This is
+  // the lever that stops 倪海厦中医 / 造价大师 / dating-coach / Bible-study
+  // skills from crowding out fleet/MCP gems on the core profile page.
+  if (hasNicheTopicSignal(repo)) {
+    const nonStack = top.filter(p => !STACK_PROFILES.has(p));
+    return nonStack.length ? nonStack : ["niche"];
+  }
+
   return top.length ? top : ["core"];
 }
 
