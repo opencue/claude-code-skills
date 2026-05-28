@@ -159,6 +159,34 @@ fi
 
 [ "${#warnings[@]}" -eq 0 ] && exit 0
 
+# ─── Opt-in: auto-log detected miscalibrations to the calibration scoreboard ─
+# The always-on audit detects exactly the events the scoreboard wants to tally
+# (evidence-less [VERIFIED], stale [KNOWN]). When the auto-log gate exists,
+# append one JSONL record per detected event in the same format as
+# scripts/calibration-log.sh, so no cross-tree path dependency. Gated so the
+# log doesn't grow unasked. Fail-open: any error is ignored.
+# Enable: touch ${HOME}/.config/cue/liedetector-calibration-auto
+cal_gate="${HOME}/.config/cue/liedetector-calibration-auto"
+if [ -f "$cal_gate" ]; then
+  cal_log="${HOME}/.config/cue/liedetector-calibration.log"
+  cal_ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  cal_append() {  # $1=tag  $2=note
+    local t n
+    t="$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    n="$(printf '%s' "$2" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    printf '{"ts":"%s","tag":"%s","note":"%s"}\n' "$cal_ts" "$t" "$n" >> "$cal_log" 2>/dev/null || true
+  }
+  if [ "$verified_count" -gt 0 ] && [ "$verification_count" -eq 0 ]; then
+    cal_append "VERIFIED" "auto(tag-audit): ${verified_count}x [VERIFIED] with 0 verification tool calls"
+  fi
+  if [ "$verified_count" -gt $((verification_count * 3 + 2)) ]; then
+    cal_append "VERIFIED" "auto(tag-audit): verified-density (${verified_count}) exceeds evidence-density (${verification_count})"
+  fi
+  if [ "$stale_known" -gt 0 ]; then
+    cal_append "KNOWN" "auto(tag-audit): ${stale_known}x time-sensitive [KNOWN] claim"
+  fi
+fi
+
 # ─── Emit warnings to stderr (Claude Code surfaces) ────────────────────────
 {
   printf '\n'

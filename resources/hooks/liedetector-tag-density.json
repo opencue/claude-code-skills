@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_CONFIG_DIR}/hooks/liedetector-tag-density.sh",
+            "description": "Opt-in Stop hook: advisory nudge on liedetector tag hygiene. Warns (never blocks) when a long response carries ZERO confidence tags, or when tags are so dense (>1 per 25 words) that the reader is trained to ignore them. Enable: touch ${HOME}/.config/cue/liedetector-tag-check. Off by default.",
+            "id": "cue:stop:liedetector-tag-density"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -124,6 +124,8 @@ commands:
   - checkpoint
   - cost-report
   - cue
+  # Independent-verifier escalation for high-stakes liedetector claims.
+  - verify
   # Safety rails — opt-in destructive-command + edit-scope guards.
   - careful
   - freeze
@@ -167,6 +169,11 @@ hooks:
   # blocks) when [VERIFIED] appears with zero Read/Grep/inspection actions
   # or when [KNOWN] is used on time-sensitive subjects. ~30ms latency.
   - tag-audit.json
+  # Stop hook: opt-in tag-density check. Warns (never blocks) when a long
+  # response carries zero confidence tags, or when tags are spammed one-per-
+  # word. No-op until ~/.config/cue/liedetector-tag-check exists; suppress a
+  # single turn with [skip-tag-density]. Fail-open.
+  - liedetector-tag-density.json
   # UserPromptSubmit hook: on the FIRST prompt of a session, save it to
   # ~/.config/cue/first-prompts/<cwd-hash>.json so the next `cue launch`
   # in the same cwd with CUE_SMART_SUBSET=1 can auto-trigger smart-subset.
