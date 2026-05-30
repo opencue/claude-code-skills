@@ -71,6 +71,8 @@ skills:
     - repo: sickn33/antigravity-awesome-skills
       skills: [neon-postgres]
 mcps:
-  - postgres   # @modelcontextprotocol/server-postgres — requires DATABASE_URL to start
+  - postgres      # @modelcontextprotocol/server-postgres — requires DATABASE_URL to start
+  - postgres-pro  # crystaldba/postgres-mcp (Postgres Pro) — perf/tuning/health; requires DATABASE_URI
 env:
   DATABASE_URL: "${DATABASE_URL}"
+  DATABASE_URI: "${DATABASE_URI}"

@@ -44,3 +44,8 @@ plugins:
   - resend@claude-plugins-official
 mcps:
   - coolify
+  - supabase   # supabase-community/supabase-mcp (official) — requires SUPABASE_ACCESS_TOKEN
+  - github     # github/github-mcp-server (official, Docker) — requires GITHUB_PERSONAL_ACCESS_TOKEN
+env:
+  SUPABASE_ACCESS_TOKEN: "${SUPABASE_ACCESS_TOKEN}"
+  GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
