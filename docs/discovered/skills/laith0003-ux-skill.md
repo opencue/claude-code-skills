@@ -2,7 +2,7 @@
 title: "Laith0003/ux-skill — Claude Code skill discovered by cue"
 description: "Design intelligence engine for AI coding. 120 anti-pattern linter rules, 110 brand DESIGN.md specs, MCP server, 22 commands, 17 IDEs, 17 languages. MIT."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, frontend, creative-media]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, frontend, creative-media]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.4 based on:
 - ⭐ 16 stars
-- 🗓️ Last pushed: 2026-05-29
+- 🗓️ Last pushed: 2026-05-30
 - 🏷️ Tags: ai-coding, ai-design, anti-ai-slop, brand-guidelines, claude-code, claude-skill, cursor, design, design-intelligence, design-system, design-tokens, frontend, linter, mcp, open-source, python, ui, ux, vibe-coding, windsurf
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "aniboy2k-gif/skill-advisor — Claude Code skill discovered by cue"
 description: "A decision-support framework for selecting the right approach in AI-assisted development workflows."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
@@ -17,7 +17,7 @@ tags: [claude-code, skill, core]
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13 based on:
 - ✅ Contains SKILL.md
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-05-29
+- 🗓️ Last pushed: 2026-05-30
 - 🏷️ Tags: ai-tools, anthropic, claude-code, claude-code-skill, developer-tools, diagnostic-tool, skill-advisor, skill-audit, static-analysis
 
 ## Best fit cue profiles

@@ -1,32 +1,17 @@
 ---
 title: "Claude Code Skills for research"
-description: "2 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `research`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cue) for the **research** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cue) for the **research** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="plutolei-paperbanana-skill"></a>
-## 💎 [PlutoLei/paperbanana-skill](https://github.com/PlutoLei/paperbanana-skill)
-
-**★ 32** · exceptional (score 16.6) · tags: academic, academic-figures, ai, claude-code, claude-code-skill
-
-Claude Code skill for PaperBanana - Generate publication-quality academic diagrams with AI
-
-✅ SKILL.md
-
-```bash
-cue skills add PlutoLei/paperbanana-skill --profile research
-```
 
 ---
 

@@ -2,7 +2,7 @@
 title: "haoyiyin/instant-site — Claude Code skill discovered by cue"
 description: "Agent-operated foreign trade independent site platform — from-zero build, deploy, content ops, SEO, multi-language & inquiry forms. Works with any AI agent."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
@@ -17,7 +17,7 @@ tags: [claude-code, skill, core]
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.8 based on:
 - ✅ Contains SKILL.md
 - ⭐ 4 stars
-- 🗓️ Last pushed: 2026-05-29
+- 🗓️ Last pushed: 2026-05-30
 - 🏷️ Tags: ai-agent-skill, ai-agents, automation, cloudflare-workers, content-ops, deploy, ecommerce, foreign-trade, multilingual, seo
 
 ## Best fit cue profiles

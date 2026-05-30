@@ -2,7 +2,7 @@
 title: "JINSEDAWONIU/mobile-app-store-deployment-automation — Claude Code skill discovered by cue"
 description: "Auto‑Deploy Mobile Apps 2026 – Unlock iOS & Android CI/CD with Capacitor, Expo & Flutter"
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, niche]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, niche]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-05-29
+- 🗓️ Last pushed: 2026-05-30
 - 🏷️ Tags: app-store-connect, capacitor, claude-code, claude-plugin, claude-skill, expo, fastlane, flutter, gradle-play-publisher, mobile-publishing, play-store, testflight
 
 ## Best fit cue profiles

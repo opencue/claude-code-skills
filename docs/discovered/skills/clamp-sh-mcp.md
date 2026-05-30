@@ -2,19 +2,19 @@
 title: "clamp-sh/mcp — Claude Code skill discovered by cue"
 description: "MCP server for Clamp, web analytics for the agentic era. Tools for traffic, referrers, live visitors, events, revenue, session paths, funnels, and alerts — quer"
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, marketing]
 ---
 
 # ✨ [clamp-sh/mcp](https://github.com/clamp-sh/mcp)
 
-**★ 1** · strong (score 5.3) · TypeScript · agent-tools, analytics, clamp, claude, claude-code
+**★ 1** · strong (score 5.2) · TypeScript · agent-tools, analytics, clamp, claude, claude-code
 
 > MCP server for Clamp, web analytics for the agentic era. Tools for traffic, referrers, live visitors, events, revenue, session paths, funnels, and alerts — queryable from Cursor, Claude Code, Claude Desktop, Smithery, and any MCP-compatible editor.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5.3 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5.2 based on:
 - ⭐ 1 stars
 - 🗓️ Last pushed: 2026-05-27
 - 🏷️ Tags: agent-tools, analytics, clamp, claude, claude-code, cursor, llm-tools, mcp, model-context-protocol, smithery, web-analytics

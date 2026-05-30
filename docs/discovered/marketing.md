@@ -1,24 +1,37 @@
 ---
 title: "Claude Code Skills for marketing"
-description: "1 community Claude Code skills curated by cue for the marketing profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the marketing profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, marketing, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `marketing`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/cue) for the **marketing** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cue) for the **marketing** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
+<a id="pepinorancio1-sticky-switcher-funnel-playbook"></a>
+## ✨ [PepinoRancio1/sticky-switcher-funnel-playbook](https://github.com/PepinoRancio1/sticky-switcher-funnel-playbook)
+
+**★ 0** · strong (score 7.5) · HTML · tags: agency-toolkit, ai-coding-agent, claude-code, claude-code-skill, conversion-optimization
+
+Modern Web Design Playbook 2026 – Niche Tokens, Sticky Switcher & Conversion Funnel
+
+```bash
+cue skills add PepinoRancio1/sticky-switcher-funnel-playbook --profile marketing
+```
+
+---
+
 <a id="clamp-sh-mcp"></a>
 ## ✨ [clamp-sh/mcp](https://github.com/clamp-sh/mcp)
 
-**★ 1** · strong (score 5.3) · TypeScript · tags: agent-tools, analytics, clamp, claude, claude-code
+**★ 1** · strong (score 5.2) · TypeScript · tags: agent-tools, analytics, clamp, claude, claude-code
 
 MCP server for Clamp, web analytics for the agentic era. Tools for traffic, referrers, live visitors, events, revenue, session paths, funnels, and alerts — queryable from Cursor, Claude Code, Claude Desktop, Smithery, and any MCP-compatible editor.
 

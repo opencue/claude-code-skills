@@ -1,120 +1,198 @@
 ---
 title: "Claude Code Skills for backend"
-description: "11 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "16 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 11 community-built skills curated by [cue](https://github.com/opencue/cue) for the **backend** profile.
+> 16 community-built skills curated by [cue](https://github.com/opencue/cue) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="archestra-ai-archestra"></a>
-## 💎 [archestra-ai/archestra](https://github.com/archestra-ai/archestra)
+<a id="rifkimaulana05-onemcp"></a>
+## 💎 [rifkimaulana05/onemcp](https://github.com/rifkimaulana05/onemcp)
 
-**★ 3751** · exceptional (score 17) · TypeScript · tags: a2a, a2a-mcp, acp, agent, ai
+**★ 0** · exceptional (score 10) · Java · tags: ai, claude-code, claude-desktop, codex-cli, copilot
 
-Enterprise AI Platform with guardrails, MCP registry, gateway & orchestrator
+🤖 Streamline AI integration with OneMCP, the open-source runtime that simplifies API usage through a natural-language interface.
 
 ```bash
-cue skills add archestra-ai/archestra --profile backend
+cue skills add rifkimaulana05/onemcp --profile backend
 ```
 
 ---
 
-<a id="triggerdotdev-trigger-dev"></a>
-## 💎 [triggerdotdev/trigger.dev](https://github.com/triggerdotdev/trigger.dev)
+<a id="mimanshaherbals-bot-skolverket-mcp"></a>
+## ✨ [mimanshaherbals-bot/Skolverket-MCP](https://github.com/mimanshaherbals-bot/Skolverket-MCP)
 
-**★ 15138** · exceptional (score 16) · TypeScript · tags: ai, ai-agent-framework, ai-agents, automation, background-jobs
+**★ 1** · strong (score 7.8) · TypeScript · tags: ai, anthropic, chatgpt, claude, education
 
-Trigger.dev – build and deploy fully‑managed AI agents and workflows
+🚀 Access all of Skolverket's open APIs through this Model Context Protocol (MCP) server, enabling seamless integration for AI assistants.
 
 ```bash
-cue skills add triggerdotdev/trigger.dev --profile backend
+cue skills add mimanshaherbals-bot/Skolverket-MCP --profile backend
 ```
 
 ---
 
-<a id="wso2-fhir-mcp-server"></a>
-## 💎 [wso2/fhir-mcp-server](https://github.com/wso2/fhir-mcp-server)
+<a id="mihirkosambia-codecompass"></a>
+## ✨ [MihirKosambia/CodeCompass](https://github.com/MihirKosambia/CodeCompass)
 
-**★ 121** · exceptional (score 15.6) · Python · tags: fhir, healthcare, mcp, mcp-server, modelcontextprotocol
+**★ 0** · strong (score 7.5) · JavaScript · tags: ai-coding-assistant, ai-driven-development, bert-model, chatbot, code-comprehension
 
-FHIR MCP Server – helping you expose any FHIR Server or API as a MCP Server.
+🧭 Transform your GitHub repo into an interactive knowledge base, enabling focused conversations and insights from your project's files.
 
 ```bash
-cue skills add wso2/fhir-mcp-server --profile backend
+cue skills add MihirKosambia/CodeCompass --profile backend
 ```
 
 ---
 
-<a id="n8n-io-n8n"></a>
-## 💎 [n8n-io/n8n](https://github.com/n8n-io/n8n)
+<a id="akbfar-zomato-mcp-demo"></a>
+## ✨ [akbfar/Zomato-MCP-Demo](https://github.com/akbfar/Zomato-MCP-Demo)
 
-**★ 190164** · exceptional (score 15) · TypeScript · tags: ai, apis, automation, cli, data-flow
+**★ 0** · strong (score 7.5) · tags: mcp-server, mcp-tools, mcp-zomato, model-context-protocol, model-context-protocol-server-zomoto
 
-Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.
+🍴 Explore Zomato's MCP Server for AI chat assistants. Set up Claude Desktop to interact seamlessly with real-world food ordering systems.
 
 ```bash
-cue skills add n8n-io/n8n --profile backend
+cue skills add akbfar/Zomato-MCP-Demo --profile backend
 ```
 
 ---
 
-<a id="jsuzanne-stigix"></a>
-## 💎 [jsuzanne/stigix](https://github.com/jsuzanne/stigix)
+<a id="princeyohann-stoic-mcp"></a>
+## ✨ [princeyohann/stoic-mcp](https://github.com/princeyohann/stoic-mcp)
 
-**★ 11** · exceptional (score 10.9) · TypeScript · tags: demo-app, digital-experience, docker, emulation, failover
+**★ 0** · strong (score 7.5) · JavaScript · tags: ai-tools, anthropic, claude-mcp, deepseek-api, developer-experience
 
-Stigix is a lab platform to validate SD‑WAN and SASE. ​ It unifies SaaS traffic generation, security tests, convergence probes, and voice/IoT/VyOS simulations in one web UI
+🧘♂️ Deliver Stoic quotes with AI-driven insights via the DeepSeek API, enhancing developer well-being through practical wisdom and live training support.
 
 ```bash
-cue skills add jsuzanne/stigix --profile backend
+cue skills add princeyohann/stoic-mcp --profile backend
 ```
 
 ---
 
-<a id="systempromptio-systemprompt-core"></a>
-## 💎 [systempromptio/systemprompt-core](https://github.com/systempromptio/systemprompt-core)
+<a id="imaginationfinagler591-mcp-hello-world"></a>
+## ✨ [Imaginationfinagler591/mcp-hello-world](https://github.com/Imaginationfinagler591/mcp-hello-world)
 
-**★ 3** · exceptional (score 10.7) · Rust · tags: a2a, agent-orchestration, agentic-ai, ai-agents, ai-governance
+**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agent, ai-integration, client-server, fastapi, fat-jar
 
-AI governance infrastructure for agentic systems. Rust library behind systemprompt.io — MCP, A2A, OAuth2, audit trails, compile-time extensions. Evaluate with systemprompt-template.
+
 
 ```bash
-cue skills add systempromptio/systemprompt-core --profile backend
+cue skills add Imaginationfinagler591/mcp-hello-world --profile backend
 ```
 
 ---
 
-<a id="thotischner-observability-mcp"></a>
-## ✨ [ThoTischner/observability-mcp](https://github.com/ThoTischner/observability-mcp)
+<a id="f1nthelad-google-contacts-mcp-server"></a>
+## ✨ [f1nthelad/google-contacts-mcp-server](https://github.com/f1nthelad/google-contacts-mcp-server)
 
-**★ 4** · strong (score 6.8) · TypeScript · tags: ai-agents, anomaly-detection, anthropic, claude, gateway
+**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, aws-cdk, aws-lambda, calendar, claude-ai
 
-Unified observability gateway for AI agents — one MCP server for Prometheus, Loki, and any backend, with cross-signal anomaly detection and a built-in Web UI.
+📇 Access Google Contacts securely with a serverless MCP server on AWS Lambda, using per-user OAuth for real-time, privacy-focused data retrieval.
 
 ```bash
-cue skills add ThoTischner/observability-mcp --profile backend
+cue skills add f1nthelad/google-contacts-mcp-server --profile backend
 ```
 
 ---
 
-<a id="prageethcs-hippocamp"></a>
-## ✨ [Prageethcs/hippocamp](https://github.com/Prageethcs/hippocamp)
+<a id="directive-reticule640-codex-mcp-server"></a>
+## ✨ [directive-reticule640/codex-mcp-server](https://github.com/directive-reticule640/codex-mcp-server)
 
-**★ 4** · strong (score 6.8) · Python · tags: agent-memory, ai-memory, anthropic, chatgpt, claude
+**★ 2** · strong (score 7) · TypeScript · tags: ai, ai-tools, azure, claude-desktop, code-context
 
-Tiered memory for AI — episodes, facts, preferences, reflections. Local. Portable. Yours.
+🚀 Connect your IDE or AI assistant to the Codex CLI with this open-source MCP server for efficient automation and robust code analysis.
 
 ```bash
-cue skills add Prageethcs/hippocamp --profile backend
+cue skills add directive-reticule640/codex-mcp-server --profile backend
+```
+
+---
+
+<a id="gefsikatsinelou-metasearchmcp"></a>
+## ✨ [gefsikatsinelou/MetaSearchMCP](https://github.com/gefsikatsinelou/MetaSearchMCP)
+
+**★ 44** · strong (score 6.9) · Python · tags: agent-tools, ai-agents, google-search, google-search-api, llm
+
+Open-source metasearch backend, MCP server, and AI search API for LLM agents. Python FastAPI search gateway with Google search via SerpBase and Serper, multi-engine search aggregation, structured JSON output, provider fallback, deduplication, and SearXNG alternative architecture for agent workflows.
+
+```bash
+cue skills add gefsikatsinelou/MetaSearchMCP --profile backend
+```
+
+---
+
+<a id="lingga1997-full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose"></a>
+## ✨ [lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose](https://github.com/lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose)
+
+**★ 0** · strong (score 6.5) · Shell · tags: ai, automation, data-flow, low-code, mcp
+
+🚀 Deploy n8n quickly with a full stack using Nginx and Docker Compose, making automation accessible to everyone.
+
+```bash
+cue skills add lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose --profile backend
+```
+
+---
+
+<a id="dull-quay940-mcp-supervisor"></a>
+## ✨ [dull-quay940/mcp-supervisor](https://github.com/dull-quay940/mcp-supervisor)
+
+**★ 0** · strong (score 6.5) · JavaScript · tags: agent, agent-control-plane, agent-orchestration, agentic-ai, agents
+
+🔒 Manage and monitor reusable autonomous agents securely with the MCP Supervisor, designed for seamless operation on Ubuntu 24.04.
+
+```bash
+cue skills add dull-quay940/mcp-supervisor --profile backend
+```
+
+---
+
+<a id="pintaro-mem0"></a>
+## ✨ [Pintaro/mem0](https://github.com/Pintaro/mem0)
+
+**★ 0** · strong (score 6.5) · Python · tags: ai-agents, application, chatbot, chatbots, chatgpt
+
+
+
+```bash
+cue skills add Pintaro/mem0 --profile backend
+```
+
+---
+
+<a id="boxcalfdevelopmentallearning748-openscout"></a>
+## ✨ [boxcalfdevelopmentallearning748/OpenScout](https://github.com/boxcalfdevelopmentallearning748/OpenScout)
+
+**★ 0** · strong (score 6.5) · Python · tags: android, android-studio, faiss, firebase, frc-scouting
+
+🔍 Enhance your queries with OpenScout, a RAG system that retrieves, ranks, and synthesizes web content for concise answers using LLM integration.
+
+```bash
+cue skills add boxcalfdevelopmentallearning748/OpenScout --profile backend
+```
+
+---
+
+<a id="alvisooculus-optionsahoy-mcp"></a>
+## ✨ [AlvisoOculus/optionsahoy-mcp](https://github.com/AlvisoOculus/optionsahoy-mcp)
+
+**★ 0** · strong (score 6) · TypeScript · tags: ai-agents, anthropic, claude, cloudflare-pages-functions, equity-compensation
+
+Equity comp tax (ISO/NSO/RSU/QSBS), concentration, and hedging optimizer. MCP server + REST API with federal + 50-state + DC tax code, multi-year horizons.
+
+```bash
+cue skills add AlvisoOculus/optionsahoy-mcp --profile backend
 ```
 
 ---
@@ -128,19 +206,6 @@ Self-hosted LLM gateway that turns flat-rate AI subscriptions (Claude Code Max, 
 
 ```bash
 cue skills add renefichtmueller/adaptive-llm-gateway --profile backend
-```
-
----
-
-<a id="bokyostudio-pg-practice-knowledgebase"></a>
-## ✨ [bokyostudio/pg-practice-knowledgebase](https://github.com/bokyostudio/pg-practice-knowledgebase)
-
-**★ 0** · strong (score 5.5) · HTML · tags: ai, ai-agents, ai-coding, claude-code-plugin, claude-code-plugins
-
-The Ultimate guide to PostgreSQL Optimization for AI Code Generation in 2026
-
-```bash
-cue skills add bokyostudio/pg-practice-knowledgebase --profile backend
 ```
 
 ---

@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for creative-media"
-description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "5 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `creative-media`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cue) for the **creative-media** profile.
+> 5 community-built skills curated by [cue](https://github.com/opencue/cue) for the **creative-media** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -50,6 +50,19 @@ cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile c
 
 ```bash
 cue skills add giovannisacca/pixel-mcp-workflow --profile creative-media
+```
+
+---
+
+<a id="aiatelie-ai-atelie"></a>
+## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
+
+**★ 5** · strong (score 5.9) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+
+Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
+
+```bash
+cue skills add aiatelie/ai-atelie --profile creative-media
 ```
 
 ---

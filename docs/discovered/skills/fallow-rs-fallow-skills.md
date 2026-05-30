@@ -2,20 +2,20 @@
 title: "fallow-rs/fallow-skills — Claude Code skill discovered by cue"
 description: "Agent skills for fallow, codebase intelligence for JavaScript and TypeScript. Teaches AI agents how to find unused code, duplication, circular deps, complexity "
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [fallow-rs/fallow-skills](https://github.com/fallow-rs/fallow-skills)
 
-**★ 52** · exceptional (score 10.3) · agent-skills, amp, claude, claude-code, code-duplication
+**★ 53** · exceptional (score 10.3) · agent-skills, amp, claude, claude-code, code-duplication
 
 > Agent skills for fallow, codebase intelligence for JavaScript and TypeScript. Teaches AI agents how to find unused code, duplication, circular deps, complexity hotspots, architecture drift, and (with Fallow Runtime) hot-path and cold-path evidence. Works with Claude Code, Cursor, Codex, Gemini CLI, and 30+ agents.
 
 ## Why cue indexed it
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.3 based on:
-- ⭐ 52 stars
+- ⭐ 53 stars
 - 🗓️ Last pushed: 2026-05-29
 - 🏷️ Tags: agent-skills, amp, claude, claude-code, code-duplication, codebase-hygiene, codebase-intelligence, codex, copilot, cursor, dead-code, fallow, gemini-cli, javascript, linter, skills, static-analysis, typescript, unused-exports, windsurf
 

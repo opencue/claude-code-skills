@@ -2,7 +2,7 @@
 title: "flamerged/sshshot — Claude Code skill discovered by cue"
 description: "Take a screenshot locally → it auto-uploads via SSH → the remote path lands on your clipboard. Paste screenshots into Claude Code, OpenAI Codex, Aider, or any A"
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 

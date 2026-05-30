@@ -2,7 +2,7 @@
 title: "Claude Code Skills for fleet-control"
 description: "2 community Claude Code skills curated by cue for the fleet-control profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, fleet-control, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,15 @@ tags: [claude-code, fleet-control, skills, mcp, ai-agents]
 
 ---
 
-<a id="wan-huiyan-agent-traffic-control"></a>
-## ✨ [wan-huiyan/agent-traffic-control](https://github.com/wan-huiyan/agent-traffic-control)
+<a id="marcos-auguusto-superx-agentic-orchestrator"></a>
+## 💎 [Marcos-Auguusto/superx-agentic-orchestrator](https://github.com/Marcos-Auguusto/superx-agentic-orchestrator)
 
-**★ 0** · strong (score 7) · Shell · tags: claude-code, claude-code-plugin, claude-code-skill, git-worktree, multi-agent
+**★ 0** · exceptional (score 10) · HTML · tags: agent-orchestration, ai-agent, ai-coding, ai-orchestration, anthropic
 
-Coordination toolkit for parallel Claude Code sessions sharing one repo — issue-pickup claim protocol, worktree isolation pitfalls, parallel-PR conflict recovery, subagent integrity, and squash/merge mechanics. 33 skills, Pattern B multi-skill plugin.
+SuperX Autonomous AI Agent 2026: 14 Specialized Coders, 10x Parallel Execution & Adaptive Skill Learning
 
 ```bash
-cue skills add wan-huiyan/agent-traffic-control --profile fleet-control
+cue skills add Marcos-Auguusto/superx-agentic-orchestrator --profile fleet-control
 ```
 
 ---

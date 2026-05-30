@@ -1,29 +1,42 @@
 ---
 title: "Claude Code Skills for python-api"
-description: "1 community Claude Code skills curated by cue for the python-api profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the python-api profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, python-api, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `python-api`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/cue) for the **python-api** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cue) for the **python-api** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="skenetechnologies-skene"></a>
-## 💎 [SkeneTechnologies/skene](https://github.com/SkeneTechnologies/skene)
+<a id="gefsikatsinelou-metasearchmcp"></a>
+## ✨ [gefsikatsinelou/MetaSearchMCP](https://github.com/gefsikatsinelou/MetaSearchMCP)
 
-**★ 106** · exceptional (score 11.4) · Go · tags: ai-tools, anthropic, automation, cli, cli-tool
+**★ 44** · strong (score 6.9) · Python · tags: agent-tools, ai-agents, google-search, google-search-api, llm
 
-Product-Led Growth (PLG) analysis toolkit that detects tech stacks, plans growth loops and builds the loop iteratively.
+Open-source metasearch backend, MCP server, and AI search API for LLM agents. Python FastAPI search gateway with Google search via SerpBase and Serper, multi-engine search aggregation, structured JSON output, provider fallback, deduplication, and SearXNG alternative architecture for agent workflows.
 
 ```bash
-cue skills add SkeneTechnologies/skene --profile python-api
+cue skills add gefsikatsinelou/MetaSearchMCP --profile python-api
+```
+
+---
+
+<a id="prem22k-adviser-cli-tool"></a>
+## ✨ [prem22k/adviser-cli-tool](https://github.com/prem22k/adviser-cli-tool)
+
+**★ 2** · strong (score 6.5) · Python · tags: chromadb, cli, developer-tools, local-ai, mcp-server
+
+A terminal-native, zero-infrastructure local RAG pipeline and developer intelligence hub powered by OpenAI Codex, ChromaDB, and Groq/Gemini.
+
+```bash
+cue skills add prem22k/adviser-cli-tool --profile python-api
 ```
 
 ---

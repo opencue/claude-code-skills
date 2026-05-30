@@ -2,20 +2,20 @@
 title: "ckanthony/Chisel — Claude Code skill discovered by cue"
 description: "🪛 Rust powered precision file tools for AI agents thats minimize context use: patch-based edits, kernel-enforced path confinement.  Dramatically fewer tokens t"
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
 # 🔹 [ckanthony/Chisel](https://github.com/ckanthony/Chisel)
 
-**★ 11** · potential (score 3.2) · Rust
+**★ 12** · potential (score 3.2) · Rust
 
 > 🪛 Rust powered precision file tools for AI agents thats minimize context use: patch-based edits, kernel-enforced path confinement.  Dramatically fewer tokens than naive read/write.  MCP Server or embeddable, bring your own MCP (Rust, Python, Nodejs).  Come with Skills.md (npx skills add ckanthony/Chisel)
 
 ## Why cue indexed it
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 3.2 based on:
-- ⭐ 11 stars
+- ⭐ 12 stars
 - 🗓️ Last pushed: 2026-03-07
 - 🏷️ Tags: (none)
 

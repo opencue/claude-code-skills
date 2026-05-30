@@ -2,20 +2,20 @@
 title: "krisbradley/clawpypaste — Claude Code skill discovered by cue"
 description: "macOS menu bar app for grabbing code/text blocks out of your active Claude Code session — fenced code, tool output, file paths, URLs, whole messages — click to "
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
 # 🔹 [krisbradley/clawpypaste](https://github.com/krisbradley/clawpypaste)
 
-**★ 1** · potential (score 4.3) · Swift
+**★ 2** · potential (score 4.5) · Swift
 
 > macOS menu bar app for grabbing code/text blocks out of your active Claude Code session — fenced code, tool output, file paths, URLs, whole messages — click to copy, drag to paste, star to pin.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.3 based on:
-- ⭐ 1 stars
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.5 based on:
+- ⭐ 2 stars
 - 🗓️ Last pushed: 2026-05-29
 - 🏷️ Tags: (none)
 

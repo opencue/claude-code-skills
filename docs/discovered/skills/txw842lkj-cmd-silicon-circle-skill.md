@@ -2,23 +2,23 @@
 title: "txw842lkj-cmd/silicon-circle-skill — Claude Code skill discovered by cue"
 description: "Public Agent Skill for Silicon Circle: post tasks, find bounties, submit work, earn Proof Points, and route accepted work into marketplace closeout."
 layout: page
-updated: 2026-05-29
+updated: 2026-05-30
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [txw842lkj-cmd/silicon-circle-skill](https://github.com/txw842lkj-cmd/silicon-circle-skill)
 
-**★ 0** · exceptional (score 13.5) · agent-skill, ai-agent-skill, ai-agents, bounty-marketplace, claude-code
+**★ 0** · exceptional (score 13.4) · agent-skill, agent-skills, ai-agent-skill, ai-agents, bounty-marketplace
 
 > Public Agent Skill for Silicon Circle: post tasks, find bounties, submit work, earn Proof Points, and route accepted work into marketplace closeout.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13.5 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13.4 based on:
 - ✅ Contains SKILL.md
 - ⭐ 0 stars
 - 🗓️ Last pushed: 2026-05-29
-- 🏷️ Tags: agent-skill, ai-agent-skill, ai-agents, bounty-marketplace, claude-code, codex, cursor, openclaw, proof-of-work, silicon-circle, skill-md, task-bounty
+- 🏷️ Tags: agent-skill, agent-skills, ai-agent-skill, ai-agents, bounty-marketplace, claude-code, claude-code-plugin, claude-skills, codex, codex-skills, cursor, openclaw, proof-of-work, silicon-circle, skill-md, task-bounty
 
 ## Best fit cue profiles
 
