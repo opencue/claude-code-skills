@@ -1,31 +1,35 @@
 ---
 title: "Discovered Claude Code Skills"
-description: "100 community Claude Code skills curated by cue across 11 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
+description: "100 community Claude Code skills curated by cue across 15 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
 layout: page
-updated: 2026-05-30
+updated: 2026-05-31
 tags: [claude-code, skills, mcp, ai-agents, marketplace]
 ---
 
 # 🎯 Discovered Claude Code Skills
 
-> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cue) across **11 profiles**.
-> Last updated: 2026-05-30 · refreshed nightly via GitHub Code Search.
+> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/claude-code-skills) across **15 profiles**.
+> Last updated: 2026-05-31 · refreshed nightly via GitHub Code Search.
 
 ## Browse by profile
 
 | Profile | Skills | Sample |
 |---|---|---|
-| [**core**](./core.md) | 63 | `context-mode`, `antigravity-workspace-template`, `brilliant-directories-mcp` |
-| [**backend**](./backend.md) | 16 | `onemcp`, `Skolverket-MCP`, `CodeCompass` |
-| [**frontend**](./frontend.md) | 8 | `suanfish-design-system`, `ux-skill`, `lottie-marketplace` |
-| [**creative-media**](./creative-media.md) | 5 | `ux-skill`, `social-media-scraper-skill`, `pixel-mcp-workflow` |
-| [**cybersecurity**](./cybersecurity.md) | 4 | `nsauditor-ai-agent-skill`, `hydra`, `Claude-OSINT` |
-| [**niche**](./niche.md) | 3 | `grant-thinking-skill`, `grant-thinking-cn-biology`, `mobile-app-store-deployment-automation` |
-| [**fleet-control**](./fleet-control.md) | 2 | `superx-agentic-orchestrator`, `rolepod` |
+| [**core**](./core.md) | 61 | `context-mode`, `antigravity-workspace-template`, `product-manager-skills` |
+| [**backend**](./backend.md) | 12 | `archestra`, `blender-mcp`, `clx` |
+| [**frontend**](./frontend.md) | 8 | `cinematic-scroll-skill`, `suanfish-design-system`, `lottie-marketplace` |
+| [**cybersecurity**](./cybersecurity.md) | 5 | `nsauditor-ai-agent-skill`, `hydra`, `slowmist-security-cc` |
+| [**fleet-control**](./fleet-control.md) | 4 | `neko-gundan`, `superx-agentic-orchestrator`, `multi-agent-revenue-orchestrator` |
+| [**creative-media**](./creative-media.md) | 3 | `social-media-scraper-skill`, `ai-atelie`, `redesigned-pancake` |
+| [**docs-writer**](./docs-writer.md) | 2 | `folio`, `wechat-dev-docs-skill` |
+| [**niche**](./niche.md) | 2 | `grant-thinking-cn-biology`, `grant-thinking-skill` |
 | [**marketing**](./marketing.md) | 2 | `sticky-switcher-funnel-playbook`, `mcp` |
-| [**python-api**](./python-api.md) | 2 | `MetaSearchMCP`, `adviser-cli-tool` |
+| [**threejs**](./threejs.md) | 1 | `cinematic-scroll-skill` |
+| [**research**](./research.md) | 1 | `ai-research-writing-skill` |
 | [**video**](./video.md) | 1 | `social-media-scraper-skill` |
-| [**research**](./research.md) | 1 | `popper-scope` |
+| [**python-api**](./python-api.md) | 1 | `neural-context-protocol` |
+| [**go-api**](./go-api.md) | 1 | `zhouyi` |
+| [**medusa**](./medusa.md) | 1 | `softjunk-lead-kit` |
 
 ## How scoring works
 
@@ -44,4 +48,4 @@ cue skills add owner/repo --profile <profile>
 
 ## About cue
 
-cue is an agent profile manager for Claude Code and Codex CLI. [github.com/opencue/cue](https://github.com/opencue/cue)
+cue is an agent profile manager for Claude Code and Codex CLI. [github.com/opencue/claude-code-skills](https://github.com/opencue/claude-code-skills)

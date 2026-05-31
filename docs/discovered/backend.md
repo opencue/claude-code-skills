@@ -1,198 +1,146 @@
 ---
 title: "Claude Code Skills for backend"
-description: "16 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "12 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-30
+updated: 2026-05-31
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 16 community-built skills curated by [cue](https://github.com/opencue/cue) for the **backend** profile.
+> 12 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="rifkimaulana05-onemcp"></a>
-## 💎 [rifkimaulana05/onemcp](https://github.com/rifkimaulana05/onemcp)
+<a id="archestra-ai-archestra"></a>
+## 💎 [archestra-ai/archestra](https://github.com/archestra-ai/archestra)
 
-**★ 0** · exceptional (score 10) · Java · tags: ai, claude-code, claude-desktop, codex-cli, copilot
+**★ 3757** · exceptional (score 17) · TypeScript · tags: a2a, a2a-mcp, acp, agent, ai
 
-🤖 Streamline AI integration with OneMCP, the open-source runtime that simplifies API usage through a natural-language interface.
+Enterprise AI Platform with guardrails, MCP registry, gateway & orchestrator
 
 ```bash
-cue skills add rifkimaulana05/onemcp --profile backend
+cue skills add archestra-ai/archestra --profile backend
 ```
 
 ---
 
-<a id="mimanshaherbals-bot-skolverket-mcp"></a>
-## ✨ [mimanshaherbals-bot/Skolverket-MCP](https://github.com/mimanshaherbals-bot/Skolverket-MCP)
+<a id="vertiiii-blender-mcp"></a>
+## 💎 [Vertiiii/blender-mcp](https://github.com/Vertiiii/blender-mcp)
 
-**★ 1** · strong (score 7.8) · TypeScript · tags: ai, anthropic, chatgpt, claude, education
+**★ 5** · exceptional (score 10.6) · Python · tags: blender, blender-addon, blender-mcp, blender-python, blender3d
 
-🚀 Access all of Skolverket's open APIs through this Model Context Protocol (MCP) server, enabling seamless integration for AI assistants.
+🛠️ Connect Blender to Claude AI for seamless 3D modeling and scene manipulation using the Model Context Protocol for enhanced creative workflows.
 
 ```bash
-cue skills add mimanshaherbals-bot/Skolverket-MCP --profile backend
+cue skills add Vertiiii/blender-mcp --profile backend
 ```
 
 ---
 
-<a id="mihirkosambia-codecompass"></a>
-## ✨ [MihirKosambia/CodeCompass](https://github.com/MihirKosambia/CodeCompass)
+<a id="blackaxgit-clx"></a>
+## 💎 [blackaxgit/clx](https://github.com/blackaxgit/clx)
 
-**★ 0** · strong (score 7.5) · JavaScript · tags: ai-coding-assistant, ai-driven-development, bert-model, chatbot, code-comprehension
+**★ 0** · exceptional (score 10) · Rust · tags: ai, claude-code, cli, command-validation, context-persistence
 
-🧭 Transform your GitHub repo into an interactive knowledge base, enabling focused conversations and insights from your project's files.
+🛡️ Rust CLI extension for Claude Code — LLM-powered command validation, SQLite context persistence & MCP tools. Two-layer safety (rules + Ollama), vector semantic search, and user-adaptive learning.
 
 ```bash
-cue skills add MihirKosambia/CodeCompass --profile backend
+cue skills add blackaxgit/clx --profile backend
 ```
 
 ---
 
-<a id="akbfar-zomato-mcp-demo"></a>
-## ✨ [akbfar/Zomato-MCP-Demo](https://github.com/akbfar/Zomato-MCP-Demo)
+<a id="ayaanjan76-awesome-mcp-servers"></a>
+## 💎 [ayaanjan76/awesome-mcp-servers](https://github.com/ayaanjan76/awesome-mcp-servers)
 
-**★ 0** · strong (score 7.5) · tags: mcp-server, mcp-tools, mcp-zomato, model-context-protocol, model-context-protocol-server-zomoto
+**★ 2** · exceptional (score 10) · tags: ai, ai-agent, awesome, awesome-mcp, collection
 
-🍴 Explore Zomato's MCP Server for AI chat assistants. Set up Claude Desktop to interact seamlessly with real-world food ordering systems.
+🚀 Explore a curated collection of top Model Context Protocol (MCP) servers for seamless connectivity and enhanced experiences in your projects.
 
 ```bash
-cue skills add akbfar/Zomato-MCP-Demo --profile backend
+cue skills add ayaanjan76/awesome-mcp-servers --profile backend
 ```
 
 ---
 
-<a id="princeyohann-stoic-mcp"></a>
-## ✨ [princeyohann/stoic-mcp](https://github.com/princeyohann/stoic-mcp)
+<a id="kahflane-whatsapp-mcp"></a>
+## 💎 [kahflane/whatsapp-mcp](https://github.com/kahflane/whatsapp-mcp)
 
-**★ 0** · strong (score 7.5) · JavaScript · tags: ai-tools, anthropic, claude-mcp, deepseek-api, developer-experience
+**★ 0** · exceptional (score 8.5) · TypeScript · tags: ai-agents, baileys, bun, claude, claude-code
 
-🧘♂️ Deliver Stoic quotes with AI-driven insights via the DeepSeek API, enhancing developer well-being through practical wisdom and live training support.
+Give your AI agent a WhatsApp account — an MCP server with 87 tools for reading, sending, groups, status, scheduling & more. Works with Claude, Codex, Cursor, OpenCode & any MCP client.
 
 ```bash
-cue skills add princeyohann/stoic-mcp --profile backend
+cue skills add kahflane/whatsapp-mcp --profile backend
 ```
 
 ---
 
-<a id="imaginationfinagler591-mcp-hello-world"></a>
-## ✨ [Imaginationfinagler591/mcp-hello-world](https://github.com/Imaginationfinagler591/mcp-hello-world)
+<a id="zcebupelka-graphql-mcp-bridge"></a>
+## ✨ [zcebupelka/graphql-mcp-bridge](https://github.com/zcebupelka/graphql-mcp-bridge)
 
-**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agent, ai-integration, client-server, fastapi, fat-jar
+**★ 1** · strong (score 7.8) · TypeScript · tags: ai-tools, api-integration, api-translator, bridge, developer-tools
 
-
+🌉 Connect GraphQL APIs seamlessly with the Model Context Protocol for enhanced data management and integration.
 
 ```bash
-cue skills add Imaginationfinagler591/mcp-hello-world --profile backend
+cue skills add zcebupelka/graphql-mcp-bridge --profile backend
 ```
 
 ---
 
-<a id="f1nthelad-google-contacts-mcp-server"></a>
-## ✨ [f1nthelad/google-contacts-mcp-server](https://github.com/f1nthelad/google-contacts-mcp-server)
+<a id="custodia-admin-pagebolt-mcp"></a>
+## ✨ [Custodia-Admin/pagebolt-mcp](https://github.com/Custodia-Admin/pagebolt-mcp)
 
-**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, aws-cdk, aws-lambda, calendar, claude-ai
+**★ 1** · strong (score 7.8) · JavaScript · tags: ai-agents, browser-automation, mcp, mcp-server, mcp-servers
 
-📇 Access Google Contacts securely with a serverless MCP server on AWS Lambda, using per-user OAuth for real-time, privacy-focused data retrieval.
+An MCP server to allow AI agents to interact with PageBolt to take screenshots, grab PDFs, and more.
 
 ```bash
-cue skills add f1nthelad/google-contacts-mcp-server --profile backend
+cue skills add Custodia-Admin/pagebolt-mcp --profile backend
 ```
 
 ---
 
-<a id="directive-reticule640-codex-mcp-server"></a>
-## ✨ [directive-reticule640/codex-mcp-server](https://github.com/directive-reticule640/codex-mcp-server)
+<a id="sunako26-container-manager-mcp"></a>
+## ✨ [Sunako26/container-manager-mcp](https://github.com/Sunako26/container-manager-mcp)
 
-**★ 2** · strong (score 7) · TypeScript · tags: ai, ai-tools, azure, claude-desktop, code-context
+**★ 1** · strong (score 7.8) · Python · tags: agentic-ai, ai, compose, container, docker
 
-🚀 Connect your IDE or AI assistant to the Codex CLI with this open-source MCP server for efficient automation and robust code analysis.
+🔧 Manage and optimize your container environments efficiently with Container Manager MCP, designed for streamlined deployment and monitoring.
 
 ```bash
-cue skills add directive-reticule640/codex-mcp-server --profile backend
+cue skills add Sunako26/container-manager-mcp --profile backend
 ```
 
 ---
 
-<a id="gefsikatsinelou-metasearchmcp"></a>
-## ✨ [gefsikatsinelou/MetaSearchMCP](https://github.com/gefsikatsinelou/MetaSearchMCP)
+<a id="luis13-source-jira-simple-mcp"></a>
+## ✨ [Luis13-source/jira-simple-mcp](https://github.com/Luis13-source/jira-simple-mcp)
 
-**★ 44** · strong (score 6.9) · Python · tags: agent-tools, ai-agents, google-search, google-search-api, llm
+**★ 0** · strong (score 7.5) · JavaScript · tags: ai-assistant, ai-tools, atlassian, atlassian-confluence, atlassian-jira
 
-Open-source metasearch backend, MCP server, and AI search API for LLM agents. Python FastAPI search gateway with Google search via SerpBase and Serper, multi-engine search aggregation, structured JSON output, provider fallback, deduplication, and SearXNG alternative architecture for agent workflows.
+🚀 Access and manage Jira issues effortlessly with this simple MCP server, enabling AI assistants to enhance your project workflows.
 
 ```bash
-cue skills add gefsikatsinelou/MetaSearchMCP --profile backend
+cue skills add Luis13-source/jira-simple-mcp --profile backend
 ```
 
 ---
 
-<a id="lingga1997-full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose"></a>
-## ✨ [lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose](https://github.com/lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose)
+<a id="mircheaaa-spring-ai-weather-tool"></a>
+## ✨ [Mircheaaa/spring-ai-weather-tool](https://github.com/Mircheaaa/spring-ai-weather-tool)
 
-**★ 0** · strong (score 6.5) · Shell · tags: ai, automation, data-flow, low-code, mcp
+**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agents, ai-integration, ai-tools, chatbot, groq-api
 
-🚀 Deploy n8n quickly with a full stack using Nginx and Docker Compose, making automation accessible to everyone.
-
-```bash
-cue skills add lingga1997/full-stack-proxy-nginx-n8n-for-everyone-with-docker-compose --profile backend
-```
-
----
-
-<a id="dull-quay940-mcp-supervisor"></a>
-## ✨ [dull-quay940/mcp-supervisor](https://github.com/dull-quay940/mcp-supervisor)
-
-**★ 0** · strong (score 6.5) · JavaScript · tags: agent, agent-control-plane, agent-orchestration, agentic-ai, agents
-
-🔒 Manage and monitor reusable autonomous agents securely with the MCP Supervisor, designed for seamless operation on Ubuntu 24.04.
+🌤️ Build a versatile weather tool with AI capabilities, integrating real-time data and user-friendly features for enhanced travel planning.
 
 ```bash
-cue skills add dull-quay940/mcp-supervisor --profile backend
-```
-
----
-
-<a id="pintaro-mem0"></a>
-## ✨ [Pintaro/mem0](https://github.com/Pintaro/mem0)
-
-**★ 0** · strong (score 6.5) · Python · tags: ai-agents, application, chatbot, chatbots, chatgpt
-
-
-
-```bash
-cue skills add Pintaro/mem0 --profile backend
-```
-
----
-
-<a id="boxcalfdevelopmentallearning748-openscout"></a>
-## ✨ [boxcalfdevelopmentallearning748/OpenScout](https://github.com/boxcalfdevelopmentallearning748/OpenScout)
-
-**★ 0** · strong (score 6.5) · Python · tags: android, android-studio, faiss, firebase, frc-scouting
-
-🔍 Enhance your queries with OpenScout, a RAG system that retrieves, ranks, and synthesizes web content for concise answers using LLM integration.
-
-```bash
-cue skills add boxcalfdevelopmentallearning748/OpenScout --profile backend
-```
-
----
-
-<a id="alvisooculus-optionsahoy-mcp"></a>
-## ✨ [AlvisoOculus/optionsahoy-mcp](https://github.com/AlvisoOculus/optionsahoy-mcp)
-
-**★ 0** · strong (score 6) · TypeScript · tags: ai-agents, anthropic, claude, cloudflare-pages-functions, equity-compensation
-
-Equity comp tax (ISO/NSO/RSU/QSBS), concentration, and hedging optimizer. MCP server + REST API with federal + 50-state + DC tax code, multi-year horizons.
-
-```bash
-cue skills add AlvisoOculus/optionsahoy-mcp --profile backend
+cue skills add Mircheaaa/spring-ai-weather-tool --profile backend
 ```
 
 ---
@@ -225,7 +173,7 @@ cue skills add Sfedfcv/redesigned-pancake --profile backend
 
 ## About this list
 
-Generated by [cue](https://github.com/opencue/cue) — an open-source agent profile manager. cue runs nightly GitHub Code Search for `filename:SKILL.md` and scores each repo by recency, skill format, MCP integration, and engagement signals.
+Generated by [cue](https://github.com/opencue/claude-code-skills) — an open-source agent profile manager. cue runs nightly GitHub Code Search for `filename:SKILL.md` and scores each repo by recency, skill format, MCP integration, and engagement signals.
 
 **Authors:** if you'd rather not be listed, add `<!-- cue: ignore -->` to your README — we respect it permanently. Want to opt in explicitly? Add `<!-- cue: ok -->`.
 
