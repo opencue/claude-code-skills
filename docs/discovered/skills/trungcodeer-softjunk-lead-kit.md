@@ -2,7 +2,7 @@
 title: "trungcodeer/softjunk-lead-kit — Claude Code skill discovered by cue"
 description: "USD 5 packet-first one-lead rescue: inspect the order packet, copy the after-packet PayPal URL, then verify with seller-side PayPal proof."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, medusa]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, medusa]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 8 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-05-31
+- 🗓️ Last pushed: 2026-06-01
 - 🏷️ Tags: agent-commerce, ai-agent, ai-buyer-route, ai-checkout, follow-up-templates, hvac-service, lead-follow-up, lead-recovery, mcp-server, missed-call, model-context-protocol, no-show-follow-up, one-lead-rescue, paypal-checkout, paypal-me, price-objection, quiet-lead, roofing-estimates, send5, small-business
 
 ## Best fit cue profiles

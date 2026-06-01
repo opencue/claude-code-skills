@@ -2,7 +2,7 @@
 title: "mindattic/Tutor — Claude Code skill discovered by cue"
 description: "Blazor Server app that converts books and documents (PDF, EPUB, DOCX, HTML, MOBI, AZW, RTF, ODT) into structured courses. A multi-LLM pipeline (OpenAI, Claude, "
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, core]
 ---
 

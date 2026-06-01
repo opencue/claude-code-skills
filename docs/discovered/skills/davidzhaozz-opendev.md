@@ -2,19 +2,19 @@
 title: "davidzhaozz/openDev — Claude Code skill discovered by cue"
 description: "openDev is a macOS desktop IDE for JavaScript and TypeScript with Claude integrated in the core. Click any element in the embedded browser to capture its CSS pa"
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, frontend]
 ---
 
 # 🔹 [davidzhaozz/openDev](https://github.com/davidzhaozz/openDev)
 
-**★ 2** · potential (score 3.2) · TypeScript
+**★ 2** · potential (score 3.1) · TypeScript
 
 > openDev is a macOS desktop IDE for JavaScript and TypeScript with Claude integrated in the core. Click any element in the embedded browser to capture its CSS path, computed styles, and a screenshot — then   ▎  ship it to the AI as context. Built-in MySQL, Postgres, and ES client. Every panel is an MCP endpoint your CLI agents can drive.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 3.2 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 3.1 based on:
 - ⭐ 2 stars
 - 🗓️ Last pushed: 2026-05-23
 - 🏷️ Tags: (none)

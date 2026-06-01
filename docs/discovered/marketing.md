@@ -1,42 +1,29 @@
 ---
 title: "Claude Code Skills for marketing"
-description: "2 community Claude Code skills curated by cue for the marketing profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the marketing profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, marketing, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `marketing`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **marketing** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **marketing** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="pepinorancio1-sticky-switcher-funnel-playbook"></a>
-## ✨ [PepinoRancio1/sticky-switcher-funnel-playbook](https://github.com/PepinoRancio1/sticky-switcher-funnel-playbook)
+<a id="dankofly-neuro-nlp-booster"></a>
+## ✨ [dankofly/Neuro-NLP-booster](https://github.com/dankofly/Neuro-NLP-booster)
 
-**★ 0** · strong (score 7.5) · HTML · tags: agency-toolkit, ai-coding-agent, claude-code, claude-code-skill, conversion-optimization
+**★ 0** · strong (score 7) · tags: claude-code, claude-skill, conversion, copywriting, marketing
 
-Modern Web Design Playbook 2026 – Niche Tokens, Sticky Switcher & Conversion Funnel
-
-```bash
-cue skills add PepinoRancio1/sticky-switcher-funnel-playbook --profile marketing
-```
-
----
-
-<a id="clamp-sh-mcp"></a>
-## ✨ [clamp-sh/mcp](https://github.com/clamp-sh/mcp)
-
-**★ 1** · strong (score 5.3) · TypeScript · tags: agent-tools, analytics, clamp, claude, claude-code
-
-MCP server for Clamp, web analytics for the agentic era. Tools for traffic, referrers, live visitors, events, revenue, session paths, funnels, and alerts — queryable from Cursor, Claude Code, Claude Desktop, Smithery, and any MCP-compatible editor.
+Maximalist NLP + Neuromarketing copywriting & web-design engine for Claude Code: Limbic motive targeting, Milton Model language, Sleight of Mouth, NeuroScoring, and a 5-voice Audit→Council→Implement SOP.
 
 ```bash
-cue skills add clamp-sh/mcp --profile marketing
+cue skills add dankofly/Neuro-NLP-booster --profile marketing
 ```
 
 ---

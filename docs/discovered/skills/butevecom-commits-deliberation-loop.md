@@ -2,7 +2,7 @@
 title: "butevecom-commits/Deliberation-Loop — Claude Code skill discovered by cue"
 description: "Claude Code skill: multi-path reasoning via 6-role structured debate (Builder ↔ Skeptic ↔ Analyst ↔ Operator → Editor → Expander)"
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, core]
 ---
 

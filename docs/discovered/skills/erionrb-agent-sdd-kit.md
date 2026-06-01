@@ -2,19 +2,19 @@
 title: "erionrb/agent-sdd-kit — Claude Code skill discovered by cue"
 description: "Spec-driven AI practice workspace: OpenSpec SDD workflow, mirrored Claude/Cursor skills, and a structured learning path for spec-first development."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, core]
 ---
 
 # 🔹 [erionrb/agent-sdd-kit](https://github.com/erionrb/agent-sdd-kit)
 
-**★ 2** · potential (score 4.3) · JavaScript
+**★ 2** · potential (score 4.2) · JavaScript
 
 > Spec-driven AI practice workspace: OpenSpec SDD workflow, mirrored Claude/Cursor skills, and a structured learning path for spec-first development.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.3 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.2 based on:
 - ⭐ 2 stars
 - 🗓️ Last pushed: 2026-05-25
 - 🏷️ Tags: (none)

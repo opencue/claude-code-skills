@@ -2,22 +2,22 @@
 title: "MustBeSimo/cinematic-scroll-skill — Claude Code skill discovered by cue"
 description: "Free, MIT Agent Skill (Claude/Cursor/Hermes) for cinematic scroll-driven websites — pinned chapters, parallax, 3D tilt, and full Shopify-Editions-style release "
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, frontend, threejs]
 ---
 
 # 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
 
-**★ 0** · exceptional (score 13.5) · TypeScript · agent-skill, claude-skill, cursor, fal-ai, framer-motion
+**★ 1** · exceptional (score 13.8) · TypeScript · agent-skill, claude-skill, cursor, fal-ai, framer-motion
 
 > Free, MIT Agent Skill (Claude/Cursor/Hermes) for cinematic scroll-driven websites — pinned chapters, parallax, 3D tilt, and full Shopify-Editions-style release pages with AI-generated visuals.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13.5 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13.8 based on:
 - ✅ Contains SKILL.md
-- ⭐ 0 stars
-- 🗓️ Last pushed: 2026-05-31
+- ⭐ 1 stars
+- 🗓️ Last pushed: 2026-06-01
 - 🏷️ Tags: agent-skill, claude-skill, cursor, fal-ai, framer-motion, gsap, nextjs, parallax, scroll-animation, shopify-editions, threejs, web-animation
 
 ## Best fit cue profiles

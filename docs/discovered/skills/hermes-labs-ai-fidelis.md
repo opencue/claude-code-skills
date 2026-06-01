@@ -2,19 +2,19 @@
 title: "hermes-labs-ai/fidelis — Claude Code skill discovered by cue"
 description: "Agent memory without the retrieval tax. Fidelity-preserving memory for Claude Code and AI agents — local-first, fast, and with no LLM in the default retrieval p"
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [hermes-labs-ai/fidelis](https://github.com/hermes-labs-ai/fidelis)
 
-**★ 20** · exceptional (score 9.1) · Python · agent-memory, ai-agents, chromadb, claude-code, fidelity
+**★ 20** · exceptional (score 9) · Python · agent-memory, ai-agents, chromadb, claude-code, fidelity
 
 > Agent memory without the retrieval tax. Fidelity-preserving memory for Claude Code and AI agents — local-first, fast, and with no LLM in the default retrieval path. 83.2% R@1 on LongMemEval-S, $0/query retrieval.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.1 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9 based on:
 - ⭐ 20 stars
 - 🗓️ Last pushed: 2026-05-28
 - 🏷️ Tags: agent-memory, ai-agents, chromadb, claude-code, fidelity, hermes-labs, integer-pointer, llm, llm-memory, local-first, longmemeval, mcp, mcp-server, mem0, memory, ollama, rag, retrieval, vector-store, zero-llm

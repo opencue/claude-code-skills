@@ -1,35 +1,32 @@
 ---
 title: "Discovered Claude Code Skills"
-description: "100 community Claude Code skills curated by cue across 15 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
+description: "100 community Claude Code skills curated by cue across 12 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, skills, mcp, ai-agents, marketplace]
 ---
 
 # 🎯 Discovered Claude Code Skills
 
-> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/claude-code-skills) across **15 profiles**.
-> Last updated: 2026-05-31 · refreshed nightly via GitHub Code Search.
+> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/claude-code-skills) across **12 profiles**.
+> Last updated: 2026-06-01 · refreshed nightly via GitHub Code Search.
 
 ## Browse by profile
 
 | Profile | Skills | Sample |
 |---|---|---|
-| [**core**](./core.md) | 61 | `context-mode`, `antigravity-workspace-template`, `product-manager-skills` |
-| [**backend**](./backend.md) | 12 | `archestra`, `blender-mcp`, `clx` |
-| [**frontend**](./frontend.md) | 8 | `cinematic-scroll-skill`, `suanfish-design-system`, `lottie-marketplace` |
+| [**core**](./core.md) | 69 | `antigravity-workspace-template`, `Unity-MCP`, `skill-memory-bank` |
+| [**backend**](./backend.md) | 6 | `trigger.dev`, `n8n`, `codex-pooler` |
+| [**docs-writer**](./docs-writer.md) | 6 | `arkon`, `code2wiki`, `llm-wiki` |
 | [**cybersecurity**](./cybersecurity.md) | 5 | `nsauditor-ai-agent-skill`, `hydra`, `slowmist-security-cc` |
-| [**fleet-control**](./fleet-control.md) | 4 | `neko-gundan`, `superx-agentic-orchestrator`, `multi-agent-revenue-orchestrator` |
+| [**frontend**](./frontend.md) | 5 | `cinematic-scroll-skill`, `suanfish-design-system`, `lottie-marketplace` |
+| [**niche**](./niche.md) | 4 | `grant-thinking-skill`, `grant-thinking-cn-biology`, `devil-chat-coach` |
 | [**creative-media**](./creative-media.md) | 3 | `social-media-scraper-skill`, `ai-atelie`, `redesigned-pancake` |
-| [**docs-writer**](./docs-writer.md) | 2 | `folio`, `wechat-dev-docs-skill` |
-| [**niche**](./niche.md) | 2 | `grant-thinking-cn-biology`, `grant-thinking-skill` |
-| [**marketing**](./marketing.md) | 2 | `sticky-switcher-funnel-playbook`, `mcp` |
+| [**fleet-control**](./fleet-control.md) | 2 | `rolepod`, `queen-protocol` |
 | [**threejs**](./threejs.md) | 1 | `cinematic-scroll-skill` |
-| [**research**](./research.md) | 1 | `ai-research-writing-skill` |
 | [**video**](./video.md) | 1 | `social-media-scraper-skill` |
-| [**python-api**](./python-api.md) | 1 | `neural-context-protocol` |
-| [**go-api**](./go-api.md) | 1 | `zhouyi` |
 | [**medusa**](./medusa.md) | 1 | `softjunk-lead-kit` |
+| [**marketing**](./marketing.md) | 1 | `Neuro-NLP-booster` |
 
 ## How scoring works
 

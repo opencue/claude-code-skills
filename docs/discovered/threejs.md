@@ -2,7 +2,7 @@
 title: "Claude Code Skills for threejs"
 description: "1 community Claude Code skills curated by cue for the threejs profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-01
 tags: [claude-code, threejs, skills, mcp, ai-agents]
 ---
 
@@ -18,7 +18,7 @@ tags: [claude-code, threejs, skills, mcp, ai-agents]
 <a id="mustbesimo-cinematic-scroll-skill"></a>
 ## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
 
-**★ 0** · exceptional (score 13.5) · TypeScript · tags: agent-skill, claude-skill, cursor, fal-ai, framer-motion
+**★ 1** · exceptional (score 13.8) · TypeScript · tags: agent-skill, claude-skill, cursor, fal-ai, framer-motion
 
 Free, MIT Agent Skill (Claude/Cursor/Hermes) for cinematic scroll-driven websites — pinned chapters, parallax, 3D tilt, and full Shopify-Editions-style release pages with AI-generated visuals.
 
