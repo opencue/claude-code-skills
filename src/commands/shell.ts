@@ -93,14 +93,17 @@ export interface ShimOptions {
 }
 
 /**
- * True when the `claude` shim is already installed in ~/.local/bin and points
- * at cue (i.e. `cue launch`). Used by `cue init` to detect that profile
- * loading hasn't been activated yet. Conservative: any read error → false.
+ * True when the `claude` shim is already installed in ~/.local/bin and is a
+ * cue launch shim. Matches both shim formats cue writes: the user-facing
+ * `cue shell install` form (`exec "<abs-path>/cue" launch claude "$@"`) and the
+ * runInstall() helper form (`exec cue launch claude "$@"`) — both contain the
+ * literal `launch claude`. Used by `cue init` to detect that profile loading
+ * hasn't been activated yet. Conservative: any read error → false.
  */
 export function shimInstalled(homeDir?: string): boolean {
   const shimPath = join(homeDir ?? homedir(), ".local", "bin", "claude");
   try {
-    return existsSync(shimPath) && readFileSync(shimPath, "utf8").includes("cue launch");
+    return existsSync(shimPath) && readFileSync(shimPath, "utf8").includes("launch claude");
   } catch {
     return false;
   }

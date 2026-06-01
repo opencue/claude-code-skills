@@ -87,7 +87,7 @@ One cuecard per project. Your agent reads the right one the moment you launch.
 
 ```bash
 npm install -g cue-ai                          # 1. install
-cue shell install                              # 2. activate the claude/codex shim (one-time)
+cue shell install                              # 2. activate the claude shim (one-time; --codex adds codex)
 cue discover search "code review"              # 3. find a skill
 cue discover install review/code-review        # 4. add it
 claude                                         # 5. launch — the cuecard is loaded
@@ -342,7 +342,7 @@ npm install -g cue-ai
 Then activate the shim once, and pin a profile in any project:
 
 ```bash
-cue shell install             # one-time: installs the claude/codex shim
+cue shell install             # one-time: installs the claude shim (--codex for codex)
 cd ~/projects/q4-launch
 echo marketing > .cue-profile
 claude                        # launches with the marketing cuecard

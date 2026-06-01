@@ -1,9 +1,9 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, readFile, rm, mkdir, stat } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm, mkdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { runInstall, runUninstall } from "./shell";
+import { runInstall, runUninstall, shimInstalled } from "./shell";
 
 let fakeHome: string;
 beforeEach(async () => {
@@ -51,5 +51,30 @@ describe("shell install", () => {
     const rc = await runUninstall({ homeDir: fakeHome });
     expect(rc).toBe(0);
     await expect(stat(join(fakeHome, ".local", "bin", "claude"))).rejects.toThrow();
+  });
+});
+
+describe("shimInstalled", () => {
+  const shimPath = () => join(fakeHome, ".local", "bin", "claude");
+
+  test("false when no shim exists", () => {
+    expect(shimInstalled(fakeHome)).toBe(false);
+  });
+
+  test("true for the runInstall() bare format (exec cue launch claude)", async () => {
+    await writeFile(shimPath(), '#!/usr/bin/env bash\nexec cue launch claude "$@"\n');
+    expect(shimInstalled(fakeHome)).toBe(true);
+  });
+
+  test("true for the `cue shell install` absolute-path format", async () => {
+    // This is the exact format run(["install"]) writes — the case the original
+    // `cue launch` substring check false-negatived on.
+    await writeFile(shimPath(), '#!/usr/bin/env bash\nexec "/home/u/Documents/cue/bin/cue" launch claude "$@"\n');
+    expect(shimInstalled(fakeHome)).toBe(true);
+  });
+
+  test("false for a non-cue claude on PATH", async () => {
+    await writeFile(shimPath(), '#!/usr/bin/env bash\nexec /opt/anthropic/claude "$@"\n');
+    expect(shimInstalled(fakeHome)).toBe(false);
   });
 });
