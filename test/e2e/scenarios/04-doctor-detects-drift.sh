@@ -6,28 +6,32 @@ ensure_temp_home
 
 repo="$(fresh_repo 04-doctor-detects-drift)"
 install_deps "$repo"
-require_profile "$repo" "medusa-dev"
 
-# Skip if 'use' is not yet implemented
-use_output="$(cue "$repo" use medusa-dev --global 2>&1)" || true
-if echo "$use_output" | grep -q "not yet implemented"; then
-  log "SKIP: 'use' command not yet implemented"
-  exit 0
-fi
+# Drift = a profile that declares a skill which isn't on disk. `cue doctor`
+# flags this as a D1 (error-severity) issue and exits non-zero; `--fix` removes
+# the dangling reference. (The old workspace-symlink model this scenario used
+# predates the current architecture — materialization now lives in the runtime
+# dir built at launch, and `cue use` is only a lightweight per-dir pin.)
+mkdir -p "$repo/profiles/drift-e2e"
+cat > "$repo/profiles/drift-e2e/profile.yaml" <<'YAML'
+name: drift-e2e
+description: E2E-only profile with an intentionally missing skill to prove doctor drift detection.
+inherits: core
+skills:
+  local:
+    - nonexistent/totally-not-a-real-skill
+YAML
 
-skills_dir="$HOME/.claude/skills"
-broken="$(first_symlink_under "$skills_dir")"
-[ -n "$broken" ] || fail "expected a materialized global skill symlink"
-
-rm "$broken"
-ln -s "__missing_cue_e2e_target__" "$broken"
-
+# doctor must detect the drift and exit non-zero (D1 is error-severity).
 if cue "$repo" doctor > "$SOUL_E2E_WORK/04-doctor.out" 2>&1; then
-  fail "cue doctor should exit non-zero for a broken symlink"
+  fail "cue doctor should exit non-zero when a profile declares a missing skill"
 fi
+grep -q "drift-e2e" "$SOUL_E2E_WORK/04-doctor.out" \
+  || fail "doctor output did not name the drifting profile (drift-e2e)"
 
-cue "$repo" doctor --fix
-[ -e "$broken" ] || fail "doctor --fix did not repair $broken"
-assert_symlink_tree_ok "$skills_dir"
+# --fix strips the dangling skill reference from the profile.
+cue "$repo" doctor --fix > "$SOUL_E2E_WORK/04-doctor-fix.out" 2>&1 || true
+grep -q "nonexistent/totally-not-a-real-skill" "$repo/profiles/drift-e2e/profile.yaml" \
+  && fail "doctor --fix did not remove the missing skill reference"
 
-log "doctor detects drift and --fix repairs it"
+log "doctor detects a missing-skill drift and --fix repairs it"
