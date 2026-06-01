@@ -17,10 +17,10 @@ function cue(args: string[]): { status: number; stdout: string; stderr: string }
 }
 
 describe("cue ai", () => {
-  test("matches python-api for python/fastapi description", () => {
+  test("matches python for python/fastapi description", () => {
     const res = cue(["ai", "python fastapi sqlalchemy"]);
     expect(res.status).toBe(0);
-    expect(res.stdout).toContain("python-api");
+    expect(res.stdout).toContain("python");
   });
 
   test("matches rust for rust/cargo description", () => {

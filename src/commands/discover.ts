@@ -521,11 +521,11 @@ export function applyFilters(gems: GemRepo[], f: GemFilter): GemRepo[] {
 // Profile suggestion (keyword matching)
 // ---------------------------------------------------------------------------
 
-const PROFILE_KEYWORDS: Record<string, string[]> = {
+export const PROFILE_KEYWORDS: Record<string, string[]> = {
   backend: ["api", "server", "express", "fastapi", "django", "flask", "webhook", "database", "sql", "graphql", "deploy", "docker", "kubernetes", "microservice", "redis", "postgres", "mongo", "supabase", "prisma"],
   frontend: ["react", "vue", "svelte", "nextjs", "css", "tailwind", "component", "browser", "dom", "ui", "ux", "responsive", "animation", "spa"],
   nextjs: ["nextjs", "next.js", "vercel", "app-router", "server-component", "next-auth"],
-  "python-api": ["python", "fastapi", "django", "flask", "sqlalchemy", "pytest", "pip", "uvicorn", "pydantic", "celery"],
+  "python": ["python", "fastapi", "django", "flask", "sqlalchemy", "pytest", "pip", "uvicorn", "pydantic", "celery"],
   rust: ["rust", "cargo", "tokio", "crate", "wasm", "async-std"],
   "go-api": ["golang", "gin", "echo", "chi", "gorm", "goroutine"],
   cybersecurity: ["security", "pentest", "vulnerability", "exploit", "forensic", "dfir", "red-team", "blue-team", "malware", "audit", "cve", "owasp", "threat", "osint", "recon", "dork", "credential", "phishing"],
@@ -535,7 +535,7 @@ const PROFILE_KEYWORDS: Record<string, string[]> = {
   threejs: ["three.js", "threejs", "webgl", "shader", "3d", "scene", "geometry"],
   video: ["video", "ffmpeg", "transcription", "frame", "subtitle", "stream", "recording", "youtube"],
   marketing: ["seo", "marketing", "copywriting", "growth", "conversion", "analytics", "campaign", "funnel", "landing-page"],
-  medusa: ["medusa", "ecommerce", "storefront", "shop", "cart", "checkout", "product-catalog", "amazon", "seller"],
+  "medusa-dev": ["medusa", "ecommerce", "storefront", "shop", "cart", "checkout", "product-catalog", "amazon", "seller"],
   "fleet-control": ["multi-agent", "orchestrat", "coordinator", "dispatch", "parallel", "swarm", "colony"],
 };
 
@@ -554,8 +554,8 @@ const NICHE_SUBJECT_HINTS: RegExp[] = [
   /\b(bilibili|spotify|reddit|bbc|wechat|notion|jira|servicenow|obsidian|home\s?assistant|farming\s?simulator|gospel|grant)\b/i,
 ];
 
-const STACK_PROFILES: ReadonlySet<string> = new Set([
-  "frontend", "backend", "nextjs", "python-api", "rust", "go-api", "threejs",
+export const STACK_PROFILES: ReadonlySet<string> = new Set([
+  "frontend", "backend", "nextjs", "python", "rust", "go-api", "threejs",
 ]);
 
 export function suggestProfiles(repo: GemRepo): string[] {
@@ -588,7 +588,7 @@ export function suggestProfiles(repo: GemRepo): string[] {
     }
 
     // Language-based boost
-    if (profile === "python-api" && lang === "python") hits += 2;
+    if (profile === "python" && lang === "python") hits += 2;
     if (profile === "rust" && lang === "rust") hits += 2;
     if (profile === "go-api" && lang === "go") hits += 2;
     if (profile === "frontend" && (lang === "typescript" || lang === "javascript")) hits += 1;
@@ -656,7 +656,7 @@ export function buildProfileQueries(profile: string): { q: string; label: string
     backend: ["api server deploy", "webhook microservice", "database migration", "docker kubernetes skill", "ci cd pipeline"],
     frontend: ["react component skill", "ui design system", "tailwind css", "browser testing", "responsive web"],
     nextjs: ["nextjs skill", "next.js vercel", "app router server component", "next-auth"],
-    "python-api": ["python fastapi skill", "django api", "flask sqlalchemy", "pytest automation"],
+    "python": ["python fastapi skill", "django api", "flask sqlalchemy", "pytest automation"],
     rust: ["rust cargo skill", "rust cli tool", "tokio async", "rust wasm"],
     "go-api": ["golang api skill", "go gin echo", "golang microservice"],
     cybersecurity: ["security audit skill", "pentest tool", "vulnerability scanner", "red team blue team", "threat detection"],
@@ -666,7 +666,7 @@ export function buildProfileQueries(profile: string): { q: string; label: string
     threejs: ["three.js skill", "webgl shader", "3d scene interactive"],
     video: ["video processing skill", "ffmpeg automation", "transcription subtitle", "youtube tool"],
     marketing: ["seo optimization skill", "marketing automation", "copywriting ai", "conversion funnel", "growth hacking"],
-    medusa: ["medusa ecommerce", "storefront skill", "shopping cart", "product catalog", "amazon seller"],
+    "medusa-dev": ["medusa ecommerce", "storefront skill", "shopping cart", "product catalog", "amazon seller"],
     "fleet-control": ["multi-agent orchestration", "agent coordinator", "parallel agent", "task dispatch"],
     coolify: ["coolify deploy", "self-hosted paas", "server management"],
     hostinger: ["hosting dns", "vps management", "domain config"],
