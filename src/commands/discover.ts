@@ -1973,7 +1973,19 @@ async function cmdNotify(repo: string | undefined, opts: { profile?: string; dry
 // Auto-install CLI dependencies from skill's SKILL.md
 // ---------------------------------------------------------------------------
 
-export function autoInstallClis(skillName: string): void {
+/**
+ * Surface (and optionally install) the CLI prerequisites a skill declares in
+ * its `## Prerequisites` block.
+ *
+ * SECURITY: the prerequisite lines come from a SKILL.md that was just fetched
+ * from an arbitrary GitHub repo, so the commands are untrusted input. We never
+ * run a package installer parsed out of them unless the caller explicitly opts
+ * in with `{ yes: true }` (wired to the `--yes` flag). Without it we only print
+ * the prerequisites as warnings and let the user install them deliberately —
+ * otherwise a typosquatted skill repo with one crafted `## Prerequisites` line
+ * could trigger arbitrary global package installs (npm/brew/cargo/pipx).
+ */
+export function autoInstallClis(skillName: string, opts: { yes?: boolean } = {}): void {
   const skillsDir = join(homedir(), ".claude", "skills");
   const skillMdPath = join(skillsDir, skillName, "SKILL.md");
   if (!existsSync(skillMdPath)) return;
@@ -2017,6 +2029,19 @@ export function autoInstallClis(skillName: string): void {
 
   if (installCmds.length === 0) return;
 
+  // Consent gate: never auto-run installers parsed from an untrusted SKILL.md.
+  // Default is warn-only; the caller must pass `{ yes: true }` (via `--yes`) to
+  // actually install. Keeps `cue discover install` and the interactive wizard
+  // from silently mutating the global toolchain.
+  if (!opts.yes) {
+    process.stdout.write(`     ⚠️  ${skillName} declares CLI prerequisites (not auto-installed):\n`);
+    for (const { label } of installCmds) {
+      process.stdout.write(`          ${label}\n`);
+    }
+    process.stdout.write(`     Review them, then install manually or re-run with --yes to auto-install.\n`);
+    return;
+  }
+
   for (const { cmd, args, label } of installCmds) {
     // Check if the package manager exists
     if (spawnSync("which", [cmd], { encoding: "utf8" }).status !== 0) {
@@ -2037,7 +2062,7 @@ export function autoInstallClis(skillName: string): void {
 // Install gems into profiles
 // ---------------------------------------------------------------------------
 
-async function cmdInstall(opts: { profile?: string; minScore: number; minQuality: number; dryRun: boolean; all: boolean; notify: boolean; digest: boolean }): Promise<number> {
+async function cmdInstall(opts: { profile?: string; minScore: number; minQuality: number; dryRun: boolean; all: boolean; notify: boolean; digest: boolean; yes: boolean }): Promise<number> {
   if (!existsSync(cacheFile())) {
     process.stderr.write("No cached gems. Run `cue discover search` first.\n");
     return 1;
@@ -2117,8 +2142,9 @@ async function cmdInstall(opts: { profile?: string; minScore: number; minQuality
       }
     }
 
-    // Auto-install CLI dependencies from the skill's SKILL.md Prerequisites
-    autoInstallClis(gem.name);
+    // Surface CLI dependencies from the skill's SKILL.md Prerequisites.
+    // Only auto-installs when the user passed --yes (see autoInstallClis).
+    autoInstallClis(gem.name, { yes: opts.yes });
 
     // Add to profile.yaml
     const profileYaml = join(REPO_ROOT, "profiles", targetProfile, "profile.yaml");
@@ -2776,8 +2802,9 @@ Examples:
     const all = args.includes("--all");
     const notify = args.includes("--notify");
     const digest = args.includes("--digest");
+    const yes = args.includes("--yes") || args.includes("-y");
     const minQuality = intFlag(args, "--min-quality", 7)!;
-    return cmdInstall({ profile, minScore, minQuality, dryRun, all, notify, digest });
+    return cmdInstall({ profile, minScore, minQuality, dryRun, all, notify, digest, yes });
   }
 
   if (rest[0] === "notify") {
