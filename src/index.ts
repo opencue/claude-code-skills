@@ -217,10 +217,12 @@ async function main(argv: string[]): Promise<number> {
   // Update check — never during a live agent launch. The `claude`/`codex`
   // shim is `exec cue launch ...`, so running it here would open a readline
   // on the agent's stdin (stealing keystrokes) and could fire a blocking
-  // `npm install -g` mid-session. Skip for `launch`, when launching
-  // (CUE_LAUNCHING), in CI, or when stdin isn't an interactive TTY.
+  // `npm install -g` mid-session. Skip for any command that spawns an agent
+  // (`launch`, plus `quick`/`playground` which spawn claude directly), when
+  // launching (CUE_LAUNCHING), in CI, or when stdin isn't an interactive TTY.
+  const AGENT_LAUNCH_COMMANDS = new Set(["launch", "quick", "playground"]);
   const skipUpdateCheck =
-    args[0] === "launch" ||
+    AGENT_LAUNCH_COMMANDS.has(args[0] ?? "") ||
     process.env.CUE_LAUNCHING === "1" ||
     !!process.env.CI ||
     !process.stdin.isTTY;
