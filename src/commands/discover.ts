@@ -2157,6 +2157,9 @@ async function cmdInstall(opts: { profile?: string; minScore: number; minQuality
       skipped++;
       continue;
     }
+    if (!gate.scanned) {
+      process.stdout.write(`     ⚠️  ${gem.full_name}: no SKILL.md found at ~/.claude/skills/${gem.name} to scan — review manually.\n`);
+    }
 
     // Surface CLI dependencies from the skill's SKILL.md Prerequisites.
     // Only auto-installs when the user passed --yes (see autoInstallClis).

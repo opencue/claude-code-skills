@@ -23,6 +23,7 @@ import { listProfiles, loadProfile } from "../lib/profile-loader";
 import { resolveActiveProfile } from "../lib/cwd-resolver";
 import { listAllSkillIds } from "../lib/resolver-local";
 import { fetchCompanionFiles, readSourceFile, findIncompleteSkills } from "../lib/companion-fetch";
+import { gateFreshSkill } from "./security";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const PROFILES_DIR = process.env.CUE_PROFILES_DIR ?? join(REPO_ROOT, "profiles");
@@ -442,7 +443,9 @@ async function cmdNpxAdd(args: string[]): Promise<number> {
   const repo = addArgs.find((a) => !a.startsWith("-") && !["claude-code", "codex", "*"].includes(a));
 
   // #6: If -y/--yes without --skill, inject --skill "*" to skip npx's interactive picker
-  const passedArgs = [...args];
+  // (strip our own --allow-unsafe so it isn't forwarded to `npx skills add`).
+  const allowUnsafe = args.includes("--allow-unsafe");
+  const passedArgs = args.filter((a) => a !== "--allow-unsafe");
   const hasYes = passedArgs.includes("-y") || passedArgs.includes("--yes");
   const hasSkill = passedArgs.includes("-s") || passedArgs.includes("--skill");
   if (hasYes && !hasSkill) {
@@ -490,6 +493,30 @@ async function cmdNpxAdd(args: string[]): Promise<number> {
 
   // If still nothing, the install was likely cancelled — don't trigger hook
   if (newSkills.length === 0) return 0;
+
+  // Security gate: scan freshly-fetched skills before the profile hook below
+  // registers any into profile.yaml. Block criticals (SEC1-3) unless
+  // --allow-unsafe; flagged skills stay on disk but are dropped from the set.
+  {
+    const blocked: string[] = [];
+    for (const slug of newSkills) {
+      const gate = gateFreshSkill(slug, { allowUnsafe });
+      if (!gate.ok) {
+        blocked.push(slug);
+        process.stderr.write(`🔴 BLOCKED ${slug}: ${gate.critical.length} critical security finding(s)\n`);
+        for (const c of gate.critical) {
+          process.stderr.write(`   [${c.code}] ${c.message}${c.line ? ` (line ${c.line})` : ""}\n`);
+        }
+      } else if (!gate.scanned) {
+        process.stderr.write(`⚠️  ${slug}: no SKILL.md found to scan — review manually.\n`);
+      }
+    }
+    if (blocked.length > 0) {
+      newSkills = newSkills.filter((s) => !blocked.includes(s));
+      process.stderr.write(`   ${blocked.length} skill(s) left on disk but NOT registered. Re-run with --allow-unsafe to register anyway.\n`);
+      if (newSkills.length === 0) return 1;
+    }
+  }
 
   // #7: Fetch GitHub repo description
   let repoDescription = "";

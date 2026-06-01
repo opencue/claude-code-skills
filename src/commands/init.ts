@@ -157,6 +157,7 @@ async function offerDiscoverGems(profile: string): Promise<void> {
   const install = await p.confirm({ message: "Install these gems?" });
   if (p.isCancel(install) || !install) return;
 
+  let flagged = 0;
   for (const g of gems) {
     p.log.step(`Installing ${g.full_name}...`);
     spawnSync("npx", ["skills", "add", g.full_name, "-a", "claude-code", "-y"], {
@@ -167,13 +168,17 @@ async function offerDiscoverGems(profile: string): Promise<void> {
     // wizard does not auto-register it to a profile).
     const gate = gateFreshSkill(g.name);
     if (!gate.ok) {
+      flagged++;
       p.log.error(`${g.full_name}: ${gate.critical.length} critical security finding(s) — review before use.`);
       for (const c of gate.critical) p.log.message(`  [${c.code}] ${c.message}`);
       continue;
     }
+    if (!gate.scanned) {
+      p.log.warn(`${g.full_name}: no SKILL.md found to scan — review manually.`);
+    }
     autoInstallClis(g.name);
   }
-  p.log.success(`Installed ${gems.length} gem(s).`);
+  p.log.success(`Installed ${gems.length} gem(s) to ~/.claude/skills${flagged > 0 ? ` (${flagged} flagged by the security scan — review before use)` : ""}.`);
 }
 
 /**
