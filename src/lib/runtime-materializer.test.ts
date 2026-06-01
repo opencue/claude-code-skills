@@ -791,6 +791,44 @@ describe("isRuntimeStale", () => {
     await writeFile(join(profilesRoot, "p3", "profile.yaml"), "name: x\n");
     expect(await isRuntimeStale("p3", "claude-code", runtimeRoot)).toBe(false);
   });
+
+  async function writeRuntimeSkill(name: string, runtimeRoot: string, slug: string): Promise<string> {
+    const skillDir = join(runtimeRoot, name, "claude", "skills", slug);
+    await mkdir(skillDir, { recursive: true });
+    const md = join(skillDir, "SKILL.md");
+    await writeFile(md, `# ${slug}\n`);
+    return md;
+  }
+
+  test("returns true when a resolved SKILL.md is newer than .cue-hash (yaml older)", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p4", runtimeRoot);
+    const mdPath = await writeRuntimeSkill("p4", runtimeRoot, "alpha");
+    await utimes(yamlPath, new Date(Date.now() - 120_000), new Date(Date.now() - 120_000));
+    await utimes(hashPath, new Date(Date.now() - 60_000), new Date(Date.now() - 60_000));
+    await utimes(mdPath, new Date(), new Date());
+    expect(await isRuntimeStale("p4", "claude-code", runtimeRoot)).toBe(true);
+  });
+
+  test("returns false when every SKILL.md is older than .cue-hash", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p5", runtimeRoot);
+    const mdPath = await writeRuntimeSkill("p5", runtimeRoot, "alpha");
+    const old = new Date(Date.now() - 60_000);
+    await utimes(yamlPath, old, old);
+    await utimes(mdPath, old, old);
+    await utimes(hashPath, new Date(), new Date());
+    expect(await isRuntimeStale("p5", "claude-code", runtimeRoot)).toBe(false);
+  });
+
+  test("skips a slug dir with no SKILL.md (broken symlink is non-fatal)", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p6", runtimeRoot);
+    await mkdir(join(runtimeRoot, "p6", "claude", "skills", "broken"), { recursive: true });
+    await utimes(yamlPath, new Date(Date.now() - 60_000), new Date(Date.now() - 60_000));
+    await utimes(hashPath, new Date(), new Date());
+    expect(await isRuntimeStale("p6", "claude-code", runtimeRoot)).toBe(false);
+  });
 });
 
 describe("linkPluginCache", () => {
