@@ -96,8 +96,52 @@ describe("materializeRuntime", () => {
       mcpRegistry: {},
       userClaudeMd: "",
     });
-    const link = await readlink(join(out.runtimeDir, "skills", "design", "ui-ux-pro-max"));
+    // Flat layout (skills/<slug>) so Claude Code's one-level discovery finds it.
+    const link = await readlink(join(out.runtimeDir, "skills", "ui-ux-pro-max"));
     expect(link).toBe("/fake/source/design/ui-ux-pro-max");
+  });
+
+  test("writes a .cue-skills manifest of <category>/<slug> ids for smart-loader", async () => {
+    const out = await materializeRuntime({
+      profile: sampleProfile,
+      agent: "claude-code",
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id) => `/fake/source/${id}`,
+      mcpRegistry: {},
+      userClaudeMd: "",
+    });
+    const manifest = await readFile(join(out.runtimeDir, ".cue-skills"), "utf8");
+    expect(manifest.split("\n").filter(Boolean)).toContain("design/ui-ux-pro-max");
+  });
+
+  test("slug collisions resolve last-wins; both ids stay in the manifest", async () => {
+    const collide: ResolvedProfile = {
+      ...sampleProfile,
+      skills: {
+        ...sampleProfile.skills,
+        local: [
+          { id: "plan/investigate" },
+          { id: "gstack/investigate" },
+        ],
+      },
+    };
+    const out = await materializeRuntime({
+      profile: collide,
+      agent: "claude-code",
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id) => `/fake/source/${id}`,
+      mcpRegistry: {},
+      userClaudeMd: "",
+    });
+    // The later entry (gstack/investigate) wins the flat /investigate link.
+    const link = await readlink(join(out.runtimeDir, "skills", "investigate"));
+    expect(link).toBe("/fake/source/gstack/investigate");
+    // Both remain in the manifest so smart-loader knows the lean one is loaded too.
+    const manifest = (await readFile(join(out.runtimeDir, ".cue-skills"), "utf8"))
+      .split("\n")
+      .filter(Boolean);
+    expect(manifest).toContain("plan/investigate");
+    expect(manifest).toContain("gstack/investigate");
   });
 
   test("excludes resources whose agents list does not include current agent", async () => {

@@ -108,8 +108,15 @@ function sortedJson(value: unknown): string {
   return "{" + keys.map((k) => JSON.stringify(k) + ":" + sortedJson(obj[k])).join(",") + "}";
 }
 
+// Bump when the on-disk runtime layout changes in a way the profile content
+// doesn't capture (e.g. flat vs nested skills, new manifest files). Folding it
+// into the hash forces every profile to rebuild once on its next launch, so
+// layout fixes roll out without a manual `--rematerialize` per profile.
+//   v2: flat skill layout + .cue-skills manifest (was nested <category>/<slug>)
+const MATERIALIZER_VERSION = 2;
+
 function computeHash(profile: ResolvedProfile, agent: AgentKind): string {
-  const canonical = sortedJson({ agent, profile });
+  const canonical = sortedJson({ v: MATERIALIZER_VERSION, agent, profile });
   return createHash("sha256").update(canonical).digest("hex");
 }
 
@@ -175,19 +182,58 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
   await mkdir(skillsDir, { recursive: true });
   const skippedSkills: string[] = [];
   let attemptedSkills = 0;
+  // Skills are linked FLAT — skills/<slug>, not skills/<category>/<slug>.
+  // Claude Code (and Codex) only register a personal skill one level deep, by
+  // its directory name (skills/<name>/SKILL.md → /<name>); a nested category
+  // dir is invisible to that scan. Flattening matches `activate-profile.sh`'s
+  // manual installer and lets every profile skill be invoked via the Skill
+  // tool — including the slug==category cases (caveman/caveman, github/github,
+  // colony/colony) that a nested layout can't expose. smart-loader's dedup no
+  // longer reads the dir tree; it reads the `.cue-skills` manifest written
+  // below, which preserves the <category>/<slug> identity.
+  const loadedSkillIds: string[] = [];
+  // Resolve first, link second, so slug collisions resolve by LAST-WINS: when
+  // two skills share a slug (e.g. plan/investigate lean vs gstack/investigate
+  // full), the later entry wins the flat /<slug> name. Skill lists merge
+  // parent→child (core first, profile last), so last-wins = the more-specific
+  // profile's choice overrides the inherited one — the standard override rule.
+  // The loser is still in the manifest, so smart-loader can surface it.
+  const slugToSrc = new Map<string, string>();
+  const slugToId = new Map<string, string>();
+  const overridden: string[] = [];
   for (const skill of profile.skills.local) {
     if (!appliesToAgent(skill, agent)) continue;
     if (skill.when && !evaluateCondition(skill.when, process.cwd())) continue;
     attemptedSkills++;
     try {
       const src = await input.skillSourceLookup(skill.id);
-      const target = join(skillsDir, skill.id);
-      await mkdir(dirname(target), { recursive: true });
-      await symlink(src, target);
+      loadedSkillIds.push(skill.id);
+      const slug = basename(skill.id);
+      const prevId = slugToId.get(slug);
+      if (prevId !== undefined && prevId !== skill.id) {
+        overridden.push(`${slug}: ${prevId} → ${skill.id}`);
+      }
+      slugToSrc.set(slug, src);
+      slugToId.set(slug, skill.id);
     } catch (err) {
       skippedSkills.push(skill.id);
     }
   }
+  for (const [slug, src] of slugToSrc) {
+    await symlink(src, join(skillsDir, slug));
+  }
+  if (overridden.length > 0) {
+    process.stderr.write(
+      `[cue] ${overridden.length} skill slug collision(s) resolved last-wins ` +
+      `(loser still smart-loadable): ${overridden.join("; ")}\n`,
+    );
+  }
+  // Manifest for smart-loader's --exclude-loaded: the resolved <category>/<slug>
+  // ids, decoupled from the (now flat) on-disk layout.
+  await writeFile(
+    join(tmpDir, ".cue-skills"),
+    loadedSkillIds.length > 0 ? `${loadedSkillIds.join("\n")}\n` : "",
+  );
   if (skippedSkills.length > 0) {
     process.stderr.write(
       `[cue] skipped ${skippedSkills.length} missing skill(s): ${skippedSkills.slice(0, 5).join(", ")}` +
