@@ -10,7 +10,7 @@
  */
 
 import * as p from "@clack/prompts";
-import { MultiSelectPrompt } from "@clack/core";
+import { MultiSelectPrompt, Prompt, type PromptOptions } from "@clack/core";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { styleText } from "node:util";
@@ -245,22 +245,208 @@ async function asciiMultiselect(opts: {
   return resolveConflicts(result as string[], conflictMap);
 }
 
+/**
+ * Filter the option list by a typed query.
+ *
+ *   - empty query → every option, dividers kept as section headers, all
+ *     non-divider rows are selectable.
+ *   - non-empty query → dividers dropped (section headers are noise once the
+ *     list is filtered) and only matching rows survive. A row matches if its
+ *     `value` *starts with* the query (the requested behavior: press "s" →
+ *     slack, studio, secops, stripe…). If nothing starts with the query we
+ *     fall back to a substring match on value or label, so a mid-word search
+ *     still finds something instead of a dead end.
+ *
+ * Pure + exported so the matching rules can be unit-tested without a TTY.
+ */
+export function filterOptions(
+  options: PickerOption[],
+  query: string,
+): { display: PickerOption[]; selectable: PickerOption[] } {
+  const q = query.trim().toLowerCase();
+  if (q.length === 0) {
+    return { display: options, selectable: options.filter((o) => o.divider !== true) };
+  }
+  const rows = options.filter((o) => o.divider !== true);
+  const startsWith = rows.filter((o) => o.value.toLowerCase().startsWith(q));
+  const pool =
+    startsWith.length > 0
+      ? startsWith
+      : rows.filter(
+          (o) => o.value.toLowerCase().includes(q) || o.label.toLowerCase().includes(q),
+        );
+  return { display: pool, selectable: pool };
+}
+
+/**
+ * Slice a list down to a scrolling window of at most `max` rows, centered on
+ * `activeIndex`. Returns the visible slice plus how many rows are hidden above
+ * and below (for "↑/↓ N more" indicators). When everything fits, the whole
+ * list is returned with zero hidden. The active row stays centered until the
+ * window hits either end, then it pins so the last/first rows stay reachable.
+ *
+ * Pure + exported so the scroll math is unit-testable without a TTY.
+ */
+export function windowOptions<T>(
+  items: T[],
+  activeIndex: number,
+  max: number,
+): { items: T[]; start: number; hiddenAbove: number; hiddenBelow: number } {
+  if (max <= 0 || items.length <= max) {
+    return { items, start: 0, hiddenAbove: 0, hiddenBelow: 0 };
+  }
+  let start = activeIndex - Math.floor(max / 2);
+  start = Math.max(0, Math.min(start, items.length - max));
+  const end = start + max;
+  return {
+    items: items.slice(start, end),
+    start,
+    hiddenAbove: start,
+    hiddenBelow: items.length - end,
+  };
+}
+
+// Interactive single-select with type-to-filter. clack's built-in `p.select`
+// has no live filtering, so we drive @clack/core's base Prompt directly: with
+// key-tracking on, printable keys buffer into `this.userInput` (readline owns
+// backspace) and only the real arrow keys emit `cursor` events — j/k/h/l type
+// into the filter instead of moving the cursor, which is what you want in a
+// search box.
+class FilterSelectPrompt extends Prompt<string> {
+  message: string;
+  allOptions: PickerOption[];
+  display: PickerOption[] = [];
+  selectable: PickerOption[] = [];
+  cursor = 0;
+  query = "";
+
+  constructor(message: string, options: PickerOption[]) {
+    // The render fn's `this` is the FilterSelectPrompt (bound by the base
+    // Prompt), but the constructor types it against Prompt<string>; the cast
+    // bridges that contravariance. Runtime binding is correct.
+    super(
+      {
+        render(this: FilterSelectPrompt) {
+          return this.renderFrame();
+        },
+      } as unknown as PromptOptions<string, Prompt<string>>,
+      true,
+    );
+    this.message = message;
+    this.allOptions = options;
+    this.recompute();
+
+    this.on("cursor", (dir) => {
+      const n = this.selectable.length;
+      if (n === 0) return;
+      if (dir === "up") this.cursor = (this.cursor - 1 + n) % n;
+      else if (dir === "down") this.cursor = (this.cursor + 1) % n;
+      this.syncValue();
+    });
+
+    // `key` fires on every keypress (including arrows). We only re-filter when
+    // the typed buffer actually changed, so arrow navigation doesn't reset it.
+    this.on("key", () => {
+      const next = (this.userInput ?? "").trim().toLowerCase();
+      if (next === this.query) return;
+      this.query = next;
+      this.cursor = 0;
+      this.recompute();
+    });
+  }
+
+  private recompute(): void {
+    const { display, selectable } = filterOptions(this.allOptions, this.query);
+    this.display = display;
+    this.selectable = selectable;
+    if (this.cursor >= this.selectable.length) this.cursor = 0;
+    this.syncValue();
+  }
+
+  private syncValue(): void {
+    this.value = this.selectable[this.cursor]?.value;
+  }
+
+  // Rows available for option rows, derived from terminal height. Reserve space
+  // for the intro line, our 2-line header, the footer, and the pin-confirm +
+  // outro clack draws below — plus the two scroll indicators. Floor at 5 so a
+  // short terminal still shows a usable window.
+  private visibleRows(): number {
+    const rows =
+      (this.output as { rows?: number } | undefined)?.rows ?? process.stdout.rows ?? 24;
+    return Math.max(5, rows - 10);
+  }
+
+  // Block submit on an empty result set so enter can't return undefined.
+  protected override _shouldSubmit(): boolean {
+    return this.selectable.length > 0;
+  }
+
+  // Bound to the instance by the base Prompt (`_render = render.bind(this)`),
+  // so `this` here is the live prompt.
+  renderFrame(this: FilterSelectPrompt): string {
+    const BAR = styleText("gray", "│");
+
+    if (this.state === "submit") {
+      const chosen = this.allOptions.find((o) => o.value === this.value);
+      return `${BAR}  ${styleText("green", "◇")}  ${this.message} ${styleText(
+        "dim",
+        chosen?.label ?? String(this.value ?? ""),
+      )}`;
+    }
+    if (this.state === "cancel") {
+      return `${BAR}  ${styleText("red", "■")}  cancelled`;
+    }
+
+    const filterTag =
+      this.query.length > 0
+        ? styleText("dim", ` · filter: ${this.query}▏`)
+        : styleText("dim", " · type to filter");
+
+    const active = this.selectable[this.cursor];
+    const lines: string[] = [];
+    lines.push(`${BAR}`);
+    lines.push(`${BAR}  ${styleText("cyan", "◆")}  ${this.message}${filterTag}`);
+
+    if (this.display.length === 0) {
+      lines.push(`${BAR}  ${styleText("yellow", `no profiles match "${this.query}"`)}`);
+    }
+    // Scroll the list so the active row stays centered and the top/bottom rows
+    // remain reachable instead of being clipped off-screen on a long list.
+    const activeIdx = active ? this.display.indexOf(active) : 0;
+    const win = windowOptions(this.display, activeIdx, this.visibleRows());
+    if (win.hiddenAbove > 0) {
+      lines.push(`${BAR}  ${styleText("dim", `↑ ${win.hiddenAbove} more`)}`);
+    }
+    for (const o of win.items) {
+      if (o.divider === true) {
+        lines.push(`${BAR}  ${styleText("dim", o.label)}`);
+        continue;
+      }
+      const isCursor = o === active;
+      const bullet = isCursor ? styleText("green", "●") : styleText("dim", "○");
+      const label = isCursor ? o.label : styleText("dim", o.label);
+      const hint = isCursor && o.hint ? styleText("dim", `  ${o.hint}`) : "";
+      lines.push(`${BAR}  ${bullet} ${label}${hint}`);
+    }
+    if (win.hiddenBelow > 0) {
+      lines.push(`${BAR}  ${styleText("dim", `↓ ${win.hiddenBelow} more`)}`);
+    }
+
+    lines.push(
+      `${BAR}  ${styleText("dim", "type to filter · ↑↓ move · enter select · esc cancel")}`,
+    );
+    return lines.join("\n");
+  }
+}
+
 async function selectSkipDividers(
   opts: PickerOption[],
   message: string,
 ): Promise<string> {
-  // `disabled: true` makes clack render the option (gray) but skip it during
-  // arrow/j-k navigation, so the user can't land on a divider.
-  const result = await p.select({
-    message,
-    options: opts.map((o) => ({
-      value: o.value,
-      label: o.label,
-      hint: o.hint,
-      disabled: o.divider === true,
-    })),
-  });
-  if (p.isCancel(result)) {
+  const prompt = new FilterSelectPrompt(message, opts);
+  const result = await prompt.prompt();
+  if (typeof result === "symbol") {
     p.cancel("cancelled");
     process.exit(130);
   }
