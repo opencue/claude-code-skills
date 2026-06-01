@@ -1650,10 +1650,18 @@ export async function run(args: string[]): Promise<number> {
   // W6/W7 description-lint surface — runs on rebuild only, so skill-writer
   // sees weak triggers/capability at the moment the profile materializes,
   // not just on explicit `cue validate`. Capped at 5 lines to avoid spam.
+  //
+  // `npxOffline: true` is critical for launch latency: we only consume W6/W7
+  // (local-skill description) issues below, but the linter's npx-fetchability
+  // check otherwise shells `npx skills add` into a throwaway temp dir on every
+  // cache miss — ~8s per npx repo, discarded immediately (it produces E3/W5,
+  // never W6/W7). Offline mode turns that into a cheap cache lookup, cutting
+  // npx-heavy profile launches from ~30s to sub-second. `cue validate` still
+  // does the full online fetchability check.
   if (runtime.rebuilt) {
     try {
       const { lintProfile } = await import("../lib/profile-linter");
-      const lint = await lintProfile(profileName);
+      const lint = await lintProfile(profileName, { npxOffline: true });
       const descIssues = lint.issues.filter(
         (i) => i.rule === "W6" || i.rule === "W7",
       );
