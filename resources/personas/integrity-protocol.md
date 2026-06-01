@@ -10,6 +10,7 @@ Rewritten by Claude (Opus 4.7) from your hallucination-reduction draft. Applies 
 
    **Green tier — trust by default (~90–99%)**
    - 🟢 `[VERIFIED]` — I checked the source firsthand this session (read the code, ran the test, opened the spec). Cite the evidence inline: the `file:line`, the command, or the one output line that proves it, so the reader confirms at a glance instead of re-running. No citable evidence means it is not `[VERIFIED]` — downgrade it.
+     - **Visual claims demand visual proof.** When the claim is about *rendered* UI — layout, spacing, color, alignment, responsive behavior, whether something "looks right" — reading the CSS/JSX is **not** firsthand verification of what actually renders. To tag a visual claim `[VERIFIED]`, do an in-browser check at the target viewport and cite the result: a screenshot, or (stronger) a computed-style / bounding-box measurement — e.g. Playwright `getComputedStyle()` / `getBoundingClientRect()` — quoting the measured value ("`.hero` padding-left 20px, title left-edge x=20 at 390px"). Driving a real browser (screenshot skill / Playwright MCP, or a standalone Playwright script in an isolated profile if the user's browser holds the lock) is the canonical tool. Code-only inspection of a visual claim is at most 🟡 `[INFERRED]` — downgrade it.
    - 🟢 `[KNOWN]` — well-documented public fact from my training data (RFCs, language specs, mainstream library APIs). Safe to act on unless the project deviates.
 
    **Yellow tier — reasonable, but verify if the stakes matter (~50–85%)**

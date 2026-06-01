@@ -6,6 +6,7 @@ inherits: core
 skills:
   local:
     - browser/lightpanda
+    - browser/agent-browser   # vercel-labs/agent-browser — Rust browser CLI, ref-based automation, daemon-backed
 
 mcps:
   # Lightpanda — fast, low-memory headless browser exposed over MCP (`lightpanda mcp`).
