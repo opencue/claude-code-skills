@@ -68,11 +68,6 @@ export async function runGlobalOnboarding(): Promise<boolean> {
         hint: "recommended — minimal base plus skill management",
       },
       { value: "core", label: "core only", hint: "smallest — just the base" },
-      {
-        value: "core+skill-writer+ecc",
-        label: "core + skill-writer + ecc",
-        hint: "+ workspace conventions (CLAUDE.md / AGENTS.md)",
-      },
       { value: "__custom", label: "Custom…", hint: "type a +-separated composite" },
       { value: "__skip", label: "Skip for now", hint: "falls back to plain `core`" },
     ],
@@ -83,7 +78,7 @@ export async function runGlobalOnboarding(): Promise<boolean> {
   let defaultComposite: string | null = null;
   if (defaultPick === "__custom") {
     const custom = await p.text({
-      message: "Composite (e.g., core+skill-writer+ecc):",
+      message: "Composite (e.g., core+skill-writer+backend):",
       placeholder: "core+skill-writer",
       validate: (v) => {
         const parts = (v ?? "").split("+").map((s) => s.trim()).filter((s) => s.length > 0);

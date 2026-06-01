@@ -21,6 +21,8 @@ describe("cue ai", () => {
     const res = cue(["ai", "python fastapi sqlalchemy"]);
     expect(res.status).toBe(0);
     expect(res.stdout).toContain("python");
+    // Guard against the phantom name returning (it's a substring of "python")
+    expect(res.stdout).not.toContain("python-api");
   });
 
   test("matches rust for rust/cargo description", () => {
