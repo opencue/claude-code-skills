@@ -13,7 +13,7 @@
   "alternateName": ["cue", "cue-ai"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL2)",
-  "description": "cuecards is an open-source agent profile manager for Claude Code, OpenAI Codex, Cursor, Cline, Gemini CLI, GitHub Copilot, Windsurf, Roo Code, Sourcegraph Amp, and Aider. One cuecard per directory — skills, MCPs, plugins, persona, playbooks, gates. Cut per-message token cost 10–25×.",
+  "description": "cuecards is an open-source agent profile manager for Claude Code, OpenAI Codex, Cursor, Cline, Gemini CLI, GitHub Copilot, Windsurf, Roo Code, Sourcegraph Amp, and Aider. One cuecard per directory — skills, MCPs, plugins, persona, playbooks, gates. Cut always-on context up to ~16×.",
   "url": "https://github.com/opencue/claude-code-skills",
   "downloadUrl": "https://www.npmjs.com/package/cue-ai",
   "codeRepository": "https://github.com/opencue/claude-code-skills",
@@ -136,7 +136,7 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
 ## by the numbers.
 
 <p align="center">
-  <strong>10–25×</strong>&nbsp;&nbsp;token cost reduction
+  <strong>up to ~16×</strong>&nbsp;&nbsp;leaner always-on context
   <br><br>
   <strong>&lt; 5 ms</strong>&nbsp;&nbsp;warm launch overhead
   <br><br>
@@ -153,19 +153,19 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
 
 ## the money shot.
 
-> Loading everything costs you tokens on every single message. cuecards cut context size by 10–25×.
+> Loading everything costs you tokens on every single message. cuecards cut your always-on context ~9–16× — and you can reproduce every number below with `cue cost --compare`.
 
-| Scenario | Context loaded | Cost per session (Sonnet) |
+| Loadout | Always-on context | Cost / 100 msgs (Sonnet input) |
 |---|---|---|
-| **Without cuecards** — all skills + every MCP | ~180k tokens | ~$2.70 😱 |
-| **With cuecards** — `backend` profile | ~8k tokens | ~$0.12 ✅ |
-| **With cuecards** — `caveman-quick` | ~2k tokens | ~$0.03 🚀 |
+| **Without cuecards** — `full` (every skill + MCP) | ~81k tokens | ~$24 😱 |
+| **With cuecards** — `backend` profile | ~9k tokens | ~$2.70 ✅ |
+| **With cuecards** — `caveman-quick` | ~6.8k tokens | ~$2.00 🚀 |
 
-That's **22× fewer tokens** on a real backend loadout vs the unmanaged baseline. Your model picks the right tool faster because it's not scanning irrelevant descriptions on every message.
+That's **~9× fewer always-on tokens** on a backend loadout (≈12× on `caveman-quick`, up to ≈16× on the leanest profiles) versus loading everything. Your model also picks the right tool faster because it's not scanning irrelevant descriptions on every message.
 
 ```bash
 cue cost                      # token budget for your active profile
-cue cost --profile full       # compare against the "everything" baseline
+cue cost --compare            # full table: every profile ranked vs the `full` baseline
 ```
 
 <br>
@@ -174,7 +174,7 @@ cue cost --profile full       # compare against the "everything" baseline
 
 ## why cuecards.
 
-- **Cut per-message token cost 10–25×.** Skills, MCPs, and plugins scoped per directory, not globally loaded into every session.
+- **Cut always-on context up to ~16×.** Skills, MCPs, and plugins scoped per directory, not globally loaded into every session — reproduce it with `cue cost --compare`.
 - **Five-dimensional agents.** Persona + playbooks + quality gates + evals + failure loop. Not just "more tools loaded" — composable expertise.
 - **One cuecard, ten agents.** The same `profile.yaml` materializes into Claude Code, Codex, Cursor, Cline, Gemini, Copilot, Windsurf, Roo, Amp, and Aider native formats.
 

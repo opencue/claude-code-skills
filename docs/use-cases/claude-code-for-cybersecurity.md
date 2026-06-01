@@ -49,11 +49,11 @@ Inside the session, ask things like:
 
 ## Why cue (vs running Claude Code globally)
 
-**Without cue:** Every Claude Code session loads all 1,900+ skills you've ever installed. The cybersecurity skills get drowned in marketing skills, frontend skills, docs skills — and the model picks the wrong tool. Per-message cost: **~$2.70**.
+**Without cue:** Every Claude Code session loads every skill you've ever installed. The cybersecurity skills get drowned in marketing skills, frontend skills, docs skills — and the model picks the wrong tool. The everything-loadout (`full`) is ~81k always-on tokens — **~$24 / 100 msgs**.
 
-**With cue and the cybersecurity profile:** Only the 754 security skills + 2 security MCPs load. Model picks the right tool first try. Per-message cost: **~$0.12**.
+**With cue and the cybersecurity profile:** Only the security skills + security MCPs load. Model picks the right tool first try. ~7k always-on tokens — **~$2.20 / 100 msgs** (`cue cost cybersecurity`).
 
-That's a **22× reduction** in token cost on top of better tool selection.
+That's a **~11× reduction** in always-on token cost on top of better tool selection.
 
 ---
 

@@ -28,7 +28,7 @@ Pick **skillport** if you want a Homebrew-for-Claude-Code skill index. Pick **cu
 | **GitHub Code Search–powered discovery** | ✅ | ❓ |
 | **Outbound PR flow** (with throttle + opt-out) | ✅ | — |
 | **Multi-agent** (Cursor, Cline, Copilot, Gemini, etc.) | ✅ (10 agents) | Claude Code only |
-| **Token cost reduction** | 10–25× via isolation | None (skills loaded globally) |
+| **Token cost reduction** | up to ~16× via isolation (`cue cost --compare`) | None (skills loaded globally) |
 
 ---
 

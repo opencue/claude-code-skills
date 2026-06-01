@@ -53,9 +53,9 @@ Inside the session:
 
 ## Why cue (vs global Claude Code)
 
-**Without cue:** Your marketing session also loads cybersecurity skills, frontend skills, Rust skills — Claude picks `nmap` when you ask for a "scan" of your funnel. Per-message cost: **~$2.70**.
+**Without cue:** Your marketing session also loads cybersecurity skills, frontend skills, Rust skills — Claude picks `nmap` when you ask for a "scan" of your funnel. The everything-loadout (`full`) is ~81k always-on tokens — **~$24 / 100 msgs**.
 
-**With cue and the marketing profile:** Only marketing skills load. The model never confuses "scan the funnel" with "scan with nmap". Per-message cost: **~$0.10**.
+**With cue and the marketing profile:** Only marketing skills load. The model never confuses "scan the funnel" with "scan with nmap". ~13k always-on tokens — **~$3.96 / 100 msgs** (`cue cost marketing`).
 
 Plus: profile-scoped MCPs mean your marketing analytics tools don't pollute non-marketing sessions.
 
@@ -111,5 +111,5 @@ The discovery flow uses GitHub Code Search + path/keyword matching to find marke
 
 - [Glossary](../glossary.md) — Skill, MCP, Profile defined
 - [Claude Code for cybersecurity](./claude-code-for-cybersecurity.md) — companion use-case page
-- [Reduce Claude Code token cost](./reduce-claude-code-token-cost.md) — the numbers behind 22× savings
+- [Reduce Claude Code token cost](./reduce-claude-code-token-cost.md) — the numbers behind the savings
 - [marketing-skills upstream](https://github.com/JonasGroenbek/marketing-skills) — the 42-skill collection cue loads
