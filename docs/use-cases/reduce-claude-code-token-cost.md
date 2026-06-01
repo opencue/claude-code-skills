@@ -94,7 +94,7 @@ cue failures backend --days 7           # see where the profile is failing (= wh
 
 ## What NOT to do
 
-- **Don't over-prune profiles.** Cutting skills makes the model worse at the things you actually do. The 25× savings comes from removing *irrelevant* skills, not from minimalism for its own sake.
+- **Don't over-prune profiles.** Cutting skills makes the model worse at the things you actually do. The savings come from removing *irrelevant* skills, not from minimalism for its own sake.
 - **Don't disable hooks to save tokens.** The safety hooks (bash-preflight, secrets-guard, commit-message-guard) cost ~120 tokens/message total. They prevent real failures that cost orders of magnitude more.
 - **Don't stack token-saving prompts.** `caveman` mode is enough; adding "be terse" + "no filler" + "short answer" in custom prompts is double-counting and confuses the model.
 
