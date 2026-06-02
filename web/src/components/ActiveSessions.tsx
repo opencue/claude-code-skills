@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetcher } from "../lib/fetcher";
+import { fetcher, postJson } from "../lib/fetcher";
 import { fmtRelative } from "../lib/format";
 
 interface SessionRow {
@@ -94,13 +94,10 @@ export function ActiveSessions() {
     setStopping(pid);
     setError(null);
     try {
-      const res = await fetch("/api/v1/sessions/kill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pid, signal: "SIGTERM" }),
-      });
-      const env = await res.json();
-      if (!env.ok) throw new Error(env.error);
+      // Route through postJson so the base URL (/api/v1) and demo-mode guard
+      // are handled the same way as every other call — a raw fetch here was
+      // the bug: in demo mode it hit a backend-less static host and 404'd.
+      await postJson("/sessions/kill", { pid, signal: "SIGTERM" });
       // Optimistic refresh — the /proc scan needs a moment to notice.
       setTimeout(() => queryClient.invalidateQueries({ queryKey: ["active-sessions"] }), 600);
     } catch (err) {
@@ -132,41 +129,32 @@ export function ActiveSessions() {
       ) : (
         <div>
           {/* Per-profile chips + token-in-flight rollup */}
-          <div className="row" style={{ flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+          <div className="session-chips">
             {groups.map(([profile, rows]) => {
               const bytes = sizeFor(profile);
               const inFlight = bytes != null ? Math.round((bytes * rows.length) / 4) : null;
               return (
                 <span
                   key={profile}
-                  title={inFlight != null ? `~${inFlight.toLocaleString()} tokens in flight` : ""}
-                  style={{
-                    fontFamily: "var(--mono)",
-                    fontSize: 12,
-                    padding: "4px 10px",
-                    borderRadius: 999,
-                    background: "var(--accent-soft)",
-                    color: "var(--accent)",
-                    border: "1px solid var(--accent)",
-                  }}
+                  className="session-chip"
+                  title={`${profile}${inFlight != null ? ` · ~${inFlight.toLocaleString()} tokens in flight` : ""}`}
                 >
-                  {profile} <span style={{ opacity: 0.7 }}>×{rows.length}</span>
+                  <span className="chip-name">{profile}</span>
+                  <span className="chip-count">×{rows.length}</span>
                   {inFlight != null && (
-                    <span style={{ opacity: 0.7, marginLeft: 6 }}>
-                      ~{inFlight >= 1000 ? `${(inFlight / 1000).toFixed(1)}k` : inFlight} tok
+                    <span className="chip-tok">
+                      ~{inFlight >= 1000 ? `${(inFlight / 1000).toFixed(1)}k` : inFlight}
                     </span>
                   )}
                 </span>
               );
             })}
             {totalInFlight != null && (
-              <span style={{ fontSize: 12, color: "var(--text-secondary)", alignSelf: "center" }}>
-                = ~{totalInFlight.toLocaleString()} tokens in flight
-              </span>
+              <span className="session-total">= ~{totalInFlight.toLocaleString()} tokens in flight</span>
             )}
           </div>
 
-          <table className="table">
+          <table className="table session-table">
             <thead>
               <tr>
                 <th></th>
@@ -196,16 +184,15 @@ export function ActiveSessions() {
                   </td>
                   <td className="dim">{s.agent ?? "—"}</td>
                   <td
-                    className="mono dim"
-                    style={{ maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
+                    className="mono dim copyable"
+                    style={{ maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                     title={`${s.cwd ?? ""}\n(click to copy)`}
                     onClick={() => s.cwd && copyToClipboard(s.cwd)}
                   >
                     {shortCwd(s.cwd)}
                   </td>
                   <td
-                    className="num mono"
-                    style={{ cursor: "pointer" }}
+                    className="num mono copyable"
                     title="click to copy PID"
                     onClick={() => copyToClipboard(String(s.pid))}
                   >
@@ -214,21 +201,10 @@ export function ActiveSessions() {
                   <td className="num dim">{fmtRelative(s.startedAt) || "—"}</td>
                   <td className="num">
                     <button
+                      className="session-stop"
                       onClick={() => killSession(s.pid, s.profile)}
                       disabled={stopping === s.pid}
                       title="Send SIGTERM to this session"
-                      style={{
-                        background: "transparent",
-                        border: "1px solid var(--border)",
-                        borderRadius: 4,
-                        color: "var(--text-secondary)",
-                        fontFamily: "var(--mono)",
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        cursor: stopping === s.pid ? "wait" : "pointer",
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "var(--red)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
                     >
                       {stopping === s.pid ? "…" : "stop"}
                     </button>
