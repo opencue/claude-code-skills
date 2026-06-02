@@ -406,3 +406,53 @@ code { font-family: var(--mono); font-size: 0.9em; }
 .save-ok code { color: var(--text-secondary); }
 .diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 @media (max-width: 700px) { .diff-grid { grid-template-columns: 1fr; } }
+
+/* ---------- active sessions ---------- */
+.session-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.session-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 300px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: border-color 0.15s ease;
+}
+.session-chip:hover { border-color: var(--border-hover); }
+.session-chip .chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.session-chip .chip-count {
+  flex: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.session-chip .chip-tok { flex: none; color: var(--text-dim); font-size: 11px; }
+.session-total { font-size: 12px; color: var(--text-dim); align-self: center; }
+
+.session-stop {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+.session-stop:hover:not(:disabled) { color: var(--red); border-color: var(--red); }
+.session-stop:disabled { opacity: 0.5; cursor: wait; }
+
+.session-table tbody tr { transition: background 0.12s ease; }
+.session-table tbody tr:hover { background: var(--bg-elev); }
+.session-table td { vertical-align: middle; }
+.session-table .copyable { cursor: pointer; }
+.session-table .copyable:hover { color: var(--accent); }
