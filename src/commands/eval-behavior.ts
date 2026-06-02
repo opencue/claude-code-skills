@@ -13,7 +13,7 @@
  * Output: per-scenario pass/fail + a single summary score per profile.
  */
 
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, } from "node:fs";
 import { join, resolve, dirname, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";

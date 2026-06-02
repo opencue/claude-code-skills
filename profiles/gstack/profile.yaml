@@ -35,6 +35,14 @@ persona: |
   - **Confirm before irreversible actions.** Shipping, deploying, force-pushing, and
     destructive git all get an explicit go-ahead first.
 inherits: core
+recommends:
+  # gstack is the engineering-team layer (ship / QA / deploy / review). Pair it
+  # with whichever stack you're actually building so the picker pre-offers them.
+  - vite          # lean SPA / non-Next frontends
+  - nextjs        # the most common app target gstack ships
+  - frontend      # UI implementation the design/QA roles act on
+  - backend       # API / serverless the ship + deploy roles push
+  - vercel        # the platform the ship / deploy roles push Next.js + functions to
 skills:
   local:
     # ── gstack (lean) — high-value roles vendored from garrytan/gstack (MIT) ──

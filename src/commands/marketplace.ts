@@ -819,10 +819,6 @@ async function cmdPrPreview(repo: string, json: boolean): Promise<number> {
     return { path, before, after: fixed, fixedRules, leftover: afterDiags };
   });
 
-  // Build one combined PR body (per-file sections)
-  const allFixed = reports.flatMap((r) => r.fixedRules.map((rule) => ({ path: r.path, rule })));
-  const allLeftover = reports.flatMap((r) => r.leftover.map((d) => ({ path: r.path, ...d })));
-
   // PR body: passes every file so the diff blocks come out per-file.
   const primary = reports.find((r) => r.fixedRules.length > 0) ?? reports[0]!;
   const allFixedRulesPrev = [...new Set(reports.flatMap((r) => r.fixedRules))];

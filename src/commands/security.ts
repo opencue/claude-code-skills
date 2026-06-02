@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
 import { listAllSkillIds } from "../lib/resolver-local";
-import { loadProfile, listProfiles } from "../lib/profile-loader";
+import { loadProfile, } from "../lib/profile-loader";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");

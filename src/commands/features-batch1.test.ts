@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -16,9 +16,14 @@ let tmp: string;
 beforeEach(() => {
   tmp = `${tmpdir()}/cue-features-test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   mkdirSync(tmp, { recursive: true });
+  // Point `cue suggest`'s session scan at the empty tmp dir so the suggest
+  // tests stay hermetic + fast — otherwise they scan the real ~/.claude
+  // history (minutes on a heavy machine), which hung the whole suite.
+  process.env.CUE_SUGGEST_SESSIONS_DIR = tmp;
 });
 
 afterEach(() => {
+  delete process.env.CUE_SUGGEST_SESSIONS_DIR;
   try { rmSync(tmp, { recursive: true, force: true }); } catch {}
 });
 

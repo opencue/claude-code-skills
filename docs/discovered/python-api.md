@@ -1,29 +1,42 @@
 ---
 title: "Claude Code Skills for python-api"
-description: "1 community Claude Code skills curated by cue for the python-api profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the python-api profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-02
 tags: [claude-code, python-api, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `python-api`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **python-api** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **python-api** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="kulkarni2u-neural-context-protocol"></a>
-## 💎 [kulkarni2u/neural-context-protocol](https://github.com/kulkarni2u/neural-context-protocol)
+<a id="signnow-sn-mcp-server"></a>
+## 💎 [signnow/sn-mcp-server](https://github.com/signnow/sn-mcp-server)
 
-**★ 1** · exceptional (score 8.3) · Python · tags: agent-communication-protocol, ai-agents, claude, claude-code, claude-skill
+**★ 6** · exceptional (score 10.7) · Python · tags: document-signing, document-templates, electronic-signature, electronic-signatures, embedded-editor
 
-Bounded, persistent context for multi-agent pipelines. MCP-native.  Claude · GPT · Gemini · Ollama. 17x token reduction. Zero infra.
+Official SignNow MCP server for AI agents. Access e-signature workflows, templates, embedded signing, documents via the Model Context Protocol.
 
 ```bash
-cue skills add kulkarni2u/neural-context-protocol --profile python-api
+cue skills add signnow/sn-mcp-server --profile python-api
+```
+
+---
+
+<a id="dewiaratna-pypi-search"></a>
+## ✨ [dewiaratna/pypi_search](https://github.com/dewiaratna/pypi_search)
+
+**★ 0** · strong (score 7.5) · Python · tags: api-integration, beautifulsoup4, claude, cursor, cursor-ai
+
+🔍 Search and cache PyPI packages using regex for fast, detailed results on names, versions, maintainers, and descriptions.
+
+```bash
+cue skills add dewiaratna/pypi_search --profile python-api
 ```
 
 ---

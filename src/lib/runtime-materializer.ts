@@ -1079,7 +1079,7 @@ function tomlRender(obj: { mcp_servers: Record<string, unknown> }): string {
 // ---------------------------------------------------------------------------
 
 import { homedir } from "node:os";
-import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { readdirSync, existsSync, statSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 async function getLastSessionSummary(profileName: string): Promise<string | null> {

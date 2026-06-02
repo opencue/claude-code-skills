@@ -19,8 +19,9 @@ import {
 } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { homedir } from "node:os";
+import { configDir } from "../lib/config-paths";
 
-import { loadProfile, listProfiles } from "../lib/profile-loader";
+import { loadProfile, } from "../lib/profile-loader";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "cue");
@@ -249,11 +250,11 @@ export async function run(args: string[]): Promise<number> {
   if (args.includes("--history")) { showHistory(); return 0; }
 
   // Resolve profile
-  const configDir = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "cue");
+  const cfgDir = configDir();
   const explicit = args.find(a => !a.startsWith("-"));
   let profileName = explicit;
   if (!profileName) {
-    const resolved = await resolveProfileForCwd({ cwd: process.cwd(), homeDir: homedir(), configDir });
+    const resolved = await resolveProfileForCwd({ cwd: process.cwd(), homeDir: homedir(), configDir: cfgDir });
     profileName = "profile" in resolved ? resolved.profile : "core";
   }
 

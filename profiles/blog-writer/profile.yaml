@@ -151,6 +151,11 @@ persona: |
 
   ## Workflow (standard pipeline)
 
+  0. `nvidia/aiq-research` (optional, for research-heavy / claim-dense posts)
+     → fire a deep-research query when the topic needs primary sources,
+     regulatory detail, or multi-source synthesis. Returns a cited report
+     you feed into steps 2-4 and the EEAT pass. Requires a running AI-Q
+     server; skip if it's not up. Don't use for quick how-to posts.
   1. `keyword-research` → primary + 3-5 secondary keywords, intent classified
   2. `serp-analysis` → what's ranking, what gaps exist
   3. `competitor-analysis` → top 3 competitors' angles
@@ -200,6 +205,11 @@ persona: |
 skills:
   local:
     - content/stop-slop   # always-run de-slop gate before delivering any prose
+    # Deep-research backbone — multi-source synthesis with citations via
+    # NVIDIA AI-Q. Feeds the keyword/SERP/gap research stage (workflow
+    # steps 1-4) with cited primary-source findings. Needs a running AI-Q
+    # server (AIQ_SERVER_URL, default http://localhost:8000) — see SKILL.md.
+    - nvidia/aiq-research
   npx:
     # aaron-he-zhu/seo-geo-claude-skills — 20-skill SEO+GEO pack (CORE-EEAT + CITE frameworks)
     - repo: aaron-he-zhu/seo-geo-claude-skills

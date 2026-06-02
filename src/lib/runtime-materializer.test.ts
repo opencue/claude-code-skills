@@ -282,7 +282,7 @@ describe("materializeRuntime", () => {
   test("credentialsSource: refreshes settings on cache hit + repoints symlinks on account switch", async () => {
     const credSrcA = join(root, "credsA");
     const credSrcB = join(root, "credsB");
-    const { mkdir, writeFile, readlink } = await import("node:fs/promises");
+    const { mkdir, writeFile } = await import("node:fs/promises");
     await mkdir(credSrcA, { recursive: true });
     await mkdir(credSrcB, { recursive: true });
     await writeFile(join(credSrcA, ".credentials.json"), '{"token":"A"}');

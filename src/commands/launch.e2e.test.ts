@@ -11,6 +11,13 @@ import { spawnSync } from "node:child_process";
 
 const CUE_BIN = join(import.meta.dir, "../index.ts");
 
+// These e2e tests shell out to `bun run`. In some sandboxes (and odd PATH
+// setups) a spawned child can't find `bun`, which would hard-fail the suite
+// with "Executable not found in $PATH: bun" — unrelated to what's under test.
+// Skip the whole describe when a child `bun` can't be spawned. CI installs bun
+// via setup-bun, so this only skips in constrained local/sandbox runs.
+const BUN_SPAWNABLE = spawnSync("bun", ["--version"], { encoding: "utf8" }).status === 0;
+
 function cue(args: string[], opts: { cwd?: string; env?: Record<string, string> } = {}): { status: number; stdout: string; stderr: string } {
   // Strip env vars set when the test runner itself is running inside a cue
   // session — they propagate to the child cue invocation and break it in
@@ -29,7 +36,7 @@ function cue(args: string[], opts: { cwd?: string; env?: Record<string, string> 
   return { status: res.status ?? 1, stdout: res.stdout ?? "", stderr: res.stderr ?? "" };
 }
 
-describe("cue launch e2e", () => {
+describe.skipIf(!BUN_SPAWNABLE)("cue launch e2e", () => {
   let tmpDir: string;
 
   beforeEach(async () => {

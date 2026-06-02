@@ -29,7 +29,6 @@ import { ProfileError } from "../../profiles/_types";
 import {
   cacheChildren,
   cacheHit,
-  cachePath,
   cachePut,
   cacheSkillPath,
   type CacheLayout,

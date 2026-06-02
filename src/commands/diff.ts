@@ -3,7 +3,7 @@
  * `cue diff --live <target>` — show impact of switching from current to target.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 

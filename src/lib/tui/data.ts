@@ -12,6 +12,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { configDir } from "../config-paths";
 
 import { listProfiles, loadProfile } from "../profile-loader";
 import { resolveProfileForCwd } from "../cwd-resolver";
@@ -43,11 +44,6 @@ function repoRoot(): string {
   return resolve(here, "..", "..", "..");
 }
 
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME
-    ? join(process.env.XDG_CONFIG_HOME, "cue")
-    : join(homedir(), ".config", "cue");
-}
 
 function skillsRoot(): string {
   return join(repoRoot(), "resources", "skills", "skills");

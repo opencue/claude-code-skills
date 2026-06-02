@@ -13,11 +13,11 @@
   "alternateName": ["cue", "cue-ai"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL2)",
-  "description": "cuecards is an open-source agent profile manager for Claude Code, OpenAI Codex, Cursor, Cline, Gemini CLI, GitHub Copilot, Windsurf, Roo Code, Sourcegraph Amp, and Aider. One cuecard per directory — skills, MCPs, plugins, persona, playbooks, gates. Cut always-on context up to ~16×.",
-  "url": "https://github.com/opencue/claude-code-skills",
+  "description": "cuecards is an open-source agent profile manager for Claude Code, OpenAI Codex, Cursor, Cline, Gemini CLI, GitHub Copilot, Windsurf, Roo Code, Sourcegraph Amp, and Aider. One cuecard per directory — skills, MCPs, plugins, persona, playbooks, gates. Cut per-message token cost 10–25×.",
+  "url": "https://github.com/opencue/cuecards",
   "downloadUrl": "https://www.npmjs.com/package/cue-ai",
-  "codeRepository": "https://github.com/opencue/claude-code-skills",
-  "license": "https://github.com/opencue/claude-code-skills/blob/main/LICENSE",
+  "codeRepository": "https://github.com/opencue/cuecards",
+  "license": "https://github.com/opencue/cuecards/blob/main/LICENSE",
   "programmingLanguage": "TypeScript",
   "runtimePlatform": "Bun",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -48,8 +48,8 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/cue-ai"><img src="https://img.shields.io/npm/v/cue-ai?style=flat-square&label=npm&color=1d1d1f&labelColor=f5f5f7" alt="npm"></a>&nbsp;
   <a href="https://www.npmjs.com/package/cue-ai"><img src="https://img.shields.io/npm/dw/cue-ai?style=flat-square&label=downloads&color=1d1d1f&labelColor=f5f5f7" alt="downloads"></a>&nbsp;
-  <a href="https://github.com/opencue/claude-code-skills/stargazers"><img src="https://img.shields.io/github/stars/opencue/claude-code-skills?style=flat-square&label=stars&color=1d1d1f&labelColor=f5f5f7" alt="stars"></a>&nbsp;
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/opencue/claude-code-skills?style=flat-square&label=license&color=1d1d1f&labelColor=f5f5f7" alt="MIT"></a>&nbsp;
+  <a href="https://github.com/opencue/cuecards/stargazers"><img src="https://img.shields.io/github/stars/opencue/cuecards?style=flat-square&label=stars&color=1d1d1f&labelColor=f5f5f7" alt="stars"></a>&nbsp;
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/opencue/cuecards?style=flat-square&label=license&color=1d1d1f&labelColor=f5f5f7" alt="MIT"></a>&nbsp;
   <img src="https://img.shields.io/badge/telemetry-none-1d1d1f?style=flat-square&labelColor=f5f5f7" alt="zero telemetry">
 </p>
 
@@ -57,6 +57,12 @@
 
 <p align="center">
   <code>npm install -g cue-ai</code>
+</p>
+
+<p align="center">
+  <sub>Requires Node ≥20 and an existing <a href="https://github.com/anthropics/claude-code">Claude Code</a> or <a href="https://github.com/openai/codex">Codex</a> install — cue is a thin shim that exec's your agent, not a replacement.</sub>
+  <br>
+  <sub>package <code>cue-ai</code> &nbsp;·&nbsp; command <code>cue</code> &nbsp;·&nbsp; repo <a href="https://github.com/opencue/cuecards"><code>opencue/cuecards</code></a></sub>
 </p>
 
 <br>
@@ -140,7 +146,7 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
   <br><br>
   <strong>&lt; 5 ms</strong>&nbsp;&nbsp;warm launch overhead
   <br><br>
-  <strong>69</strong>&nbsp;&nbsp;pre-built cuecards · <strong>110+</strong> local skills
+  <strong>69</strong>&nbsp;&nbsp;pre-built cuecards · <strong>330+</strong> local skills
   <br><br>
   <strong>10</strong>&nbsp;&nbsp;AI coding agents supported
   <br><br>
@@ -352,8 +358,8 @@ claude                        # launches with the marketing cuecard
 
 | Path | Command |
 |---|---|
-| One-line script | `curl -fsSL https://raw.githubusercontent.com/opencue/claude-code-skills/main/get.sh \| bash` |
-| Manual clone | `git clone https://github.com/opencue/claude-code-skills.git ~/Documents/cue && ~/Documents/cue/install.sh` |
+| One-line script | `curl -fsSL https://raw.githubusercontent.com/opencue/cuecards/main/get.sh \| bash` |
+| Manual clone | `git clone https://github.com/opencue/cuecards.git ~/Documents/cue && ~/Documents/cue/install.sh` |
 | Per-OS bootstrap | paste [`setup/macos.md`](./setup/macos.md) · [`setup/linux.md`](./setup/linux.md) · [`setup/windows.md`](./setup/windows.md) into Claude Code |
 
 </details>
@@ -444,11 +450,11 @@ The bits that didn't fit on the landing page:
 
 | Project | Profile | What they do |
 |---|---|---|
-| [opencue/claude-code-skills](https://github.com/opencue/claude-code-skills) | `full`, `skill-writer` | Dogfooding cue on itself |
+| [opencue/cuecards](https://github.com/opencue/cuecards) | `full`, `skill-writer` | Dogfooding cue on itself |
 | [recodeee/colony](https://github.com/recodeee/colony) | `fleet-control` | Multi-agent coordination MCP |
 | [recodeee/gitguardex](https://github.com/recodeee/gitguardex) | `backend` | Branch + worktree isolation for parallel agents |
 
-> **Using cue?** Open a PR or drop a link in [Discussions](https://github.com/opencue/claude-code-skills/discussions).
+> **Using cue?** Open a PR or drop a link in [Discussions](https://github.com/opencue/cuecards/discussions).
 
 <br>
 
@@ -456,11 +462,11 @@ The bits that didn't fit on the landing page:
 
 ## star history.
 
-<a href="https://star-history.com/#opencue/claude-code-skills&Date">
+<a href="https://star-history.com/#opencue/cuecards&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=opencue/claude-code-skills&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=opencue/claude-code-skills&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=opencue/claude-code-skills&type=Date" width="720" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=opencue/cuecards&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=opencue/cuecards&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=opencue/cuecards&type=Date" width="720" />
   </picture>
 </a>
 
@@ -471,7 +477,7 @@ The bits that didn't fit on the landing page:
 ## contributing.
 
 ```bash
-git clone https://github.com/opencue/claude-code-skills.git
+git clone https://github.com/opencue/cuecards.git
 cd cue && bun install
 bun test                                      # tests (lib + commands)
 bun run src/index.ts --help                   # run locally
@@ -482,6 +488,6 @@ bun run src/index.ts --help                   # run locally
 | Add a skill | `cue skills-new <name>` then edit `resources/skills/skills/<category>/<name>/SKILL.md` |
 | Add a profile | `cue new <name>` then `cue validate <name>` |
 | Share your profile | `cue share publish --profile <name>` |
-| Report a bug | [Open an issue](https://github.com/opencue/claude-code-skills/issues) |
+| Report a bug | [Open an issue](https://github.com/opencue/cuecards/issues) |
 
 License: [MIT](./LICENSE).

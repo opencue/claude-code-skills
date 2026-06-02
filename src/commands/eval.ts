@@ -15,8 +15,8 @@
  * cost-per-message and the score now use perMessage so they reflect reality.
  */
 
-import { resolve, join, dirname, basename, isAbsolute } from "node:path";
-import { readFileSync, existsSync } from "node:fs";
+import { resolve, join, dirname, isAbsolute } from "node:path";
+import { readFileSync, } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 

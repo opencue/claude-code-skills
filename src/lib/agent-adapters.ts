@@ -5,8 +5,8 @@
  * that a specific agent expects.
  */
 
-import { writeFileSync, mkdirSync, existsSync, readFileSync, symlinkSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { writeFileSync, mkdirSync, existsSync, readFileSync, } from "node:fs";
+import { join, } from "node:path";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 

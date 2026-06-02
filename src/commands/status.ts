@@ -6,9 +6,10 @@
 
 import { homedir } from "node:os";
 import { join, resolve, dirname } from "node:path";
-import { existsSync, readFileSync, readdirSync, lstatSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import { configDir } from "../lib/config-paths";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 import { loadProfile, listProfiles } from "../lib/profile-loader";
 import { computeStats } from "../lib/analytics";
@@ -19,11 +20,6 @@ const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
 const MCP_CONFIGS_DIR = join(REPO_ROOT, "resources", "mcps", "configs");
 const RUNTIME_ROOT = join(process.env.HOME ?? "~", ".config", "cue", "runtime");
 
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME
-    ? join(process.env.XDG_CONFIG_HOME, "cue")
-    : join(homedir(), ".config", "cue");
-}
 
 export interface Warning {
   code: string;

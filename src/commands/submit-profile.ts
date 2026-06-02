@@ -13,7 +13,7 @@
 
 import { existsSync, mkdtempSync, mkdirSync, copyFileSync, readFileSync } from "node:fs";
 import { tmpdir, homedir } from "node:os";
-import { join, basename, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 import { parse as parseYaml } from "yaml";

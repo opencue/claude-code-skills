@@ -219,6 +219,22 @@ describe("buildPickerSections", () => {
     expect(composite?.label).toBe("backend + designer");
   });
 
+  test("recent composite reuses each part's icon label, not bare names", () => {
+    // Combined recent rows should carry every part's icon (emoji or kitty image
+    // placeholder), pulled from each part's own option label.
+    const all = [
+      { value: "improver", label: "📈 improver", hint: "" },
+      { value: "secops", label: "🔒 secops", hint: "" },
+      { value: "builder", label: "🐻 builder", hint: "" },
+    ];
+    const recent = [
+      { name: "improver+secops+builder", sessions: 4, lastUsed: "2026-05-26T09:00:00Z" },
+    ];
+    const out = buildPickerSections(opt("__default"), all, recent, 3, now);
+    const composite = out.find((o) => o.value === "improver+secops+builder");
+    expect(composite?.label).toBe("📈 improver + 🔒 secops + 🐻 builder");
+  });
+
   test("featured: composites synthesized, single profiles reuse their option and leave All", () => {
     const all = [opt("backend"), opt("designer"), opt("webshop")];
     const out = buildPickerSections(
@@ -508,6 +524,19 @@ describe("formatProfileSummary", () => {
     ];
     const out = formatProfileSummary(main, parts);
     expect(out[0]).toBe("skills    6  ← 🧬 writer:2 + 🐢 core:2");
+  });
+
+  test("caps a fat composite breakdown at 6 parts with a '+N more' suffix", () => {
+    const names = ["a", "b", "c", "d", "e", "f", "g"]; // 7 parts → cap kicks in
+    const main = makeProfile({
+      name: names.join("+"),
+      skills: { local: names.map((n) => ({ id: `${n}/1` })), npx: [] },
+    });
+    const parts = names.map((n) =>
+      makeProfile({ name: n, skills: { local: [{ id: `${n}/1` }], npx: [] } }),
+    );
+    const out = formatProfileSummary(main, parts);
+    expect(out[0]).toBe("skills    7  ← a:1 + b:1 + c:1 + d:1 + e:1 + f:1 +1 more");
   });
 
   test("adds category line below skills when localCount >= 5", () => {

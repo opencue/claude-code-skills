@@ -1,5 +1,6 @@
 name: vercel
 icon: "🔺"
+iconImage: "logo.png"
 description: "Vercel platform — deploy, env, functions, storage, AI SDK, Next.js, Turbopack, CLI, firewall, sandbox via the official Vercel plugin (hosted MCP + 26 skills)"
 inherits: core
 recommends:

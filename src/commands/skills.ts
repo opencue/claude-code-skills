@@ -1552,7 +1552,6 @@ function cmdChangelog(id: string): number {
     return 1;
   }
 
-  const meta = parseSkillMeta(id);
   const skillPath = join(SKILLS_ROOT, id, "SKILL.md");
   try {
     const content = readFileSync(skillPath, "utf8");

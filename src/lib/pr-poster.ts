@@ -23,7 +23,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, } from "node:path";
 
 /**
  * Build a deterministic branch name keyed by today's date + a hash of the

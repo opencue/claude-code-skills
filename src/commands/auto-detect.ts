@@ -4,7 +4,7 @@
 
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { detectProfile, detectProfileV2 } from "../lib/auto-detect";
+import { detectProfile, } from "../lib/auto-detect";
 import { scanProject } from "../lib/project-scanner";
 
 export async function run(args: string[]): Promise<number> {

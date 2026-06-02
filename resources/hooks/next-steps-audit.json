@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_CONFIG_DIR}/hooks/next-steps-audit.sh",
+            "description": "Stop hook (opt-in): warn when a substantive turn (>=1 file edit or >=3 Bash steps, >=600 chars) ends without a Next steps block. Re-grounds the meta/next-steps auto-fire behaviour in observable output. Off by default; enable with `touch ~/.config/cue/next-steps-check`. Never blocks; suppress one turn with [skip-next-steps].",
+            "id": "cue:stop:next-steps-audit"
+          }
+        ]
+      }
+    ]
+  }
+}

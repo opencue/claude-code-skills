@@ -16,7 +16,7 @@ moderators talk and Reddit's anti-spam catches it.
 **Body**:
 
 ```text
-Sharing a tool I've been using daily for a few months: cue.
+Sharing a tool I built and now use daily across my own projects: cue.
 
 The problem: Claude Code loads every skill globally, but I work on ~6 projects
 with different stacks (Rust, Next.js, FastAPI, etc.). I don't want my Rust skills
@@ -28,10 +28,10 @@ per-profile CLAUDE_CONFIG_DIR with just that profile's skills/MCPs/plugins and
 execs the real claude binary.
 
 There's a discovery side too — `cue discover` scans GitHub Code Search nightly
-for new SKILL.md repos, scores them, and bundles them per-profile. About 500
+for new SKILL.md repos, scores them, and bundles them per-profile. About 360
 indexed currently.
 
-MIT, repo: https://github.com/opencue/claude-code-skills
+MIT, repo: https://github.com/opencue/cuecards
 Install: `npm install -g cue-ai` then `cue init`
 
 Curious what other people are doing for per-project skill management. Symlinks?
@@ -68,11 +68,11 @@ So I wrote a scanner that runs nightly:
 - Outputs ranked per-profile (backend, rust, cybersecurity, …) so you can
   see "best skills for X" instantly
 
-Currently indexes ~500 repos. The per-profile pages ship JSON-LD ItemList
+Currently indexes ~360 repos. The per-profile pages ship JSON-LD ItemList
 schema, so they get cited by AI search (Perplexity, ChatGPT, Google AI
 Overviews) when people search for "Claude Code skills for X".
 
-The discovery engine is part of cue (MIT, github.com/opencue/claude-code-skills) but you
+The discovery engine is part of cue (MIT, github.com/opencue/cuecards) but you
 can use it standalone — `npx cue-ai discover search --profile rust` works
 without installing the profile manager.
 

@@ -39,6 +39,9 @@ jobs:
           grep -q 'exec cue launch claude' "$PREFIX/claude"
           PATH="$PREFIX:$PATH" "$PREFIX/cue" --version
 
+      - name: Verify bundled CLI boots
+        run: bun run build:bundle && node dist/cue.js --version
+
       - name: Validate all profiles
         run: bun src/index.ts validate --all || true
 
@@ -57,11 +60,14 @@ jobs:
         run: bun install
 
       - name: Type check
-        run: bun run typecheck
+        run: bun x tsc --noEmit --skipLibCheck
 
-      # Surface skill-lint output (was a silent no-op: bare `skills-lint`
-      # exits 1 on a usage error, masked by `2>/dev/null || true`; the real
-      # command is `skills lint --all`). Kept non-blocking until the
-      # skill-hygiene backlog is cleared.
+      - name: Lint (biome)
+        run: bun run lint
+
+      # Advisory until the skill-hygiene backlog (duplicate slugs etc.) is
+      # cleared; `skills lint --all` currently reports 174 errors the
+      # materializer tolerates via last-wins. Fixed the command (was a silent
+      # no-op: bare `skills-lint` exits 1 on usage, masked by `|| true`).
       - name: Lint skills
         run: bun src/index.ts skills lint --all || true

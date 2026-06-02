@@ -14,10 +14,7 @@ import { join } from "node:path";
 
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 import { loadProfile } from "../lib/profile-loader";
-
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME ? join(process.env.XDG_CONFIG_HOME, "cue") : join(homedir(), ".config", "cue");
-}
+import { configDir } from "../lib/config-paths";
 
 interface InspectResult {
   profile: string;

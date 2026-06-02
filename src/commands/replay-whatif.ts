@@ -5,13 +5,9 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
 import { loadProfile } from "../lib/profile-loader";
-
-const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
 
 export async function run(args: string[]): Promise<number> {
   if (args.includes("-h") || args.includes("--help")) {
@@ -44,7 +40,6 @@ Shows which skills/tools would have been available or missing.
   }
 
   const profileSkills = new Set(profile.skills.local.map(s => s.id));
-  const profileMcps = new Set(profile.mcps.map(m => m.id));
 
   // Find session to replay
   let sessFile = sessionPath;

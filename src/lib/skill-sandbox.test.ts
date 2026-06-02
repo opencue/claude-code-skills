@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { parseAllowedTools, validateToolUsage, auditSkillPermissions, generateSandboxReport } from "./skill-sandbox";
+import { parseAllowedTools, validateToolUsage, generateSandboxReport } from "./skill-sandbox";
 
 const TEST_ROOT = join(import.meta.dir, "..", "..", "__test_sandbox__");
 

@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { resolve, dirname, join, basename } from "node:path";
+import { resolve, dirname, join, } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadProfile } from "../lib/profile-loader";

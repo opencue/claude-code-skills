@@ -6,12 +6,18 @@ inherits: core
 recommends:
   - blog-writer   # author the long-form piece this social campaign promotes
   - trendradar    # surface trending topics worth posting about
+  - higgsfield    # generate the post imagery/video (brandkit + medusa bridge surface)
 skills:
   local:
     - content/trend-to-thread   # end-to-end pipeline: trendradar → article → X thread → Higgsfield → Postiz draft
     - content/article-writer    # topic-agnostic long-form writer (5 presets + voice library + source-discipline)
     - content/article-to-everywhere   # fan-out finished article → X + LinkedIn + Substack + Reddit derivatives
     - content/engagement-feedback     # /engagement-report — Postiz analytics ↔ voice/preset/topic correlator
+    - content/postiz-cards            # brand card pipeline: pre-publish lint + logo-composite + OCR + analytics (powers /post-as)
+    # Deep-research backbone for the article-writer: multi-source synthesis
+    # with citations via NVIDIA AI-Q. Needs a running AI-Q server
+    # (AIQ_SERVER_URL, default http://localhost:8000) — see SKILL.md.
+    - nvidia/aiq-research
     # Higgsfield image/video generation — brand cards, hero shots, marketplace
     # assets for the social posts this profile schedules (persona drives these).
     - higgsfield/higgsfield-generate
@@ -69,12 +75,16 @@ persona: |
 
   **Before generating ANY image, copy, or thumbnail for a brand:**
     1. Read `brands/<brand>/brand.md` in full.
-    2. Pass `brands/<brand>/logo.png` as a reference image to image-gen
-       (Higgsfield, Postiz built-in, etc.) and instruct the model to use
-       it EXACTLY — no redraw / recolor / restyle.
+    2. Generate the card with an EMPTY top band, then composite the REAL
+       logo POST-generation via the `postiz-cards` skill
+       (`scripts/card.sh <raw> --brand <brand> --check "<HEADLINE>" --upload`).
+       NEVER pass logo.png to image-gen as a reference — it redraws/restyles
+       the mark. Compositing guarantees pixel-exact logo fidelity.
     3. Follow the brand's palette + typography + voice rules verbatim.
     4. Use the brand.md card template as the system prompt; adapt only the
        subject and headline lines.
+    5. Lint copy before scheduling: `postiz-cards/scripts/lint.py` (blocks
+       >1 cashtag/tweet, em-dashes, uncited stats).
 
   **Before posting to Postiz:**
     1. ALWAYS confirm with the user which account to publish under

@@ -2,7 +2,7 @@
 title: "razaumair2203-ux/adversarial-reviewer-lite — Claude Code skill discovered by cue"
 description: "Claude Code skill for Windows-friendly adversarial AI code review using Codex CLI as an independent reviewer."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 8 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-05-31
+- 🗓️ Last pushed: 2026-06-02
 - 🏷️ Tags: adversarial-review, agentic-coding, ai-code-review, ai-safety, claude-code, claude-code-skill, code-review, codex-cli, llm-tools, windows-dev
 
 ## Best fit cue profiles

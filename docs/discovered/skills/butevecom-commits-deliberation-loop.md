@@ -2,19 +2,19 @@
 title: "butevecom-commits/Deliberation-Loop — Claude Code skill discovered by cue"
 description: "Claude Code skill: multi-path reasoning via 6-role structured debate (Builder ↔ Skeptic ↔ Analyst ↔ Operator → Editor → Expander)"
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [butevecom-commits/Deliberation-Loop](https://github.com/butevecom-commits/Deliberation-Loop)
 
-**★ 2** · exceptional (score 11.2) · ai, claude-code, debate, deliberation, reasoning
+**★ 2** · exceptional (score 11.1) · ai, claude-code, debate, deliberation, reasoning
 
 > Claude Code skill: multi-path reasoning via 6-role structured debate (Builder ↔ Skeptic ↔ Analyst ↔ Operator → Editor → Expander)
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 11.2 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 11.1 based on:
 - ✅ Contains SKILL.md
 - ⭐ 2 stars
 - 🗓️ Last pushed: 2026-05-24

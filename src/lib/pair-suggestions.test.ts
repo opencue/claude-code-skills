@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  buildUniversalSuggestions,
   computeAffinityMap,
   parseComposite,
   suggestPartnersFor,
   suggestionsByProfile,
+  UNIVERSAL_COMPANIONS,
 } from "./pair-suggestions";
 
 const row = (profile: string, ts = "2026-05-28T00:00:00Z"): string =>
@@ -140,5 +142,114 @@ describe("suggestionsByProfile", () => {
     expect(all.get("a")?.[0]?.name).toBe("b");
     expect(all.get("b")?.[0]?.name).toBe("a");
     expect(all.get("solo")).toBeUndefined();
+  });
+});
+
+describe("buildUniversalSuggestions", () => {
+  const known = (...names: string[]) => new Set(names);
+
+  test("featured come first in declared order, capped, and filtered to installed", () => {
+    const out = buildUniversalSuggestions({
+      featured: ["improver", "ghost", "secops", "builder", "maker", "studio", "ops"],
+      affinity: computeAffinityMap(lines()),
+      known: known("improver", "secops", "builder", "maker", "studio", "ops"),
+    });
+    // `ghost` dropped (not installed); default cap 5 keeps the first five real ones,
+    // so `ops` (sixth) is excluded.
+    expect(out).toEqual([
+      { name: "improver", origin: "featured" },
+      { name: "secops", origin: "featured" },
+      { name: "builder", origin: "featured" },
+      { name: "maker", origin: "featured" },
+      { name: "studio", origin: "featured" },
+    ]);
+  });
+
+  test("frequency fills the rest, highest picks first, above the floor", () => {
+    const affinity = computeAffinityMap(
+      lines(
+        ...Array(10).fill(row("skill-writer")),
+        ...Array(5).fill(row("core")),
+        ...Array(2).fill(row("rare")), // below default minFrequentPicks=3
+      ),
+    );
+    const out = buildUniversalSuggestions({
+      featured: [],
+      affinity,
+      known: known("skill-writer", "core", "rare"),
+    });
+    expect(out).toEqual([
+      { name: "skill-writer", origin: "frequent" },
+      { name: "core", origin: "frequent" },
+    ]);
+  });
+
+  test("a profile that is both featured and frequent appears once, as featured", () => {
+    const affinity = computeAffinityMap(lines(...Array(10).fill(row("improver"))));
+    const out = buildUniversalSuggestions({
+      featured: ["improver"],
+      affinity,
+      known: known("improver"),
+    });
+    expect(out).toEqual([{ name: "improver", origin: "featured" }]);
+  });
+
+  test("empty featured + empty history yields nothing", () => {
+    expect(
+      buildUniversalSuggestions({ featured: [], affinity: new Map(), known: new Set() }),
+    ).toEqual([]);
+  });
+
+  test("caps and the frequency floor are configurable", () => {
+    const affinity = computeAffinityMap(
+      lines(...Array(5).fill(row("a")), ...Array(4).fill(row("b")), ...Array(3).fill(row("c"))),
+    );
+    const out = buildUniversalSuggestions({
+      featured: ["f1", "f2"],
+      affinity,
+      known: known("f1", "f2", "a", "b", "c"),
+      maxFeatured: 1,
+      maxFrequent: 1,
+      minFrequentPicks: 4,
+    });
+    // featured cap 1 → f1; frequency cap 1 with floor 4 → a (5 picks, highest).
+    expect(out).toEqual([
+      { name: "f1", origin: "featured" },
+      { name: "a", origin: "frequent" },
+    ]);
+  });
+
+  test("pinned companions (gstack) close the list when installed, after featured/frequent", () => {
+    const gstack = UNIVERSAL_COMPANIONS[0]!; // "gstack"
+    const affinity = computeAffinityMap(lines(...Array(5).fill(row("a"))));
+    const out = buildUniversalSuggestions({
+      featured: ["f1"],
+      affinity,
+      known: known("f1", "a", gstack),
+    });
+    expect(out).toEqual([
+      { name: "f1", origin: "featured" },
+      { name: "a", origin: "frequent" },
+      { name: gstack, origin: "pinned" },
+    ]);
+  });
+
+  test("a pinned companion that isn't installed is silently dropped", () => {
+    const out = buildUniversalSuggestions({
+      featured: ["f1"],
+      affinity: new Map(),
+      known: known("f1"), // gstack not installed
+    });
+    expect(out).toEqual([{ name: "f1", origin: "featured" }]);
+  });
+
+  test("a pinned companion already in featured keeps its featured origin (de-duped)", () => {
+    const gstack = UNIVERSAL_COMPANIONS[0]!;
+    const out = buildUniversalSuggestions({
+      featured: [gstack],
+      affinity: new Map(),
+      known: known(gstack),
+    });
+    expect(out).toEqual([{ name: gstack, origin: "featured" }]);
   });
 });

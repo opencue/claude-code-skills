@@ -2,21 +2,21 @@
 title: "opencue/cuecards — Claude Code skill discovered by cue"
 description: "Agent profile manager for Claude Code & Codex. Per-directory profiles select which skills, MCP servers, and plugins load — automatically, before launch. Install"
 layout: page
-updated: 2026-05-31
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [opencue/cuecards](https://github.com/opencue/cuecards)
 
-**★ 1** · exceptional (score 10.8) · TypeScript · agent-framework, agent-skill, ai-agents, ai-coding, anthropic
+**★ 2** · exceptional (score 11) · TypeScript · agent-framework, agent-skill, ai-agents, ai-coding, anthropic
 
 > Agent profile manager for Claude Code & Codex. Per-directory profiles select which skills, MCP servers, and plugins load — automatically, before launch. Install: npm install -g cue-ai
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.8 based on:
-- ⭐ 1 stars
-- 🗓️ Last pushed: 2026-05-31
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 11 based on:
+- ⭐ 2 stars
+- 🗓️ Last pushed: 2026-06-02
 - 🏷️ Tags: agent-framework, agent-skill, ai-agents, ai-coding, anthropic, claude, claude-cli, claude-code, claude-skill, cli, codex, codex-cli, developer-tools, mcp, mcp-server, mcp-tools, openai, plugins, profile-manager, skills
 
 ## Best fit cue profiles

@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { evaluateCondition, filterConditionalSkills, type SkillCondition, type ConditionalSkill } from "./conditional-skills";
+import { evaluateCondition, filterConditionalSkills, type ConditionalSkill } from "./conditional-skills";
 
 let tmp: string;
 

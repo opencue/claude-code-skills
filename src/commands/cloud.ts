@@ -156,7 +156,7 @@ async function cmdPush(args: string[]): Promise<number> {
     }
 
     process.stderr.write(`⚠️  Push failed (${res.status}): ${await res.text()}\n`);
-  } catch (err) {
+  } catch {
     process.stderr.write(`⚠️  Cloud API not reachable. Profile saved locally only.\n`);
     process.stderr.write(`   Will sync when API is live. Run \`cue push ${profileName}\` again later.\n`);
   }

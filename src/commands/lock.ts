@@ -26,7 +26,6 @@ export function isProfileLocked(profileName: string): { locked: boolean; by?: st
 }
 
 export async function run(args: string[]): Promise<number> {
-  const sub = args[0]; // "lock" or "unlock" (routed from _index.ts)
   // When called as `cue lock <profile>`, args = ["<profile>", ...]
   // The command name is already stripped by the router
   const profileName = args.find(a => !a.startsWith("-"));

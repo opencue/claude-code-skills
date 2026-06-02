@@ -1,96 +1,44 @@
 ---
 title: "Claude Code Skills for docs-writer"
-description: "6 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `docs-writer`
 
-> 6 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **docs-writer** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **docs-writer** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="nduckmink-arkon"></a>
-## 💎 [nduckmink/arkon](https://github.com/nduckmink/arkon)
+<a id="jamesshi96-project-butler"></a>
+## 💎 [JamesShi96/project-butler](https://github.com/JamesShi96/project-butler)
 
-**★ 920** · exceptional (score 13.5) · Python · tags: enterprise-ai, knowledge-base-embeddings, knowledge-based-systems, knowledge-bases, llm-wiki-personal-knowledge-base
+**★ 156** · exceptional (score 21) · tags: ai-agent, ai-coding, ai-workflow, changelog, claude-code
 
-Arkon: Enterprise AI Knowledge Hub & MCP Server. Self-hosted knowledge base for teams to manage RAG contexts, access policies, and AI skills. Connect Claude and other LLMs via Model Context Protocol (MCP) for automated, secure organizational knowledge integration.
-
-```bash
-cue skills add nduckmink/arkon --profile docs-writer
-```
-
----
-
-<a id="woaillr-crypto-code2wiki"></a>
-## 💎 [woaillr-crypto/code2wiki](https://github.com/woaillr-crypto/code2wiki)
-
-**★ 3** · exceptional (score 10) · Python · tags: agent-skill, ai-agent-skill, ai-coding, business-context, code-analysis
-
-AI Agent Skill — Auto-generate business context layer (BCL) for large backend codebases. Supports Java, Python, Go, Kotlin, TypeScript. Turn 500K lines into navigable knowledge maps.code2wiki ( code to wiki) 是一项专为复杂项目构建面向业务的“业务语义层”的技能。通过 code2wiki，开发者可以将既有代码库高效地转化为系统化的项目上下文与 Wiki 文档，从而显著提升 LLM 对复杂业务系统的理解深度，赋能代码总结、领域 Skill 构建及自动化文档生成。
+Project memory system for AI coding assistants (Claude Code, Cursor, Codex): session logs, project wiki, rules, TODOs, and handoff.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add woaillr-crypto/code2wiki --profile docs-writer
+cue skills add JamesShi96/project-butler --profile docs-writer
 ```
 
 ---
 
-<a id="howdow698-ui-llm-wiki"></a>
-## 💎 [howdow698-ui/llm-wiki](https://github.com/howdow698-ui/llm-wiki)
+<a id="azrtydxb-kryton"></a>
+## ✨ [azrtydxb/kryton](https://github.com/azrtydxb/kryton)
 
-**★ 0** · exceptional (score 8.5) · tags: agent-skill, claude-code-skill, cli, codex, gemini
+**★ 4** · strong (score 6.8) · TypeScript · tags: ai-agents, claude, graph-visualization, knowledge-base, knowledge-management
 
-Build a structured knowledge base with LLM agents to automate documentation, link concepts, and maintain long-term information retention in Markdown.
-
-```bash
-cue skills add howdow698-ui/llm-wiki --profile docs-writer
-```
-
----
-
-<a id="mindgameolympiangames78-llm-knowledge-base"></a>
-## 💎 [mindgameolympiangames78/llm-knowledge-base](https://github.com/mindgameolympiangames78/llm-knowledge-base)
-
-**★ 0** · exceptional (score 8) · tags: bert-models, biomedical-informatics, claude-code, claude-code-skill, gpt
-
-Automate your personal knowledge base in Obsidian using Claude. Feed raw content and let the LLM organize, link, and synthesize your notes.
+A shared brain for people and AI. Self-hosted knowledge base with built-in MCP server, wiki-linking, graph visualization, mobile sync, and plugin ecosystem.
 
 ```bash
-cue skills add mindgameolympiangames78/llm-knowledge-base --profile docs-writer
-```
-
----
-
-<a id="fourparty-utnapishtim59-llm-knowledge-base"></a>
-## ✨ [fourparty-utnapishtim59/llm-knowledge-base](https://github.com/fourparty-utnapishtim59/llm-knowledge-base)
-
-**★ 1** · strong (score 6.3) · tags: agent-skills, bioinformatics, bioinformatics-algorithms, claude-code-skill, google-adk
-
-Build and maintain LLM-compiled knowledge bases with a versioned schema, structured learning layer, and clear markdown workflows
-
-```bash
-cue skills add fourparty-utnapishtim59/llm-knowledge-base --profile docs-writer
-```
-
----
-
-<a id="liningyang00-document-governance-skill"></a>
-## 🔹 [liningyang00/document-governance-skill](https://github.com/liningyang00/document-governance-skill)
-
-**★ 1** · potential (score 3.2) · tags: adr, agent-workflow, ai-agent-skill, documentation, project-docs
-
-A portable AI-agent skill for organizing project documentation architecture.
-
-```bash
-cue skills add liningyang00/document-governance-skill --profile docs-writer
+cue skills add azrtydxb/kryton --profile docs-writer
 ```
 
 ---

@@ -11,10 +11,11 @@
  * public interface would be a privacy footgun.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
+import { configDir } from "./config-paths";
 import { computeStats } from "./analytics";
 import { listActiveSessions, supportsProcScan } from "./active-sessions";
 import { readGateStatus, readAllGateStatus } from "./gate-status";
@@ -44,11 +45,6 @@ const WEB_DIST = join(REPO_ROOT, "web", "dist");
 /** Standard envelope so the UI doesn't have to special-case per-endpoint shape. */
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME
-    ? join(process.env.XDG_CONFIG_HOME, "cue")
-    : join(homedir(), ".config", "cue");
-}
 
 /**
  * Resolve a `?profile=...` query against precedence: explicit → cwd pin →

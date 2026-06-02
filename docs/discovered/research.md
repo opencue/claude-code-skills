@@ -1,31 +1,44 @@
 ---
 title: "Claude Code Skills for research"
-description: "1 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-05-31
+updated: 2026-06-02
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `research`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **research** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/claude-code-skills) for the **research** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="jin-s13-ai-research-writing-skill"></a>
-## 💎 [jin-s13/ai-research-writing-skill](https://github.com/jin-s13/ai-research-writing-skill)
+<a id="veyralabsgroup-venture-analyst"></a>
+## 💎 [veyralabsgroup/venture-analyst](https://github.com/veyralabsgroup/venture-analyst)
 
-**★ 1** · exceptional (score 12.8) · TeX · tags: academic-writing, ai-agent, ai-writing, claude-code-skill, claude-skills
+**★ 0** · exceptional (score 11) · Python · tags: ai-agent-skill, claude-code, competitor-analysis, idea-validation, lean-startup
 
-AI Research Writing Skill (AI论文写作技能) is an agent skill for ML / AI / CV / NLP researchers. Point your coding agent at code, experiment logs, notes, and a venue template; it helps you produce an auditable, evidence-backed LaTeX draft and submission package — not a polished fiction.
+Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add jin-s13/ai-research-writing-skill --profile research
+cue skills add veyralabsgroup/venture-analyst --profile research
+```
+
+---
+
+<a id="aemro-motors-popper-scope"></a>
+## ✨ [aemro-motors/popper-scope](https://github.com/aemro-motors/popper-scope)
+
+**★ 0** · strong (score 7.5) · HTML · tags: claude-code, claude-code-plugin, claude-code-plugins, claude-code-plugins-marketplace, claude-code-skill
+
+Popper Probe Repo: Automated Vulnerability Scanner 2026 - Smart GitHub Code Analysis
+
+```bash
+cue skills add aemro-motors/popper-scope --profile research
 ```
 
 ---

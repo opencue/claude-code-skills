@@ -180,8 +180,7 @@ describe("cue cli (top-level)", () => {
 
   test("unknown subcommand exits 1", async () => {
     const orig = process.stderr.write.bind(process.stderr);
-    let err = "";
-    (process.stderr as any).write = (c: string | Uint8Array) => { err += String(c); return true; };
+    (process.stderr as any).write = () => true;
     try {
       const exit = await cliRun(["nonsense"]);
       expect(exit).toBe(1);

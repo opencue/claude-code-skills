@@ -17,15 +17,13 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
+import { configDir } from "./config-paths";
 
 const CONSENT_RECORD_VERSION = 1;
 
-export function configDir(): string {
-  const xdg = process.env.XDG_CONFIG_HOME;
-  return join(xdg && xdg.length > 0 ? xdg : join(homedir(), ".config"), "cue");
-}
+// Re-exported for back-compat: external callers import `configDir` from here.
+export { configDir };
 
 export function consentPath(): string {
   return join(configDir(), ".telemetry-consent");

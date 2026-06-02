@@ -20,10 +20,10 @@
  * `core+skill-writer` sessions count toward the same skill.
  */
 
-import { readFileSync, existsSync, statSync } from "node:fs";
-import { homedir } from "node:os";
+import { readFileSync, existsSync, } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { configDir } from "./config-paths";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
@@ -32,10 +32,6 @@ export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-function configDir(): string {
-  const xdg = process.env.XDG_CONFIG_HOME;
-  return join(xdg && xdg.length > 0 ? xdg : join(homedir(), ".config"), "cue");
-}
 
 /** Split a SKILL.md into its YAML frontmatter and body. */
 function splitFrontmatter(text: string): { frontmatter: string; body: string } {

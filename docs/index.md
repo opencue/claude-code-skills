@@ -2,7 +2,7 @@
 layout: default
 title: "cue — Discover Claude Code Skills"
 description: "Find hidden gem skills for Claude Code, Codex, and 8 more AI agents. One command to search, score, and install."
-image: https://opencue.github.io/cue/assets/hero.svg
+image: https://opencue.github.io/cuecards/assets/hero.svg
 ---
 
 # Discover skills your AI agent is missing
@@ -52,4 +52,4 @@ cue discover install --min-score 8     # install top gems
 cue use backend                        # switch profile
 ```
 
-[GitHub →](https://github.com/opencue/claude-code-skills)
+[GitHub →](https://github.com/opencue/cuecards)

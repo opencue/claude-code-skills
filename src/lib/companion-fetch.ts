@@ -16,9 +16,10 @@
  */
 
 import { spawnSync, spawn as nodeSpawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, cpSync, rmSync, mkdtempSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, cpSync, rmSync, mkdtempSync, } from "node:fs";
 import { join } from "node:path";
-import { tmpdir, homedir } from "node:os";
+import { tmpdir } from "node:os";
+import { cacheDir } from "./config-paths";
 import { createHash } from "node:crypto";
 
 // ---------------------------------------------------------------------------
@@ -68,10 +69,7 @@ interface ETagEntry {
   ts: number;
 }
 
-const ETAG_CACHE_PATH = join(
-  process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"),
-  "cue", "companion-etags.json",
-);
+const ETAG_CACHE_PATH = join(cacheDir(), "companion-etags.json");
 
 function loadETagCache(): Record<string, ETagEntry> {
   try {

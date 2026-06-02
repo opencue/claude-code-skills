@@ -21,8 +21,9 @@ claude-plugins-official/
 # Generated runtime (lives at ~/.config/cue/ but excluded if symlinked in for inspection)
 .cue-hash
 
-# OMX agent state (per-session traces, not source-controlled)
+# OMX / OMC agent state (per-session traces + mission state, not source-controlled)
 .omx/
+.omc/
 andrej-karpathy-skills/
 agentshield/
 awesome-clis/
@@ -35,3 +36,4 @@ awesome-clis/
 # Third-party repos cloned for study (have their own .git/ — keep out of cue's tree)
 vendor/
 .gstack/
+vibecode-pro-max-kit/

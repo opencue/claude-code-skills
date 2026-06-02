@@ -17,7 +17,6 @@ import { loadProfile, listProfiles } from "../lib/profile-loader";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SKILLS_LOCK = join(homedir(), "skills-lock.json");
-const CLAUDE_SKILLS_DIR = join(homedir(), ".claude", "skills");
 
 interface LockEntry {
   source: string;
@@ -97,7 +96,7 @@ function cmdList(json: boolean): number {
 async function cmdProfile(profileName: string, json: boolean): Promise<number> {
   const lock = loadSkillsLock();
   let profile;
-  try { profile = await loadProfile(profileName); } catch (e) {
+  try { profile = await loadProfile(profileName); } catch {
     process.stderr.write(`Profile "${profileName}" not found.\n`);
     return 1;
   }

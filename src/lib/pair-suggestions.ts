@@ -159,6 +159,91 @@ export function suggestionsByProfile(
   return out;
 }
 
+/** Where a universal combine suggestion came from — drives the row hint. */
+export type UniversalOrigin = "featured" | "frequent" | "pinned";
+
+/** A cross-profile combine suggestion offered under every primary. */
+export interface UniversalSuggestion {
+  name: string;
+  origin: UniversalOrigin;
+}
+
+/**
+ * Profiles offered as a combine companion under *every* primary, independent of
+ * the curated featured set, session frequency, the picked profile's
+ * `recommends:`, or cwd content. gstack is the engineering-team layer (ship /
+ * QA / deploy / review) that pairs with whatever stack you're building, so the
+ * picker always offers to stack it on. Emitted as the `pinned` origin by
+ * `buildUniversalSuggestions` (the single "offered under every primary" path)
+ * and surfaced unchecked — offered, never forced into the pin.
+ */
+export const UNIVERSAL_COMPANIONS: readonly string[] = ["gstack"];
+
+export interface BuildUniversalOptions {
+  /** Curated featured slugs, in display order (from `_featured.yaml`). */
+  featured: string[];
+  /** Global pick-frequency map (from `computeAffinityMap`). */
+  affinity: Map<string, ProfileAffinity>;
+  /** Installed profile names — both sources are filtered to these. */
+  known: Set<string>;
+  /** Max curated featured suggestions. Default 5. */
+  maxFeatured?: number;
+  /** Max session-frequency suggestions. Default 2. */
+  maxFrequent?: number;
+  /** Min own-picks for a profile to count as "used a lot". Default 3. */
+  minFrequentPicks?: number;
+}
+
+const UNIVERSAL_DEFAULTS: Required<Omit<BuildUniversalOptions, "featured" | "affinity" | "known">> =
+  { maxFeatured: 5, maxFrequent: 2, minFrequentPicks: 3 };
+
+/**
+ * Cross-profile combine suggestions surfaced under *every* primary: the curated
+ * `_featured.yaml` set (where profiles like `improver` live) plus the profiles
+ * the user actually picks most often, mined from session history. Featured wins
+ * on overlap and ordering; frequency fills the remaining slots. Both are
+ * filtered to installed profiles and capped so the combine list stays short.
+ *
+ * Pure: the picker offers the result *unchecked* (a hint, never an auto-pin),
+ * de-duped against recommends/history/detected. Empty featured + empty affinity
+ * yields an empty list.
+ */
+export function buildUniversalSuggestions(opts: BuildUniversalOptions): UniversalSuggestion[] {
+  const o = { ...UNIVERSAL_DEFAULTS, ...opts };
+  const out: UniversalSuggestion[] = [];
+  const seen = new Set<string>();
+
+  // Curated featured first, in declared order, capped.
+  for (const name of o.featured) {
+    if (out.length >= o.maxFeatured) break;
+    if (seen.has(name) || !o.known.has(name)) continue;
+    seen.add(name);
+    out.push({ name, origin: "featured" });
+  }
+
+  // Frequency fills the rest: own-picks above the floor, highest first.
+  const frequent = [...o.affinity.entries()]
+    .filter(([name, a]) => o.known.has(name) && !seen.has(name) && a.picks >= o.minFrequentPicks)
+    .sort((x, y) => y[1].picks - x[1].picks || x[0].localeCompare(y[0]))
+    .slice(0, o.maxFrequent);
+  for (const [name] of frequent) {
+    seen.add(name);
+    out.push({ name, origin: "frequent" });
+  }
+
+  // Pinned companions (gstack) close the list: always offered under every
+  // primary, after featured/frequent so those keep their slots. De-duped (a
+  // pinned profile that's also featured keeps the earlier featured origin) and
+  // known-filtered like the rest, so an uninstalled pin silently drops.
+  for (const name of UNIVERSAL_COMPANIONS) {
+    if (seen.has(name) || !o.known.has(name)) continue;
+    seen.add(name);
+    out.push({ name, origin: "pinned" });
+  }
+
+  return out;
+}
+
 function defaultReadLines(): string[] {
   const path = sessionLogPath();
   if (!existsSync(path)) return [];

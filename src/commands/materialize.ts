@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 
 import { loadProfile } from "../lib/profile-loader";
 import { resolveActiveProfile } from "../lib/cwd-resolver";
-import { getAdapter, AGENT_IDS, ADAPTERS } from "../lib/agent-adapters";
+import { getAdapter, AGENT_IDS, } from "../lib/agent-adapters";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");

@@ -15,7 +15,7 @@
  */
 
 import * as p from "@clack/prompts";
-import { existsSync, readFileSync, writeFileSync, appendFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, appendFileSync, } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";

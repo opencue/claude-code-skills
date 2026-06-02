@@ -16,15 +16,14 @@
  */
 
 import { readFileSync, existsSync, lstatSync, readlinkSync, readdirSync } from "node:fs";
-import { readFile, writeFile, readdir, lstat, rm } from "node:fs/promises";
+import { readFile, writeFile, rm } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 
 import { listProfiles, loadProfile } from "../lib/profile-loader";
 import { listAllSkillIds } from "../lib/resolver-local";
-import { findIncompleteSkills, fetchCompanionFiles, detectSkillPath, readSourceFile } from "../lib/companion-fetch";
+import { findIncompleteSkills, fetchCompanionFiles, readSourceFile } from "../lib/companion-fetch";
 import { detectMissingDependencies } from "../lib/skill-dependencies";
 import { shimInstalled, runInstall } from "./shell";
 import { findRealClaudeBin } from "../lib/claude-binary";

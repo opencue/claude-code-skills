@@ -12,8 +12,8 @@
  *   - --markdown: one-liner for README
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join, resolve, dirname } from "node:path";
+import { writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadProfile, listProfiles } from "../lib/profile-loader";

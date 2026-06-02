@@ -13,6 +13,8 @@
 # list lights up bucket-by-bucket as you save each one. The pre-merge loadouts
 # (webshop, marketing) stay featured during the transition.
 featured:
+  # --- focused workflow profiles ---
+  - improver   # 📈 plan → rank by ROI → goal-with-a-check → improve existing repos
   # --- consolidation target: the 8 (appear once created) ---
   - commerce
   - growth

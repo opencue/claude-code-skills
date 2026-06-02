@@ -11,7 +11,7 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
-import { loadProfile, listProfiles } from "../lib/profile-loader";
+import { loadProfile, } from "../lib/profile-loader";
 import { listAllSkillIds } from "../lib/resolver-local";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 
@@ -131,33 +131,58 @@ function tokenizeText(text: string): string[] {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, " ").split(/\s+/).filter(t => t.length > 2);
 }
 
+// Bound the session scan so `cue suggest` stays fast regardless of how large
+// the user's history is: read the most-recent transcripts first, up to a file
+// and total-byte budget. Without this, a heavy user's ~/.claude/projects (many
+// large .jsonl files) makes both this scan and scoreSkills run for minutes.
+// `CUE_SUGGEST_SESSIONS_DIR` overrides the source dir (tests use it to stay
+// hermetic). Transcripts beyond the budget are skipped — recent sessions are
+// the relevant signal anyway.
+const MAX_SESSION_FILES = 100;
+const MAX_SESSION_BYTES = 2_000_000;
+const PER_FILE_BYTES = 100_000;
+
 function scanSessions(cutoffMs: number): string[] {
-  const projectsDir = join(homedir(), ".claude", "projects");
+  const projectsDir = process.env.CUE_SUGGEST_SESSIONS_DIR ?? join(homedir(), ".claude", "projects");
   if (!existsSync(projectsDir)) return [];
 
-  const chunks: string[] = [];
+  // Collect candidate transcripts newer than the cutoff, with mtime for ranking.
+  const candidates: Array<{ path: string; mtimeMs: number }> = [];
   try {
     const dirs = readdirSync(projectsDir).filter(d => {
       try { return statSync(join(projectsDir, d)).isDirectory(); } catch { return false; }
     });
     for (const dir of dirs) {
       const dirPath = join(projectsDir, dir);
-      const files = readdirSync(dirPath).filter(f => f.endsWith(".jsonl"));
+      let files: string[];
+      try { files = readdirSync(dirPath).filter(f => f.endsWith(".jsonl")); } catch { continue; }
       for (const f of files) {
         const fPath = join(dirPath, f);
         try {
           const st = statSync(fPath);
           if (st.mtimeMs < cutoffMs) continue;
-          // Read first 100KB of each file
-          const fd = require("node:fs").openSync(fPath, "r");
-          const buf = Buffer.alloc(100_000);
-          const n = require("node:fs").readSync(fd, buf, 0, 100_000, 0);
-          require("node:fs").closeSync(fd);
-          chunks.push(buf.toString("utf8", 0, n));
+          candidates.push({ path: fPath, mtimeMs: st.mtimeMs });
         } catch {}
       }
     }
   } catch {}
+
+  // Most-recent first, then read up to the file/byte budget.
+  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  const fs = require("node:fs");
+  const chunks: string[] = [];
+  let total = 0;
+  for (const { path: fPath } of candidates) {
+    if (chunks.length >= MAX_SESSION_FILES || total >= MAX_SESSION_BYTES) break;
+    try {
+      const fd = fs.openSync(fPath, "r");
+      const buf = Buffer.alloc(PER_FILE_BYTES);
+      const n = fs.readSync(fd, buf, 0, PER_FILE_BYTES, 0);
+      fs.closeSync(fd);
+      chunks.push(buf.toString("utf8", 0, n));
+      total += n;
+    } catch {}
+  }
   return chunks;
 }
 

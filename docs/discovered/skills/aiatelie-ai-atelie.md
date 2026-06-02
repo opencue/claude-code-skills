@@ -2,7 +2,7 @@
 title: "aiatelie/ai-atelie — Claude Code skill discovered by cue"
 description: "Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composab"
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, skill, creative-media, frontend]
 ---
 

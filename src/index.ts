@@ -154,10 +154,10 @@ function similarity(a: string, b: string): number {
 async function checkForUpdate(currentVersion: string): Promise<void> {
   const { existsSync, readFileSync: rf, writeFileSync: wf, mkdirSync } = await import("node:fs");
   const { join } = await import("node:path");
-  const { homedir } = await import("node:os");
+  const { configDir } = await import("./lib/config-paths");
 
-  const configDir = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "cue");
-  const checkFile = join(configDir, ".last-update-check");
+  const cfgDir = configDir();
+  const checkFile = join(cfgDir, ".last-update-check");
 
   // Only check once per 24 hours
   if (existsSync(checkFile)) {
@@ -173,7 +173,7 @@ async function checkForUpdate(currentVersion: string): Promise<void> {
   if (!latest) return;
 
   // Save check timestamp
-  mkdirSync(configDir, { recursive: true });
+  mkdirSync(cfgDir, { recursive: true });
   wf(checkFile, String(Date.now()));
 
   // Compare versions
@@ -192,8 +192,8 @@ async function checkForUpdate(currentVersion: string): Promise<void> {
     const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
     const answer = await new Promise<string>((resolve) => {
       rl.question("     Install now? [y/N] ", (a) => { rl.close(); resolve(a); });
-      // Default to "no" if the user doesn't answer — never auto-install
-      // a global package unattended.
+      // Auto-decline after 5 seconds — never install a new global without an
+      // affirmative y/yes. Walking away from the terminal must be a no-op.
       setTimeout(() => { rl.close(); resolve("n"); }, 5000);
     });
     if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
@@ -215,17 +215,20 @@ async function main(argv: string[]): Promise<number> {
   const args = argv.slice(2);
 
   // Update check — never during a live agent launch. The `claude`/`codex`
-  // shim is `exec cue launch ...`, so running it here would open a readline
-  // on the agent's stdin (stealing keystrokes) and could fire a blocking
+  // shim is `exec cue launch ...`, so running it here would open a readline on
+  // the agent's stdin (stealing keystrokes) and could fire a blocking
   // `npm install -g` mid-session. Skip for any command that spawns an agent
-  // (`launch`, plus `quick`/`playground` which spawn claude directly), when
-  // launching (CUE_LAUNCHING), in CI, or when stdin isn't an interactive TTY.
+  // (`launch`, plus `quick`/`playground`), for trivial or non-interactive
+  // invocations, when launching (CUE_LAUNCHING), or in CI.
   const AGENT_LAUNCH_COMMANDS = new Set(["launch", "quick", "playground"]);
+  const TRIVIAL_ARGS = new Set(["--version", "-v", "version", "--help", "-h", "help"]);
   const skipUpdateCheck =
     AGENT_LAUNCH_COMMANDS.has(args[0] ?? "") ||
+    TRIVIAL_ARGS.has(args[0] ?? "") ||
     process.env.CUE_LAUNCHING === "1" ||
     !!process.env.CI ||
-    !process.stdin.isTTY;
+    !process.stdin.isTTY ||
+    !process.stdout.isTTY;
   if (!skipUpdateCheck) checkForUpdate(readVersion()).catch(() => {});
 
   if (args.length === 0) {

@@ -36,13 +36,21 @@ function parseExplicitDeps(content: string): string[] {
 /**
  * Detect implicit MCP dependencies from mcp__<server>__<tool> references.
  */
+/**
+ * Pseudo-MCP names the *host* provides, not something cue installs. `conductor`
+ * is the host orchestrator that exposes tools like
+ * `mcp__conductor__AskUserQuestion`; skills reference it only as documentation,
+ * so it must never be reported as a missing dependency.
+ */
+const HOST_PROVIDED_MCPS = new Set(["conductor"]);
+
 function parseImplicitDeps(content: string): string[] {
   const refs = content.match(/mcp__([a-zA-Z][a-zA-Z0-9_-]*)__/g);
   if (!refs) return [];
   const servers = new Set<string>();
   for (const ref of refs) {
     const match = ref.match(/^mcp__([a-zA-Z][a-zA-Z0-9_-]*)__$/);
-    if (match) servers.add(match[1]!);
+    if (match && !HOST_PROVIDED_MCPS.has(match[1]!)) servers.add(match[1]!);
   }
   return [...servers];
 }

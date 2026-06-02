@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_CONFIG_DIR}/hooks/next-steps-nudge.sh",
+            "description": "Stop hook: observability + opt-in nudge for the meta/next-steps closing. Always appends one next_steps event to ~/.config/cue/analytics.jsonl (was the turn substantive? did it end with a Next steps block?) so adoption is measurable. Only warns (stderr, never blocks) when ${HOME}/.config/cue/next-steps-nudge exists. Off by default. Fail-open; suppress one turn with [skip-next-steps].",
+            "id": "cue:stop:next-steps-nudge"
+          }
+        ]
+      }
+    ]
+  }
+}

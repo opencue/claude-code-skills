@@ -2,7 +2,7 @@
 
 _Last updated: 2026-05-24_
 
-**Short answer:** [skillport](https://github.com/search?q=skillport) is a skill installer — it pulls SKILL.md files from a registry into your `~/.claude/skills/` directory. [cue](https://github.com/opencue/claude-code-skills) is an agent profile manager — it scopes skills + MCPs + plugins + persona + playbooks + quality gates per-directory, with inheritance, materialized isolation, and a failure-feedback loop.
+**Short answer:** [skillport](https://github.com/search?q=skillport) is a skill installer — it pulls SKILL.md files from a registry into your `~/.claude/skills/` directory. [cue](https://github.com/opencue/cuecards) is an agent profile manager — it scopes skills + MCPs + plugins + persona + playbooks + quality gates per-directory, with inheritance, materialized isolation, and a failure-feedback loop.
 
 Pick **skillport** if you want a Homebrew-for-Claude-Code skill index. Pick **cue** if you want per-project agent loadouts that compose into expert agents.
 

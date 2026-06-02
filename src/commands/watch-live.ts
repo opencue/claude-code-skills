@@ -5,7 +5,7 @@
  * On change: re-runs materialization with 500ms debounce.
  */
 
-import { watch, existsSync, readFileSync } from "node:fs";
+import { watch, existsSync, } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

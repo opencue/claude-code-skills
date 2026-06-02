@@ -26,7 +26,7 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
 import { clusterByKeywords, type ClusterItem } from "../lib/cluster-skills";
-import { readEvents, type SessionEvent } from "../lib/analytics";
+import { readEvents, } from "../lib/analytics";
 import { findRealClaudeBin } from "../lib/claude-binary";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");

@@ -33,7 +33,6 @@ import {
   type ResolvedPlugin,
   type ResolvedProfile,
   type ResolvedSkill,
-  type SkillCondition,
   type SkillRef,
   SchemaViolation,
 } from "../../profiles/_types";
@@ -549,7 +548,19 @@ export function parseProfileSelector(selector: string): string[] {
       `Profile selector "${selector}" is empty after parsing`,
     );
   }
-  return parts;
+  // Collapse duplicate parts, order preserved. A selector can accumulate
+  // repeats — a stale pin, a Recent/Featured row built from an already-duped
+  // selector, or a composite primary whose part is also offered as a companion.
+  // Loading the same profile twice bloats the materialized CLAUDE.md and the
+  // token count for no benefit (skills/mcps fold to a set anyway).
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const part of parts) {
+    if (seen.has(part)) continue;
+    seen.add(part);
+    unique.push(part);
+  }
+  return unique;
 }
 
 /** True when the selector names two or more profiles to merge. */
@@ -676,7 +687,11 @@ export async function loadProfile(name: string): Promise<ResolvedProfile> {
     const chain = await buildInheritanceChain(part);
     resolved.push(foldChain(chain));
   }
-  return foldComposite(name, resolved);
+  // Name the composite from the deduped parts, not the raw selector: a duped
+  // selector ("a+b+a") loads correct (once-each) resources but must not name
+  // a redundant runtime dir / CLAUDE.md path — that splits the materializer
+  // cache and resurrects the duplicated-profile display bug downstream.
+  return foldComposite(parts.join("+"), resolved);
 }
 
 /**

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for frontend"
 description: "5 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
@@ -15,17 +15,15 @@ tags: [claude-code, frontend, skills, mcp, ai-agents]
 
 ---
 
-<a id="mustbesimo-cinematic-scroll-skill"></a>
-## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
+<a id="mobilereality-mdma"></a>
+## 💎 [MobileReality/mdma](https://github.com/MobileReality/mdma)
 
-**★ 1** · exceptional (score 13.8) · TypeScript · tags: agent-skill, claude-skill, cursor, fal-ai, framer-motion
+**★ 13** · exceptional (score 11) · JavaScript · tags: agent-skills, ai-agents, claude-skill, generative-ui, interactive-markdown
 
-Free, MIT Agent Skill (Claude/Cursor/Hermes) for cinematic scroll-driven websites — pinned chapters, parallax, 3D tilt, and full Shopify-Editions-style release pages with AI-generated visuals.
-
-✅ SKILL.md
+Interactive documents from Markdown. Extends MD with forms, approvals, webhooks, and more — built for next gen apps
 
 ```bash
-cue skills add MustBeSimo/cinematic-scroll-skill --profile frontend
+cue skills add MobileReality/mdma --profile frontend
 ```
 
 ---
@@ -33,7 +31,7 @@ cue skills add MustBeSimo/cinematic-scroll-skill --profile frontend
 <a id="suanfishxyy-suanfish-design-system"></a>
 ## 💎 [SuanFishXYY/suanfish-design-system](https://github.com/SuanFishXYY/suanfish-design-system)
 
-**★ 6** · exceptional (score 11) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
+**★ 6** · exceptional (score 10.9) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
 
 🐟 Suanfish Design System — 33 specialized AI design agents across 7 tiers with REJECT mechanism. Multi-agent design language SKILL for Claude Code / Codex CLI / Copilot CLI. v2.5 adds AI-native Path G (streaming · tool-calls · reasoning · citations · artifacts).
 
@@ -58,6 +56,19 @@ cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
 
 ---
 
+<a id="ystherr-wechat-article-formatter-skill"></a>
+## ✨ [ystherr/wechat-article-formatter-skill](https://github.com/ystherr/wechat-article-formatter-skill)
+
+**★ 1** · strong (score 7.8) · CSS · tags: claude, claude-skill, crawler, data-science, demo
+
+🎨 Format Markdown to styled HTML for WeChat articles, with automatic image uploads and custom CSS for optimal readability.
+
+```bash
+cue skills add ystherr/wechat-article-formatter-skill --profile frontend
+```
+
+---
+
 <a id="aiatelie-ai-atelie"></a>
 ## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
 
@@ -67,19 +78,6 @@ Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed,
 
 ```bash
 cue skills add aiatelie/ai-atelie --profile frontend
-```
-
----
-
-<a id="davidzhaozz-opendev"></a>
-## 🔹 [davidzhaozz/openDev](https://github.com/davidzhaozz/openDev)
-
-**★ 2** · potential (score 3.1) · TypeScript
-
-openDev is a macOS desktop IDE for JavaScript and TypeScript with Claude integrated in the core. Click any element in the embedded browser to capture its CSS path, computed styles, and a screenshot — then   ▎  ship it to the AI as context. Built-in MySQL, Postgres, and ES client. Every panel is an MCP endpoint your CLI agents can drive.
-
-```bash
-cue skills add davidzhaozz/openDev --profile frontend
 ```
 
 ---

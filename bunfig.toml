@@ -1,2 +1,13 @@
 [test]
-pathIgnorePatterns = ["profiles/_cache/**", "resources/skills/skills/**"]
+# Scope `bun test` to cue's own suite. The excluded trees are vendored or
+# local-only (git-ignored on a fresh clone) and ship their own toolchains, so
+# running their tests here only adds noise/failures unrelated to cue:
+#   profiles/_cache, resources/skills/skills — submodule + cached skill content
+#   vendor, agentshield, .claude — local-only working copies (not in CI)
+pathIgnorePatterns = [
+  "profiles/_cache/**",
+  "resources/skills/skills/**",
+  "vendor/**",
+  "agentshield/**",
+  ".claude/**",
+]

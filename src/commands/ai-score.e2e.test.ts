@@ -8,6 +8,11 @@ import { join } from "node:path";
 
 const CUE_BIN = join(import.meta.dir, "../index.ts");
 
+// Skip when a child `bun` can't be spawned (some sandboxes / odd PATH setups);
+// these tests shell out to `bun run` and would otherwise hard-fail the suite
+// with "Executable not found in $PATH: bun". CI installs bun via setup-bun.
+const BUN_SPAWNABLE = spawnSync("bun", ["--version"], { encoding: "utf8" }).status === 0;
+
 function cue(args: string[]): { status: number; stdout: string; stderr: string } {
   const res = spawnSync("bun", ["run", CUE_BIN, ...args], {
     encoding: "utf8",
@@ -16,7 +21,7 @@ function cue(args: string[]): { status: number; stdout: string; stderr: string }
   return { status: res.status ?? 1, stdout: res.stdout ?? "", stderr: res.stderr ?? "" };
 }
 
-describe("cue ai", () => {
+describe.skipIf(!BUN_SPAWNABLE)("cue ai", () => {
   test("matches python for python/fastapi description", () => {
     const res = cue(["ai", "python fastapi sqlalchemy"]);
     expect(res.status).toBe(0);
@@ -68,7 +73,7 @@ describe("cue ai", () => {
   });
 });
 
-describe("cue score", () => {
+describe.skipIf(!BUN_SPAWNABLE)("cue score", () => {
   test("scores a specific profile", () => {
     const res = cue(["score", "--profile", "core"]);
     expect(res.status).toBe(0);

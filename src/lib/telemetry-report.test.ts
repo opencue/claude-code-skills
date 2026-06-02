@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { mkdtempSync, rmSync, } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { analyticsPath, enable } from "./telemetry-consent";
+import { enable } from "./telemetry-consent";
 import { recordEvent } from "./analytics";
 import { compositeReport, missLeaderboard, topSkills, zombies } from "./telemetry-report";
 

@@ -53,11 +53,11 @@ Some specifics:
 - Works with Claude Code, Codex, Cursor, Cline, Gemini CLI, Copilot, Windsurf,
   Roo Code, Amp, Aider — 10+ agents
 
-The discovery side is the surprising part. We've already indexed ~500 skill repos
+The discovery side is the surprising part. We've already indexed ~360 skill repos
 and the per-profile pages get cited by AI search (Perplexity, ChatGPT search,
 Google AI Overviews) because they ship JSON-LD ItemList schema.
 
-MIT license. Repo: https://github.com/opencue/claude-code-skills
+MIT license. Repo: https://github.com/opencue/cuecards
 
 What I'd love feedback on:
 1. Anyone else writing per-project agent configs by hand? What pain points

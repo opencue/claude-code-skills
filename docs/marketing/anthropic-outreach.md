@@ -41,17 +41,17 @@ Anthropic's devrel emails: `devrel@anthropic.com` (general), or find a
 specific person on the Claude Code team via their public LinkedIn or
 GitHub profile.
 
-**Subject**: `cue — open-source profile manager for Claude Code (500+★, used by N teams)`
+**Subject**: `cue — open-source agent profile manager for Claude Code & Codex`
 
 **Body**:
 
 ```text
 Hi [Name],
 
-I'm the maintainer of cue (github.com/opencue/claude-code-skills), an open-source profile
-manager for Claude Code and Codex CLI. It's been growing organically for
-~6 months — currently at [N] stars, [N] npm weekly downloads, and indexed in
-the discovery engine are ~500 community-built skill repos that I think your
+I'm the maintainer of cue (github.com/opencue/cuecards), an open-source profile
+manager for Claude Code and Codex CLI. It's early but growing — currently at
+[N] stars, [N] npm weekly downloads, and the discovery engine has indexed
+~360 community-built skill repos that I think your
 docs team would find useful.
 
 A few specific reasons I'm reaching out:

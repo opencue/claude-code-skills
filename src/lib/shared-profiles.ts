@@ -16,6 +16,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+import { cacheDir } from "./config-paths";
 
 export interface SharedRef {
   /** Originating GitHub user / org. */
@@ -279,9 +280,7 @@ export function registryIndexUrl(): string {
 
 /** Path of the cached index.json on disk. */
 export function indexCachePath(): string {
-  const xdg = process.env.XDG_CACHE_HOME;
-  const base = xdg && xdg.length > 0 ? xdg : join(homedir(), ".cache");
-  return join(base, "cue", "registry-index.json");
+  return join(cacheDir(), "registry-index.json");
 }
 
 export interface IndexCacheEntry {

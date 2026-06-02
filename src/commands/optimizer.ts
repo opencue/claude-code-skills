@@ -416,9 +416,6 @@ Examples:
   for (let i = 0; i < reports.length; i++) {
     const r = reports[i]!;
     const cliCount = r.clis.size;
-    const isLast = i === reports.length - 1;
-    const connector = isLast ? "╰" : "├";
-    const pipe = isLast ? " " : "│";
 
     // Profile header
     const profileLogoPath = join(PROFILES_DIR, r.name, "logo.png");

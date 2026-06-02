@@ -413,6 +413,17 @@ describe("parseProfileSelector", () => {
     expect(() => parseProfileSelector("+++")).toThrow(/empty/i);
   });
 
+  test("duplicate parts collapse, first-occurrence order preserved", () => {
+    // A stale pin / Recent row can carry repeats — loading a profile twice
+    // bloats the materialized CLAUDE.md, so the parser de-dupes.
+    expect(parseProfileSelector("gstack+higgsfield+postizz+higgsfield+postizz+gstack")).toEqual([
+      "gstack",
+      "higgsfield",
+      "postizz",
+    ]);
+    expect(parseProfileSelector("a+a+a")).toEqual(["a"]);
+  });
+
   test("isCompositeSelector recognizes ≥2 parts", () => {
     expect(isCompositeSelector("postizz")).toBe(false);
     expect(isCompositeSelector("postizz+trendradar")).toBe(true);

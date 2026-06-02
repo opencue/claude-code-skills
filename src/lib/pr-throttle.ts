@@ -14,13 +14,9 @@
 
 import { mkdirSync, readFileSync, writeFileSync, existsSync, renameSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { homedir } from "node:os";
+import { cacheDir } from "./config-paths";
 
-const DEFAULT_PATH = join(
-  process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"),
-  "cue",
-  "pr-opened.json",
-);
+const DEFAULT_PATH = join(cacheDir(), "pr-opened.json");
 
 export const DEFAULT_COOLDOWN_DAYS = 90;
 export const DAILY_CAP = 25;

@@ -6,7 +6,7 @@ Thanks for your interest in contributing! cue is an open-source CLI that manages
 
 ```bash
 # Clone
-git clone https://github.com/opencue/claude-code-skills.git ~/Documents/cue
+git clone https://github.com/opencue/cuecards.git ~/Documents/cue
 cd ~/Documents/cue
 
 # Install deps (requires bun >= 1.0)

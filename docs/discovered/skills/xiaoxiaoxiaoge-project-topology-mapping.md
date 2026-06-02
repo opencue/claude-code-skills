@@ -2,7 +2,7 @@
 title: "xiaoxiaoxiaoge/project-topology-mapping — Claude Code skill discovered by cue"
 description: "AI 驱动的项目拓扑扫描工具，专为 Claude Code 设计。生成完整、持久化的项目结构图，包含数据流分析、变异点检测、前后端映射。"
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 
@@ -17,7 +17,7 @@ tags: [claude-code, skill, core]
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 13.3 based on:
 - ✅ Contains SKILL.md
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-01
+- 🗓️ Last pushed: 2026-06-02
 - 🏷️ Tags: ai-coding-assistant, claude-code, claude-code-skill, code-structure-analysis, data-flow-analysis, developer-tools, project-scanner, project-topology
 
 ## Best fit cue profiles

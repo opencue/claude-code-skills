@@ -2,7 +2,7 @@
 title: "terrence-kira/claude-statusline — Claude Code skill discovered by cue"
 description: "A Claude Code statusline with gradient progress bars, color-graded session effort, and worktree-aware paths"
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 

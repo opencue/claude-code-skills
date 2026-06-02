@@ -22,7 +22,7 @@
  * expected; we skip them and keep going.
  */
 
-import { existsSync, readdirSync, readFileSync, readlinkSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, readlinkSync, } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 

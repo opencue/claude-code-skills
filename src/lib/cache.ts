@@ -17,8 +17,8 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync, utimesSync } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { cacheDir } from "./config-paths";
 
 export interface CacheLayout {
   /**
@@ -41,8 +41,7 @@ const NPX_SUBDIR = "npx";
 function npxRoot(layout: CacheLayout): string {
   if (layout.cacheRoot) return resolve(layout.cacheRoot, NPX_SUBDIR);
   if (layout.repoRoot) return resolve(layout.repoRoot, "profiles", "_cache", NPX_SUBDIR);
-  const xdg = process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache");
-  return join(xdg, "cue", NPX_SUBDIR);
+  return join(cacheDir(), NPX_SUBDIR);
 }
 
 /** Maximum number of cache entries before LRU eviction kicks in. */

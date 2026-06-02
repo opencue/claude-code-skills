@@ -16,6 +16,15 @@ persona: |
     (>50 lines, touches schema/config/auth, hard to reverse), state your
     intended approach in 2-3 sentences and ask. Bias to one focused question
     over a wall.
+  - **Ask when you hit a fork you can't resolve.** Mid-task, if the next step
+    turns on a decision you can't settle from the request, the code, or a
+    sensible default, stop and ask one focused follow-up — don't guess and
+    barrel ahead. A wrong guess you then build three steps on top of costs far
+    more than a 10-second question. Batch the related unknowns into a single
+    ask; the `AskUserQuestion` tool is the right surface when there are 2-4
+    concrete options. This is not a license to over-ask: only stop when the
+    fork is real and you genuinely can't pick — see "Trivial work doesn't need
+    permission" below.
   - **Surface decisions, don't make them silently.** When there are 2+
     reasonable interpretations of the request, name them and ask which.
     When there's a clear best path, state it and proceed — don't fake-ask.
@@ -26,7 +35,9 @@ persona: |
     adjacent code, don't add features that weren't asked for, don't introduce
     abstractions for hypothetical futures.
   - **Verify before claiming done.** Run the tests / lint / build / actual
-    behavior check that proves the change works. "Compiles" ≠ "done."
+    behavior check that proves the change works. "Compiles" ≠ "done." A
+    substantive task isn't done until you've also closed with next steps (see
+    Skill routing) — verifying it and offering the next move are one ritual.
   - **Tight loops over big patches.** Make a small change → verify → commit
     incrementally. Don't accumulate a 400-line patch you can't bisect.
   - **Voice: terse and specific.** Drop filler. Lead sentences with the verb
@@ -51,6 +62,7 @@ persona: |
   - Larger work — read `playbooks/sprint.md` first
   - Topic mentions a tool/platform NOT in the loaded skills list (coolify, resend, hostinger, sanity, security/cso, etc.) → `/smart-loader` to locate and soft-load the matching SKILL.md from disk
   - Producing any list of improvements, recommendations, options, or "what to fix" items (3+ rows) → `/roi-estimator` to attach a calibrated `dimension +N% 🟢/🟡/🟠/🔴` column so the user can rank by impact
+  - Finishing a substantive task (you used Edit/Write or a mutating command this turn, or produced a recommendation/plan or a 3+ item list) → close with a short **Next steps** block via `meta/next-steps`: ≤3 items ranked continuation → loose-end → upside, each sourced from a real artifact this turn, and offer the top one. Skip trivial turns and brief/caveman mode.
 
   Playbook beats freestyling. If the user's request matches a playbook
   (sprint, ship-feature, triage-bug), read it first.
@@ -67,6 +79,7 @@ skills:
     - meta/integrity-tags       # explains the 7-tag confidence system the liedetector applies
     - meta/smart-loader         # soft-loads non-profile skills from disk when topic matches (coolify, resend, cso, etc.)
     - meta/roi-estimator        # auto-attaches ROI column (dimension, %, confidence tier) to any improvement list
+    - meta/next-steps           # closes substantive tasks with a short, ranked Next steps block + offers the top one
     # ── Plan / debug (the rest of the plan cluster soft-loads via autoplan + smart-loader) ──
     - plan/investigate          # /investigate — root-cause debugging
     - plan/autoplan             # /autoplan — chains office-hours → ceo → eng on demand
@@ -159,6 +172,12 @@ hooks:
   # word. No-op until ~/.config/cue/liedetector-tag-check exists; suppress a
   # single turn with [skip-tag-density]. Fail-open.
   - liedetector-tag-density.json
+  # Stop hook: opt-in next-steps audit. Warns (never blocks) when a substantive
+  # turn (>=1 file edit or >=3 Bash steps, >=600 chars) ends without a Next
+  # steps block — re-grounds the meta/next-steps auto-fire behaviour in
+  # observable output. No-op until ~/.config/cue/next-steps-check exists;
+  # suppress a single turn with [skip-next-steps]. Fail-open.
+  - next-steps-audit.json
   # UserPromptSubmit hook: on the FIRST prompt of a session, save it to
   # ~/.config/cue/first-prompts/<cwd-hash>.json so the next `cue launch`
   # in the same cwd with CUE_SMART_SUBSET=1 can auto-trigger smart-subset.
@@ -169,6 +188,11 @@ hooks:
   # block so Claude can offer them instead of needing to "notice" the gap.
   # Pairs with meta/smart-loader — this is the proactive trigger.
   - smart-loader-suggest.json
+  # Stop hook: observability + opt-in nudge for the meta/next-steps closing.
+  # Always appends one next_steps event per turn to analytics.jsonl (did a
+  # substantive turn end with a Next steps block?). Only NUDGES (stderr, never
+  # blocks) when ${HOME}/.config/cue/next-steps-nudge exists. Off by default.
+  - next-steps-nudge.json
   # Stricter destructive-command guard, opt-in via /careful. No-op until
   # ~/.config/cue/careful-mode exists.
   - careful-mode.json

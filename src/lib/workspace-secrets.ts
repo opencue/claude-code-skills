@@ -25,10 +25,6 @@ function storePath(): string {
   return join(secretsDir(), "workspace-secrets.json.age");
 }
 
-function plainStorePath(): string {
-  return join(secretsDir(), "workspace-secrets.json");
-}
-
 function hasAge(): boolean {
   try {
     execSync("which age", { stdio: "pipe" });

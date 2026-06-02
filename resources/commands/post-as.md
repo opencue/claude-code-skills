@@ -9,6 +9,14 @@ End-to-end posting under a specific brand. Forces the brand kit and
 account confirmation flow so the agent can't accidentally publish under
 the wrong identity.
 
+## ⚠️ Current workflow (patched 2026-06-02 — supersedes the stale steps below)
+
+- **Account:** the live X integration is `cmpkbuwc70001rz98ksuq0ot6`, labeled "NagyVikt" but it **posts to @volariax**. Threads/IG are still placeholders. Confirm it as "@volariax".
+- **Image (Phase 4):** generate the card with an **EMPTY top band**, then composite the REAL logo post-gen with the `postiz-cards` skill: `${CUE_REPO_ROOT}/resources/skills/skills/content/postiz-cards/scripts/card.sh <raw> --brand <brand> --check "<HEADLINE WORDS>" --upload`. **NEVER** pass `logo.png` as an image-gen reference — Higgsfield redraws it (see `feedback-volaria-logo-composite`).
+- **Lint (before scheduling):** `python3 ${CUE_REPO_ROOT}/resources/skills/skills/content/postiz-cards/scripts/lint.py <draft>` — blocks >1 cashtag/tweet (X nonRetryable), em-dashes, and flags uncited stats. (Skill: `postiz-cards`.)
+- **Schedule (Phase 6):** use the `postiz` CLI (the MCP `create_post`/`ask_postiz` path is broken — no OpenAI key). Bake a **first-reply CTA** (source link + "follow @volariax") as an extra `-c`.
+- **Levers:** apply `~/Documents/volaria/volaria-content-plan.md` — front-load, ≤3 tweets, peak 13/15 UTC, one `$TICKER` + 1-2 `#`, per-pillar visual motif.
+
 ## Parse arguments
 
 - `<brand>` (required) — must match a directory under `profiles/postizz/brands/`

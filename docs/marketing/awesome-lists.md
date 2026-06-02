@@ -21,19 +21,19 @@ Highest ROI of any growth task. Each PR is durable inbound traffic for years.
 Keep it under 200 chars. The recipe most awesome-lists follow:
 
 ```markdown
-- [cue](https://github.com/opencue/claude-code-skills) — Agent profile manager for Claude Code, Codex, and 10+ AI coding agents. Discover, install, and organize skills, MCPs, and plugins per-project. [![Stars](https://img.shields.io/github/stars/opencue/claude-code-skills?style=social)](https://github.com/opencue/claude-code-skills)
+- [cue](https://github.com/opencue/cuecards) — Agent profile manager for Claude Code, Codex, and 10+ AI coding agents. Discover, install, and organize skills, MCPs, and plugins per-project. [![Stars](https://img.shields.io/github/stars/opencue/cuecards?style=social)](https://github.com/opencue/cuecards)
 ```
 
 Variant emphasizing **discovery** (for awesome-mcp-servers):
 
 ```markdown
-- [cue](https://github.com/opencue/claude-code-skills) — Discover MCP servers + skills via GitHub Code Search, score by quality signal, install into per-profile bundles. CLI, MIT-licensed. [![Stars](https://img.shields.io/github/stars/opencue/claude-code-skills?style=social)](https://github.com/opencue/claude-code-skills)
+- [cue](https://github.com/opencue/cuecards) — Discover MCP servers + skills via GitHub Code Search, score by quality signal, install into per-profile bundles. CLI, MIT-licensed. [![Stars](https://img.shields.io/github/stars/opencue/cuecards?style=social)](https://github.com/opencue/cuecards)
 ```
 
 Variant for **CLI tools** lists:
 
 ```markdown
-- [cue](https://github.com/opencue/claude-code-skills) `npm install -g cue-ai` — Profile manager + skill discovery for AI coding agents. One CLI, 10+ agents, automatic per-project profile resolution.
+- [cue](https://github.com/opencue/cuecards) `npm install -g cue-ai` — Profile manager + skill discovery for AI coding agents. One CLI, 10+ agents, automatic per-project profile resolution.
 ```
 
 ## Workflow per list
@@ -53,7 +53,7 @@ git push origin add-cue-profile-manager
 
 # 4. Open PR
 gh pr create --fill --title "Add cue — profile manager for Claude Code" --body "$(cat <<'EOF'
-**Project**: [cue](https://github.com/opencue/claude-code-skills)
+**Project**: [cue](https://github.com/opencue/cuecards)
 **License**: MIT
 **Stars**: see badge
 **What it does**: Manages Claude Code / Codex profiles. Each profile bundles skills, MCPs, plugins, rules, and slash commands. cue auto-resolves the right profile per cwd and materializes a per-profile CLAUDE_CONFIG_DIR so the agent only loads what the current task needs.

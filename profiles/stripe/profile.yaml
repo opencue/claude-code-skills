@@ -1,5 +1,6 @@
 name: stripe
 icon: "💳"
+iconImage: "logo.png"
 description: "Stripe payments — Checkout, Subscriptions, Connect, webhooks, idempotency, SCA. Pairs with webshop and medusa-dev."
 inherits: core
 recommends:

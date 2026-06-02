@@ -2,7 +2,7 @@
 
 _Last updated: 2026-05-24_
 
-**Short answer:** `claude-code-switcher` swaps between named MCP configurations — useful if you keep separate sets of MCP servers for different projects. [cue](https://github.com/opencue/claude-code-skills) does that **plus** skills, plugins, rules, commands, hooks, persona, playbooks, quality gates, and evals — a full per-directory agent loadout, not just an MCP set.
+**Short answer:** `claude-code-switcher` swaps between named MCP configurations — useful if you keep separate sets of MCP servers for different projects. [cue](https://github.com/opencue/cuecards) does that **plus** skills, plugins, rules, commands, hooks, persona, playbooks, quality gates, and evals — a full per-directory agent loadout, not just an MCP set.
 
 Pick **claude-code-switcher** if your only need is "different MCPs per project." Pick **cue** if you also want different skills, plugins, persona, and quality gates per project — without manual switching.
 

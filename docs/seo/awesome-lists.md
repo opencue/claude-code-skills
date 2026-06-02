@@ -22,7 +22,7 @@ Curated lists where cue should be submitted for backlinks + authority signals. E
 Each PR adds a single line in the "Tools" / "CLI" / "Agent management" section:
 
 ```markdown
-- [cue](https://github.com/opencue/claude-code-skills) — Agent profile manager for Claude Code, Codex, Cursor, Cline, Gemini, Copilot. Discover skills via GitHub Code Search, scope per-directory, compose into expert agents with persona + playbooks + quality gates.
+- [cue](https://github.com/opencue/cuecards) — Agent profile manager for Claude Code, Codex, Cursor, Cline, Gemini, Copilot. Discover skills via GitHub Code Search, scope per-directory, compose into expert agents with persona + playbooks + quality gates.
 ```
 
 ## Why this matters

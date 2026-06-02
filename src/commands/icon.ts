@@ -10,6 +10,7 @@ import * as p from "@clack/prompts";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 import { loadProfile } from "../lib/profile-loader";
 import { homedir } from "node:os";
+import { configDir } from "../lib/config-paths";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -19,11 +20,6 @@ const ICONS = [
   "🦈", "🐊", "🦅", "🐎", "🦁", "🐘",
 ];
 
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME
-    ? join(process.env.XDG_CONFIG_HOME, "cue")
-    : join(homedir(), ".config", "cue");
-}
 
 export async function run(args: string[]): Promise<number> {
   const profileName = args[0] ?? await resolveCurrentProfile();

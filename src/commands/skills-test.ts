@@ -65,7 +65,6 @@ function loadTestCases(skillId: string): TestCase[] {
 function runTest(skillId: string, testCase: TestCase): TestResult {
   const skillPath = join(SKILLS_ROOT, skillId, "SKILL.md");
   const skillContent = existsSync(skillPath) ? readFileSync(skillPath, "utf8").toLowerCase() : "";
-  const input = testCase.input.toLowerCase();
   const failures: string[] = [];
 
   // Check: does the skill description match the input context?

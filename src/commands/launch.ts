@@ -13,19 +13,30 @@
 
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { homedir } from "node:os";
+import { configDir } from "../lib/config-paths";
+import { debug } from "../lib/debug-log";
+import {
+  computeTokenBreakdown,
+  splitSkillBytes,
+  tokenLevelEmoji,
+  type SkillTokens,
+  type TokenBreakdown,
+} from "../lib/token-budget";
 
 import { loadProfile, listProfiles, listFeaturedProfiles, parseProfileSelector } from "../lib/profile-loader";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
-import { DIVIDER_PREFIX, runPicker, type PickerOption } from "../lib/picker";
+import { DIVIDER_PREFIX, runPicker, type PickerOption, type ProfileTally } from "../lib/picker";
 import { materializeRuntime, type McpServerConfig } from "../lib/runtime-materializer";
 import { resolveLocalSkill, listAllSkillIds } from "../lib/resolver-local";
 import { detectKittyTerminal, kittyPlaceholderLabel, transmitKittyImage } from "../lib/kitty-image";
 import { computeStats } from "../lib/analytics";
 import { detectProfileV2, type DetectionResultV2 } from "../lib/auto-detect";
+import { detectCompanions, type CompanionSignal } from "../lib/companion-detect";
 import type { ResolvedProfile } from "../../profiles/_types";
+import type { ProfileAffinity, UniversalSuggestion } from "../lib/pair-suggestions";
 import { hasWorkspaces, getActiveWorkspace, computeOverrides, resolveWorkspaceForCwd } from "../lib/workspaces";
 
 // ---------------------------------------------------------------------------
@@ -120,15 +131,6 @@ async function applyWorkspaceOverrides(profile: ResolvedProfile): Promise<Resolv
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// Config dir helper
-// ---------------------------------------------------------------------------
-
-function configDir(): string {
-  return process.env.XDG_CONFIG_HOME
-    ? join(process.env.XDG_CONFIG_HOME, "cue")
-    : join(homedir(), ".config", "cue");
-}
 
 // ---------------------------------------------------------------------------
 // Exec helper — spawn with inherited stdio so interactive sessions work
@@ -301,6 +303,7 @@ async function expandWildcards(profile: ResolvedProfile): Promise<void> {
  * Colors are emitted only when stdout is a TTY and `NO_COLOR` is unset.
  */
 const LIST_TRUNCATE = 8;
+const BREAKDOWN_MAX = 6; // per-profile skill breakdown cap before "+N more"
 const COMMANDS_PER_LINE = 4;
 const LABEL_WIDTH = 10; // "commands  " — keep visually aligned
 
@@ -320,10 +323,16 @@ export function formatProfileSummary(
     const breakdown = npxCount > 0 ? ` (${localCount} local, ${npxCount} npx)` : "";
     let line = `${label("skills")}${c.yellow(String(totalSkills))}${c.dim(breakdown)}`;
     if (parts && parts.length > 1) {
-      const split = parts
-        .map((p) => `${p.icon ? `${p.icon} ` : ""}${p.name}:${p.skills.local.length + p.skills.npx.length}`)
-        .join(" + ");
-      line += `  ${c.dim("←")} ${c.dim(split)}`;
+      const segs = parts.map(
+        (p) => `${p.icon ? `${p.icon} ` : ""}${p.name}:${p.skills.local.length + p.skills.npx.length}`,
+      );
+      // Cap the per-profile breakdown so a fat composite doesn't wrap into a
+      // multi-line wall — the headline total already carries the full picture.
+      const shown =
+        segs.length > BREAKDOWN_MAX
+          ? `${segs.slice(0, BREAKDOWN_MAX).join(" + ")} +${segs.length - BREAKDOWN_MAX} more`
+          : segs.join(" + ");
+      line += `  ${c.dim("←")} ${c.dim(shown)}`;
     }
     lines.push(line);
     if (localCount >= 5) {
@@ -409,106 +418,16 @@ function colorFns() {
 // at the call site that supplies them with real file measurements.
 // ---------------------------------------------------------------------------
 
-export interface SkillTokens {
-  /** Tokens for the YAML frontmatter (always-on, loaded into skill router). */
-  frontmatter: number;
-  /** Tokens for the rest of SKILL.md (load-on-activate). */
-  body: number;
-}
-
-export interface TokenBreakdown {
-  /** Sum of frontmatter tokens across every skill — the real always-on cost. */
-  alwaysOn: number;
-  /** Sum of body tokens — the ceiling if every skill activates this session. */
-  maxIfAllActivate: number;
-  /** Skill count for the header line. */
-  totalSkills: number;
-  /**
-   * Per-profile attribution of `alwaysOn` for composite selectors (length > 1).
-   * Each skill is credited to the first part that declares it, so per-part
-   * numbers sum to `alwaysOn` (no double-counting from overlap). Empty for
-   * single-part profiles. `icon` carries the part's emoji when declared.
-   */
-  byProfile: { name: string; icon?: string; tokens: number; skillCount: number }[];
-  /** Skills sorted by body size, descending — for the "heaviest if activated" hint. */
-  heaviestBodies: { id: string; tokens: number }[];
-}
-
-export function computeTokenBreakdown(
-  profile: ResolvedProfile,
-  parts: ResolvedProfile[] | undefined,
-  tokensForSkill: (id: string) => SkillTokens,
-): TokenBreakdown {
-  let alwaysOn = 0;
-  let maxIfAllActivate = 0;
-  const heaviestBodies: { id: string; tokens: number }[] = [];
-  for (const s of profile.skills.local) {
-    const { frontmatter, body } = tokensForSkill(s.id);
-    alwaysOn += frontmatter;
-    maxIfAllActivate += body;
-    if (body > 0) heaviestBodies.push({ id: s.id, tokens: body });
-  }
-  heaviestBodies.sort((a, b) => b.tokens - a.tokens);
-
-  const byProfile: TokenBreakdown["byProfile"] = [];
-  if (parts && parts.length > 1) {
-    const credited = new Set<string>();
-    for (const part of parts) {
-      let pTokens = 0;
-      let pCount = 0;
-      for (const s of part.skills.local) {
-        if (credited.has(s.id)) continue;
-        credited.add(s.id);
-        const { frontmatter } = tokensForSkill(s.id);
-        if (frontmatter > 0) {
-          pTokens += frontmatter;
-          pCount += 1;
-        }
-      }
-      byProfile.push({ name: part.name, icon: part.icon, tokens: pTokens, skillCount: pCount });
-    }
-  }
-
-  return {
-    alwaysOn,
-    maxIfAllActivate,
-    totalSkills: profile.skills.local.length,
-    byProfile,
-    heaviestBodies,
-  };
-}
-
-/**
- * Extract frontmatter byte length from a SKILL.md string. Returns
- * `{ frontmatter, body }` byte counts. Falls back to a token count of zero
- * when the file lacks the leading `---` block (still legal but rare).
- */
-export function splitSkillBytes(source: string): { frontmatter: number; body: number } {
-  if (!source.startsWith("---\n") && !source.startsWith("---\r\n")) {
-    return { frontmatter: 0, body: source.length };
-  }
-  // Find the closing `---` on its own line. Search starts after the opener.
-  const closer = source.indexOf("\n---", 4);
-  if (closer === -1) {
-    return { frontmatter: source.length, body: 0 };
-  }
-  // Include the closing `---\n` in the frontmatter block.
-  const fmEnd = source.indexOf("\n", closer + 1);
-  const cut = fmEnd === -1 ? source.length : fmEnd + 1;
-  return { frontmatter: cut, body: source.length - cut };
-}
-
-/**
- * Map an always-on token count to the bands we color in the CLI banner and
- * the tmux pane-border badge. Single source of truth so the two displays
- * never drift apart on threshold values.
- */
-export function tokenLevelEmoji(alwaysOn: number): "🔴" | "🟠" | "🟡" | "🟢" {
-  return alwaysOn > 15000 ? "🔴"
-    : alwaysOn > 10000 ? "🟠"
-      : alwaysOn > 5000 ? "🟡"
-        : "🟢";
-}
+// Token-budget math (SkillTokens, TokenBreakdown, computeTokenBreakdown,
+// splitSkillBytes, tokenLevelEmoji) moved to lib/token-budget.ts. Re-exported
+// here so existing importers of these from "./launch" keep resolving.
+export {
+  computeTokenBreakdown,
+  splitSkillBytes,
+  tokenLevelEmoji,
+  type SkillTokens,
+  type TokenBreakdown,
+} from "../lib/token-budget";
 
 /** Format the token-overhead block. Returns `[]` under the 2K always-on floor. */
 export function formatTokenWarning(b: TokenBreakdown): string[] {
@@ -691,6 +610,28 @@ export const SUGGESTED_MIN_CONFIDENCE = 0.5;
  */
 export const SUGGESTED_AUTO_PICK_CONFIDENCE = 0.7;
 
+/**
+ * Registered postizz brand folder names (dir basenames under
+ * profiles/postizz/brands), used by the combine companion detector to suggest
+ * postizz when the cwd is a brand dir. Best-effort: missing dir → empty set.
+ * Resolves the profiles root exactly like listProfileOptions does.
+ */
+function listPostizzBrands(): Set<string> {
+  try {
+    const profilesRoot =
+      process.env.CUE_PROFILES_DIR ??
+      process.env.SOUL_PROFILES_DIR ??
+      join(resolve(new URL(import.meta.url).pathname, "..", "..", ".."), "profiles");
+    return new Set(
+      readdirSync(join(profilesRoot, "postizz", "brands"), { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name),
+    );
+  } catch {
+    return new Set();
+  }
+}
+
 // Recent now answers "what were the last N profiles I picked," not "what do
 // I pick most often." It sorts strictly by lastUsed timestamp and applies no
 // session-count floor — a single deliberate pick yesterday belongs in Recent
@@ -801,9 +742,17 @@ function makeSelectorOption(selector: string, allProfileOpts: PickerOption[]): P
   // synthesize a self-describing row for; a bare unknown name is a stale or
   // deleted profile and is dropped (undefined) so it never shows in the picker.
   if (!selector.includes("+")) return undefined;
+  // Reuse each part's own option label so the combined row carries every part's
+  // icon — emoji or kitty image placeholder — e.g. "📈 improver + 🔒 secops + 🐻
+  // builder" instead of bare "improver + secops + builder". Parts with no
+  // resolved option (stale) fall back to the bare name.
+  const label = selector
+    .split("+")
+    .map((part) => allProfileOpts.find((o) => o.value === part)?.label ?? part)
+    .join(" + ");
   return {
     value: selector,
-    label: selector.split("+").join(" + "),
+    label,
     hint: "stacked profile",
   };
 }
@@ -966,7 +915,7 @@ export function getDefaultSelector(
       .map((s) => s.trim())
       .map((s) => s.replace(/#.*$/, "").trim())
       .filter((s) => s.length > 0 && s !== "core");
-  } catch { /* file missing -> core only */ }
+  } catch (err) { debug("launch:default-profile", err); /* missing → core only */ }
   // Dedupe while preserving order.
   const seen = new Set<string>(["core"]);
   const parts = ["core"];
@@ -1152,7 +1101,7 @@ async function loadMcpRegistry(agent: "claude-code" | "codex"): Promise<Record<s
     for (const [k, v] of Object.entries(raw.servers ?? {})) {
       merged[k] = v;
     }
-  } catch { /* master missing — keep runtime fallbacks */ }
+  } catch (err) { debug("launch:master-config", err); /* keep runtime fallbacks */ }
 
   return merged;
 }
@@ -1301,7 +1250,7 @@ async function resolveClaudeCredentialsSource(): Promise<string> {
         `▸ cue: refreshed source credentials from a sibling runtime (rotated refresh-token healed)\n`,
       );
     }
-  } catch { /* heal is best-effort — never block the launch */ }
+  } catch (err) { debug("launch:runtime-heal", err); /* best-effort — never blocks launch */ }
   return picked;
 }
 
@@ -1414,7 +1363,6 @@ export async function run(args: string[]): Promise<number> {
         const ok = await runGlobalOnboarding();
         if (ok) {
           try {
-            const { configDir } = await import("../lib/telemetry-consent");
             mkdirSync(configDir(), { recursive: true });
             writeFileSync(marker, new Date().toISOString() + "\n");
           } catch { /* non-fatal */ }
@@ -1428,32 +1376,104 @@ export async function run(args: string[]): Promise<number> {
     // The picker pre-checks empirical partners in the combine multiselect.
     // Best-effort: any failure (missing log, malformed lines) yields empty.
     let pairSuggestions: Map<string, string[]> | undefined;
+    // Affinity map (own-pick + co-occurrence counts) is mined once here and
+    // reused by the cross-profile frequency suggestions below.
+    let affinity: Map<string, ProfileAffinity> = new Map();
     try {
       const { computeAffinityMap, suggestionsByProfile } = await import("../lib/pair-suggestions");
-      const affinity = computeAffinityMap();
+      affinity = computeAffinityMap();
       const sug = suggestionsByProfile(affinity);
       pairSuggestions = new Map();
       for (const [name, partners] of sug) {
         pairSuggestions.set(name, partners.map((p) => p.name));
       }
-    } catch { /* non-fatal */ }
+    } catch (err) { debug("launch:pair-suggestions", err); }
+    // Installed profile names, computed ONCE and shared by the autodetect +
+    // companion passes below (both filter their detections to known profiles).
+    // Previously each pass re-walked listProfiles() independently.
+    let knownProfileNames = new Set<string>();
+    try {
+      knownProfileNames = new Set(await listProfiles());
+    } catch (err) { debug("launch:list-profiles", err); }
     // Cwd autodetect signals, forwarded to runPicker so it can offer a
     // "switch to <X>?" nudge when the user picks a profile that conflicts
     // with what the directory actually looks like (e.g. picking medusa-next
     // in a vite.config.ts project).
     let detected: ReadonlyArray<{ name: string; reasons: string[]; confidence: number }> = [];
     try {
-      const knownProfileNames = new Set(await listProfiles());
       detected = detectProfileV2(cwd)
         .filter((d) => knownProfileNames.has(d.profile))
         .map((d) => ({ name: d.profile, reasons: d.reasons, confidence: d.confidence }));
-    } catch { /* non-fatal */ }
+    } catch (err) { debug("launch:autodetect", err); }
+    // Content-aware combine companions: scan the cwd for asset/draft/brand
+    // signals and feed matching profiles into the combine multiselect.
+    let companions: CompanionSignal[] = [];
+    try {
+      companions = detectCompanions({ cwd, knownProfiles: knownProfileNames, brands: listPostizzBrands() });
+    } catch (err) { debug("launch:companions", err); }
+    // Cross-profile combine suggestions offered under every primary: the curated
+    // `_featured.yaml` set (improver, secops, builder, …) plus the profiles the
+    // user picks most often (from the affinity map above). Offered unchecked.
+    let universalSuggestions: UniversalSuggestion[] = [];
+    try {
+      const { buildUniversalSuggestions } = await import("../lib/pair-suggestions");
+      const featured = await listFeaturedProfiles();
+      universalSuggestions = buildUniversalSuggestions({ featured, affinity, known: knownProfileNames });
+    } catch (err) { debug("launch:universal-suggestions", err); }
+    // Per-profile resource tally for the combine multiselect's live preview +
+    // per-row hints. Memoized so each offered profile loads at most once.
+    // A shared skill-token reader feeds the always-on estimate (frontmatter
+    // bytes ÷4 ≈ tokens) — same approximation as the post-launch overhead
+    // banner below, so the picker's heads-up and the banner agree.
+    const { readFileSync: readSkillFile } = await import("node:fs");
+    const skillsRootForTally = join(
+      process.env.CUE_REPO_ROOT ?? resolve(new URL(import.meta.url).pathname, "..", "..", ".."),
+      "resources", "skills", "skills",
+    );
+    const skillTokenCache = new Map<string, SkillTokens>();
+    const tokensForSkill = (id: string): SkillTokens => {
+      const c = skillTokenCache.get(id);
+      if (c) return c;
+      let result: SkillTokens = { frontmatter: 0, body: 0 };
+      try {
+        const { frontmatter, body } = splitSkillBytes(readSkillFile(join(skillsRootForTally, id, "SKILL.md"), "utf8"));
+        result = { frontmatter: Math.ceil(frontmatter / 4), body: Math.ceil(body / 4) };
+      } catch { /* skill missing on disk → counts as 0 */ }
+      skillTokenCache.set(id, result);
+      return result;
+    };
+    const tallyCache = new Map<string, ProfileTally>();
+    const resourceTally = async (value: string): Promise<ProfileTally> => {
+      const hit = tallyCache.get(value);
+      if (hit) return hit;
+      const prof = await loadProfile(value);
+      await expandWildcards(prof);
+      const tally: ProfileTally = {
+        // Skills mirror the headline count: one entry per local skill + one per
+        // npx repo (an npx ref bundles several skills under one repo).
+        skills: [
+          ...prof.skills.local.map((s) => `local:${s.id}`),
+          ...prof.skills.npx.map((n) => `npx:${n.repo}`),
+        ],
+        mcps: prof.mcps.map((m) => m.id),
+        plugins: prof.plugins.map((pl) => pl.id),
+        commands: (prof.commands ?? []).slice(),
+        // This profile's own always-on frontmatter cost (parts=undefined → just
+        // its own skills). The picker sums these across the selection.
+        alwaysOn: computeTokenBreakdown(prof, undefined, tokensForSkill).alwaysOn,
+      };
+      tallyCache.set(value, tally);
+      return tally;
+    };
     const picked = await runPicker({
       cwd,
       options,
       noPin: isAccountAlias,
       pairSuggestions,
       detected,
+      companions,
+      universalSuggestions,
+      resourceTally,
       details: async (name) => {
         const loaded = await loadProfile(name);
         await expandWildcards(loaded);
@@ -1562,7 +1582,7 @@ export async function run(args: string[]): Promise<number> {
         try { await rmFile(hashPath, { force: true }); } catch { /* ok */ }
         process.stderr.write(`[cue] profile changed, rebuilding runtime...\n`);
       }
-    } catch { /* fail-open — staleness check is best-effort, never blocks launch */ }
+    } catch (err) { debug("launch:staleness", err); /* fail-open — never blocks launch */ }
   }
 
   // --subset / CUE_SMART_SUBSET: ask claude --print which skills are relevant
@@ -1815,13 +1835,26 @@ export async function run(args: string[]): Promise<number> {
         const duration_s = Math.round((Date.now() - new Date(startTs).getTime()) / 1000);
         recordEvent({ ts: new Date().toISOString(), event: "end", profile: profileName, agent: agentKind, cwd: process.cwd(), duration_s });
       } catch { /* best-effort */ }
-      // Sync refreshed credentials back to source so next launch has valid tokens
+      // Sync refreshed credentials back to source so next launch has valid tokens.
+      // Freshness guard (mirrors the materializer's preserve step at
+      // runtime-materializer.ts:704): write back ONLY when the runtime token is
+      // strictly newer than source. Without it, a stale runtime — e.g. a sibling
+      // profile rotated the shared source mid-session — would drag a dead, rotated
+      // token over a live one and force a re-login. Anthropic rotates the refresh
+      // token on every refresh, so the highest expiresAt holds the live token.
+      // Must stay synchronous: process.on("exit") handlers cannot await.
       if (credentialsSource) {
         try {
-          const { copyFileSync, existsSync: ex } = require("node:fs");
+          const { copyFileSync, readFileSync: rf, existsSync: ex } = require("node:fs");
           const runtimeCreds = join(runtime.runtimeDir, ".credentials.json");
           const sourceCreds = join(credentialsSource, ".credentials.json");
-          if (ex(runtimeCreds)) {
+          const expiresAt = (p: string): number => {
+            try {
+              const v = JSON.parse(rf(p, "utf8"))?.claudeAiOauth?.expiresAt;
+              return typeof v === "number" ? v : 0;
+            } catch { return 0; }
+          };
+          if (ex(runtimeCreds) && expiresAt(runtimeCreds) > expiresAt(sourceCreds)) {
             copyFileSync(runtimeCreds, sourceCreds);
           }
         } catch { /* best-effort */ }

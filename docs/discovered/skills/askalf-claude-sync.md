@@ -2,7 +2,7 @@
 title: "askalf/claude-sync — Claude Code skill discovered by cue"
 description: "Sync Claude Code sessions across machines. Pack a local CC session into a portable .ccsync file, ship it via Dropbox / iCloud / Syncthing / USB stick, unpack on"
 layout: page
-updated: 2026-06-01
+updated: 2026-06-02
 tags: [claude-code, skill, core]
 ---
 

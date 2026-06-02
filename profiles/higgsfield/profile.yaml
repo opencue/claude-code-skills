@@ -3,6 +3,9 @@ icon: "🌌"
 iconImage: "logo.png"
 description: "Higgsfield image, video, brand, marketplace, and Soul Character workflows — CLI + hosted MCP (mcp.higgsfield.ai)"
 inherits: core
+recommends:
+  - postizz         # schedule/publish the generated assets across social platforms
+  - creative-media  # broader image/video/brand asset pipeline
 
 skills:
   local:

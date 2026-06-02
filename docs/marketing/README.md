@@ -29,7 +29,7 @@ not final copy.
 - ✅ Nightly GitHub discover scan → per-profile SEO pages → published to GitHub Pages (`discover-publish.yml`)
 - ✅ Nightly `discovered.md` refresh + commit (`discover-refresh.yml`)
 - ✅ Per-repo backlink loop via `cue discover install --notify`
-- ✅ Daily digest discussion in opencue/claude-code-skills via `cue discover install --digest`
+- ✅ Daily digest discussion in opencue/cuecards via `cue discover install --digest`
 
 ## What this kit does NOT cover
 
