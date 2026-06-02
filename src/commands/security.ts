@@ -23,7 +23,7 @@ const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? res
 const SKILLS_ROOT = join(REPO_ROOT, "resources", "skills", "skills");
 const GLOBAL_SKILLS_ROOT = join(homedir(), ".claude", "skills");
 
-interface SecurityIssue {
+export interface SecurityIssue {
   code: string;
   severity: "critical" | "high" | "medium";
   skill: string;
@@ -124,7 +124,7 @@ const RULES: { code: string; severity: "critical" | "high" | "medium"; patterns:
   },
 ];
 
-function scanSkill(id: string): SecurityIssue[] {
+export function scanSkill(id: string, opts: { trustGlobalPack?: boolean } = {}): SecurityIssue[] {
   // Try both local repo skills and global ~/.claude/skills
   let path = join(SKILLS_ROOT, id, "SKILL.md");
   if (!existsSync(path)) path = join(GLOBAL_SKILLS_ROOT, id, "SKILL.md");
@@ -153,37 +153,60 @@ function scanSkill(id: string): SecurityIssue[] {
   const isGlobalPack = existsSync(join(GLOBAL_SKILLS_ROOT, id, "SKILL.md")) &&
     !existsSync(join(SKILLS_ROOT, id, "SKILL.md"));
 
+  // Category-based suppressions trust the skill's self-declared identity
+  // (frontmatter/id/path) — fine when auditing curated or local packs, but
+  // that signal is attacker-controlled for a freshly-fetched remote skill (a
+  // malicious skill could self-label as "security" to dodge SEC1-5). The
+  // freshness gate passes { trustGlobalPack: false } to run the FULL ruleset;
+  // `cue security` keeps the default (true) and its existing behavior.
+  const trustGlobal = opts.trustGlobalPack !== false;
+
   for (const rule of RULES) {
     // Skip rules for skill categories where these patterns are expected documentation
-    if ((isSecuritySkill || isGlobalPack) && ["SEC1", "SEC2", "SEC3", "SEC4", "SEC5"].includes(rule.code)) continue;
-    if (isMetaSkill && ["SEC4", "SEC5"].includes(rule.code)) continue;
-    if (isApiDocSkill && ["SEC1", "SEC2", "SEC5"].includes(rule.code)) continue;
-    if (isDesignSkill && ["SEC2"].includes(rule.code)) continue;
-    if (isOrchSkill && ["SEC4", "SEC5"].includes(rule.code)) continue;
-    if (isResearchSkill && ["SEC1", "SEC2"].includes(rule.code)) continue;
+    if (trustGlobal) {
+      if ((isSecuritySkill || isGlobalPack) && ["SEC1", "SEC2", "SEC3", "SEC4", "SEC5"].includes(rule.code)) continue;
+      if (isMetaSkill && ["SEC4", "SEC5"].includes(rule.code)) continue;
+      if (isApiDocSkill && ["SEC1", "SEC2", "SEC5"].includes(rule.code)) continue;
+      if (isDesignSkill && ["SEC2"].includes(rule.code)) continue;
+      if (isOrchSkill && ["SEC4", "SEC5"].includes(rule.code)) continue;
+      if (isResearchSkill && ["SEC1", "SEC2"].includes(rule.code)) continue;
+    }
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]!;
 
-      // Skip lines that are clearly safe contexts
-      if (/\b(MUST NOT|must not|do not|don't|never|avoid|reject|block|forbid|disallow|detect|flag|warn|alert)\b/i.test(line)) continue;
-      if (/^#|^\/\/|^\s*\*|NEVER|prohibited/i.test(line.trim())) continue;
-      // Skip lines that list things to detect/block/remove (security documentation)
-      if (/^-\s*(Remove|Add|Block|Detect|Flag|Check|Scan|Verify|Validate|Ensure)/i.test(line.trim())) continue;
-      // Skip lines about checking/testing for vulnerabilities (security review tools)
-      if (/\b(check|test|scan|verify|detect|audit|review|validate|ensure|confirm)\b.*\b(key|secret|token|credential|exposed|leak)/i.test(line)) continue;
-      // Skip lines inside code blocks (``` fenced) — these are examples
-      if (/^```/.test(line.trim())) continue;
-      // Skip lines that are curl examples showing API usage (documentation)
-      if (/^\s*(curl|fetch|wget)\s/.test(line) && /example|api\.|developers\./i.test(line)) continue;
-      // Skip lines with placeholder variables ($VARIABLE_NAME) — these are templates
-      if (/\$\{?[A-Z_]+\}?/.test(line) && /(-H|header|Authorization|Bearer)/i.test(line)) continue;
-      // Skip lines documenting CLI flags (--force, --skip-verify in help text)
-      if (/^\s*(-|•|\*|`--)/.test(line) && /flag|option|argument/i.test(lines[Math.max(0, i-3)]! + lines[Math.max(0, i-2)]! + lines[Math.max(0, i-1)]!)) continue;
-      // Skip lines that describe what a response "includes" (not an instruction to expose)
-      if (/response|returns|includes|contains/i.test(line) && rule.code === "SEC1") continue;
-      // Skip fetch() in code examples (inside ``` blocks)
-      if (isInsideCodeBlock(lines, i)) continue;
+      // Documentation-context skips cut false positives for TRUSTED skills, but
+      // they're trivially exploitable for an untrusted one — an attacker hides
+      // the payload in a ``` fence (isInsideCodeBlock), or sprinkles a benign
+      // keyword like "never"/"verify" on the same line. So they only apply in
+      // trusted mode. The gate (trustGlobalPack:false) scans EVERY line, trading
+      // more false positives for no bypass (mitigated by --allow-unsafe +
+      // leaving the skill on disk for review).
+      if (trustGlobal) {
+        // Skip lines that are clearly safe contexts
+        if (/\b(MUST NOT|must not|do not|don't|never|avoid|reject|block|forbid|disallow|detect|flag|warn|alert)\b/i.test(line)) continue;
+        if (/^#|^\/\/|^\s*\*|NEVER|prohibited/i.test(line.trim())) continue;
+        // Skip lines that list things to detect/block/remove (security documentation)
+        if (/^-\s*(Remove|Add|Block|Detect|Flag|Check|Scan|Verify|Validate|Ensure)/i.test(line.trim())) continue;
+        // Skip lines about checking/testing for vulnerabilities (security review tools)
+        if (/\b(check|test|scan|verify|detect|audit|review|validate|ensure|confirm)\b.*\b(key|secret|token|credential|exposed|leak)/i.test(line)) continue;
+        // Skip lines inside code blocks (``` fenced) — these are examples
+        if (/^```/.test(line.trim())) continue;
+        // Skip lines that are curl examples showing API usage (documentation)
+        if (/^\s*(curl|fetch|wget)\s/.test(line) && /example|api\.|developers\./i.test(line)) continue;
+        // Skip lines with placeholder variables ($VARIABLE_NAME) — these are templates
+        if (/\$\{?[A-Z_]+\}?/.test(line) && /(-H|header|Authorization|Bearer)/i.test(line)) continue;
+        // Skip lines documenting CLI flags (--force, --skip-verify in help text)
+        if (/^\s*(-|•|\*|`--)/.test(line) && /flag|option|argument/i.test(lines[Math.max(0, i-3)]! + lines[Math.max(0, i-2)]! + lines[Math.max(0, i-1)]!)) continue;
+        // Skip lines that describe what a response "includes" (not an instruction to expose)
+        if (/response|returns|includes|contains/i.test(line) && rule.code === "SEC1") continue;
+        // Skip fetch() in code examples (inside ``` blocks)
+        if (isInsideCodeBlock(lines, i)) continue;
+      } else {
+        // Untrusted scan: still skip the fence DELIMITER line itself (it carries
+        // no payload) so we don't report the literal ``` line, but scan content.
+        if (/^```/.test(line.trim())) continue;
+      }
 
       for (const pattern of rule.patterns) {
         if (pattern.test(line)) {
@@ -204,6 +227,29 @@ function scanSkill(id: string): SecurityIssue[] {
   }
 
   return issues;
+}
+
+/**
+ * Enforcement gate for a freshly-fetched remote skill. Scans with category
+ * suppressions OFF (the skill is untrusted), and treats SEC1-3 (secret
+ * exfiltration, data exfiltration, safety-override / prompt injection) as
+ * blocking. `allowUnsafe` lets the caller override. Pure (only scanSkill's
+ * file read); the caller owns all messaging.
+ */
+export function gateFreshSkill(
+  skillId: string,
+  opts: { allowUnsafe?: boolean } = {},
+): { ok: boolean; issues: SecurityIssue[]; critical: SecurityIssue[]; scanned: boolean } {
+  // Did we actually find a SKILL.md to scan? If a skill installs at a subpath
+  // (not ~/.claude/skills/<id>/SKILL.md), scanSkill returns [] for "nothing
+  // found" — indistinguishable from "clean" without this. Callers should warn
+  // when scanned===false rather than treat it as a pass.
+  const scanned =
+    existsSync(join(SKILLS_ROOT, skillId, "SKILL.md")) ||
+    existsSync(join(GLOBAL_SKILLS_ROOT, skillId, "SKILL.md"));
+  const issues = scanSkill(skillId, { trustGlobalPack: false });
+  const critical = issues.filter((issue) => issue.severity === "critical");
+  return { ok: critical.length === 0 || opts.allowUnsafe === true, issues, critical, scanned };
 }
 
 /** Check if a line index is inside a fenced code block */

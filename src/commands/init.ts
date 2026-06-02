@@ -18,6 +18,8 @@ import { detectProfile } from "../lib/auto-detect";
 import { scanProject } from "../lib/project-scanner";
 import { listProfiles } from "../lib/profile-loader";
 import { getCachedGemsForProfile, autoInstallClis } from "./discover";
+import { shimInstalled, runInstall } from "./shell";
+import { gateFreshSkill } from "./security";
 import {
   configDir,
   enable as enableTelemetry,
@@ -67,11 +69,6 @@ export async function runGlobalOnboarding(): Promise<boolean> {
         hint: "recommended — minimal base plus skill management",
       },
       { value: "core", label: "core only", hint: "smallest — just the base" },
-      {
-        value: "core+skill-writer+ecc",
-        label: "core + skill-writer + ecc",
-        hint: "+ workspace conventions (CLAUDE.md / AGENTS.md)",
-      },
       { value: "__custom", label: "Custom…", hint: "type a +-separated composite" },
       { value: "__skip", label: "Skip for now", hint: "falls back to plain `core`" },
     ],
@@ -82,7 +79,7 @@ export async function runGlobalOnboarding(): Promise<boolean> {
   let defaultComposite: string | null = null;
   if (defaultPick === "__custom") {
     const custom = await p.text({
-      message: "Composite (e.g., core+skill-writer+ecc):",
+      message: "Composite (e.g., core+skill-writer+backend):",
       placeholder: "core+skill-writer",
       validate: (v) => {
         const parts = (v ?? "").split("+").map((s) => s.trim()).filter((s) => s.length > 0);
@@ -160,14 +157,58 @@ async function offerDiscoverGems(profile: string): Promise<void> {
   const install = await p.confirm({ message: "Install these gems?" });
   if (p.isCancel(install) || !install) return;
 
+  let flagged = 0;
   for (const g of gems) {
     p.log.step(`Installing ${g.full_name}...`);
     spawnSync("npx", ["skills", "add", g.full_name, "-a", "claude-code", "-y"], {
       encoding: "utf8", timeout: 60000, stdio: ["ignore", "pipe", "pipe"],
     });
+    // Security gate: flag a just-fetched skill with critical findings and skip
+    // its CLI auto-install (the gem is installed to ~/.claude/skills, but the
+    // wizard does not auto-register it to a profile).
+    const gate = gateFreshSkill(g.name);
+    if (!gate.ok) {
+      flagged++;
+      p.log.error(`${g.full_name}: ${gate.critical.length} critical security finding(s) — review before use.`);
+      for (const c of gate.critical) p.log.message(`  [${c.code}] ${c.message}`);
+      continue;
+    }
+    if (!gate.scanned) {
+      p.log.warn(`${g.full_name}: no SKILL.md found to scan — review manually.`);
+    }
     autoInstallClis(g.name);
   }
-  p.log.success(`Installed ${gems.length} gem(s).`);
+  p.log.success(`Installed ${gems.length} gem(s) to ~/.claude/skills${flagged > 0 ? ` (${flagged} flagged by the security scan — review before use)` : ""}.`);
+}
+
+/**
+ * Offer to install the shell shims if they're missing. Without the
+ * `~/.local/bin/claude` shim, typing `claude` runs vanilla Claude Code and
+ * the pinned profile is never loaded — the #1 "I followed the docs and
+ * nothing happened" failure. Detect it here and offer the one-time fix.
+ */
+async function ensureShim(): Promise<void> {
+  if (shimInstalled()) return;
+  p.log.warn(
+    "The `claude`/`codex` shim isn't installed yet — without it, launching `claude` runs vanilla Claude Code and won't load this profile.",
+  );
+  const install = await p.confirm({
+    message: "Install the shell shim now? (writes ~/.local/bin/claude)",
+  });
+  if (p.isCancel(install) || !install) {
+    p.log.message("Skipped — run `cue shell install` later to activate profile loading.");
+    return;
+  }
+  try {
+    const code = await runInstall();
+    if (code === 0) {
+      p.log.success("Shim installed to ~/.local/bin. Make sure it's earlier on your PATH than the real claude/codex.");
+    } else {
+      p.log.warn("Shim install reported an issue — run `cue shell install` manually for details.");
+    }
+  } catch {
+    p.log.warn("Couldn't install the shim automatically — run `cue shell install` manually.");
+  }
 }
 
 export async function run(args: string[]): Promise<number> {
@@ -264,6 +305,7 @@ export async function run(args: string[]): Promise<number> {
 
     writeFileSync(join(cwd, ".cue-profile"), (name as string) + "\n");
     await offerDiscoverGems(name as string);
+    await ensureShim();
     p.outro(`✅ Created profile "${name}" and pinned to this directory.`);
     return 0;
   }
@@ -271,6 +313,7 @@ export async function run(args: string[]): Promise<number> {
   // Pin the chosen profile
   writeFileSync(join(cwd, ".cue-profile"), (choice as string) + "\n");
   await offerDiscoverGems(choice as string);
+  await ensureShim();
   p.outro(`✅ Pinned "${choice}" to this directory. Next \`claude\` launch will use it.`);
   return 0;
 }

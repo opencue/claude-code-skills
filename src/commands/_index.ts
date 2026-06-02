@@ -386,6 +386,10 @@ export const COMMANDS = {
     summary: "Expose cue data over MCP (stdio JSON-RPC) so Claude can query it as tool calls",
     load: () => import("./mcp"),
   },
+  mem: {
+    summary: "Inspect/manage per-profile claude-mem stores (status / path / ports / seed)",
+    load: () => import("./mem"),
+  },
 } as const satisfies Record<string, Command>;
 
 export type CommandName = keyof typeof COMMANDS;

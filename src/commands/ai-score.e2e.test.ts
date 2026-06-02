@@ -22,10 +22,12 @@ function cue(args: string[]): { status: number; stdout: string; stderr: string }
 }
 
 describe.skipIf(!BUN_SPAWNABLE)("cue ai", () => {
-  test("matches python-api for python/fastapi description", () => {
+  test("matches python for python/fastapi description", () => {
     const res = cue(["ai", "python fastapi sqlalchemy"]);
     expect(res.status).toBe(0);
-    expect(res.stdout).toContain("python-api");
+    expect(res.stdout).toContain("python");
+    // Guard against the phantom name returning (it's a substring of "python")
+    expect(res.stdout).not.toContain("python-api");
   });
 
   test("matches rust for rust/cargo description", () => {

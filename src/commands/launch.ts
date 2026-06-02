@@ -1722,6 +1722,16 @@ export async function run(args: string[]): Promise<number> {
     CUE_LAUNCHING: "1",
   };
 
+  // Per-profile claude-mem memory: point the (cue-managed) claude-mem plugin at
+  // an isolated, SQLite-only store + its own worker/server ports so one profile's
+  // memory never bleeds into another's. Best-effort — a failure here must never
+  // block the launch. Opt out with CUE_CLAUDE_MEM_ISOLATE=0. See lib/claude-mem-env.ts.
+  try {
+    const { resolveClaudeMemEnv } = await import("../lib/claude-mem-env");
+    const memEnv = resolveClaudeMemEnv(profileName, { existingEnv: process.env });
+    if (memEnv) Object.assign(childEnv, memEnv);
+  } catch { /* non-fatal — memory isolation is an enhancement, not a gate */ }
+
   if (parsed.dryRun) {
     process.stdout.write(
       JSON.stringify(
@@ -1731,7 +1741,13 @@ export async function run(args: string[]): Promise<number> {
           runtimeDir: runtime.runtimeDir,
           rebuilt: runtime.rebuilt,
           hash: runtime.hash,
-          env: { [envKey]: childEnv[envKey] },
+          env: {
+            [envKey]: childEnv[envKey],
+            CLAUDE_MEM_DATA_DIR: childEnv.CLAUDE_MEM_DATA_DIR,
+            CLAUDE_MEM_CHROMA_ENABLED: childEnv.CLAUDE_MEM_CHROMA_ENABLED,
+            CLAUDE_MEM_WORKER_PORT: childEnv.CLAUDE_MEM_WORKER_PORT,
+            CLAUDE_MEM_SERVER_PORT: childEnv.CLAUDE_MEM_SERVER_PORT,
+          },
           command: [parsed.agent, ...parsed.passthrough],
         },
         null,

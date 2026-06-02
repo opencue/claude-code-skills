@@ -24,14 +24,20 @@ describe("detectProfileV2", () => {
     expect(rust!.reasons).toContain("Cargo.toml");
   });
 
-  test("Cargo.toml + src/main.rs → rust-cli at 0.7", () => {
+  test("Cargo.toml + src/main.rs → rust, corroborated above the lone-signal base", () => {
     writeFileSync(join(tmp, "Cargo.toml"), "[package]");
     mkdirSync(join(tmp, "src"));
     writeFileSync(join(tmp, "src/main.rs"), "fn main() {}");
     const results = detectProfileV2(tmp);
-    const cli = results.find(r => r.profile === "rust-cli");
-    expect(cli).toBeDefined();
-    expect(cli!.confidence).toBe(0.7);
+    const rust = results.find(r => r.profile === "rust");
+    expect(rust).toBeDefined();
+    expect(rust!.reasons).toContain("src/main.rs");
+    // Two corroborating signals (Cargo.toml + src/main.rs) lift confidence
+    // above the 0.9 lone-signal base, capped at 0.97.
+    expect(rust!.confidence).toBeGreaterThan(0.9);
+    expect(rust!.confidence).toBeLessThanOrEqual(0.97);
+    // `rust-cli` was a phantom profile (no profiles/rust-cli on disk) — gone now.
+    expect(results.find(r => r.profile === "rust-cli")).toBeUndefined();
   });
 
   test("package.json with next → nextjs 0.9", () => {

@@ -93,10 +93,14 @@ One cuecard per project. Your agent reads the right one the moment you launch.
 
 ```bash
 npm install -g cue-ai                          # 1. install
-cue discover search "code review"              # 2. find a skill
-cue discover install review/code-review        # 3. add it
-claude                                         # 4. launch — the cuecard is loaded
+cue shell install                              # 2. activate the claude shim (one-time; --codex adds codex)
+cue discover search "code review"              # 3. find a skill
+cue discover install review/code-review        # 4. add it
+claude                                         # 5. launch — the cuecard is loaded
 ```
+
+> Step 2 is what makes `claude` load your cuecard: it installs a `~/.local/bin/claude`
+> shim that hands off to `cue launch`. Skip it and `claude` just runs vanilla Claude Code.
 
 Search. Install. Use. No config files to edit. Works the same with `codex`, `cursor`, `cline`, `gemini`, and five other agents.
 
@@ -138,7 +142,7 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
 ## by the numbers.
 
 <p align="center">
-  <strong>10–25×</strong>&nbsp;&nbsp;token cost reduction
+  <strong>up to ~16×</strong>&nbsp;&nbsp;leaner always-on context
   <br><br>
   <strong>&lt; 5 ms</strong>&nbsp;&nbsp;warm launch overhead
   <br><br>
@@ -155,19 +159,19 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
 
 ## the money shot.
 
-> Loading everything costs you tokens on every single message. cuecards cut context size by 10–25×.
+> Loading everything costs you tokens on every single message. cuecards cut your always-on context ~9–16× — and you can reproduce every number below with `cue cost --compare`.
 
-| Scenario | Context loaded | Cost per session (Sonnet) |
+| Loadout | Always-on context | Cost / 100 msgs (Sonnet input) |
 |---|---|---|
-| **Without cuecards** — all skills + every MCP | ~180k tokens | ~$2.70 😱 |
-| **With cuecards** — `backend` profile | ~8k tokens | ~$0.12 ✅ |
-| **With cuecards** — `caveman-quick` | ~2k tokens | ~$0.03 🚀 |
+| **Without cuecards** — `full` (every skill + MCP) | ~81k tokens | ~$24 😱 |
+| **With cuecards** — `backend` profile | ~9k tokens | ~$2.70 ✅ |
+| **With cuecards** — `caveman-quick` | ~6.8k tokens | ~$2.00 🚀 |
 
-That's **22× fewer tokens** on a real backend loadout vs the unmanaged baseline. Your model picks the right tool faster because it's not scanning irrelevant descriptions on every message.
+That's **~9× fewer always-on tokens** on a backend loadout (≈12× on `caveman-quick`, up to ≈16× on the leanest profiles) versus loading everything. Your model also picks the right tool faster because it's not scanning irrelevant descriptions on every message.
 
 ```bash
 cue cost                      # token budget for your active profile
-cue cost --profile full       # compare against the "everything" baseline
+cue cost --compare            # full table: every profile ranked vs the `full` baseline
 ```
 
 <br>
@@ -176,7 +180,7 @@ cue cost --profile full       # compare against the "everything" baseline
 
 ## why cuecards.
 
-- **Cut per-message token cost 10–25×.** Skills, MCPs, and plugins scoped per directory, not globally loaded into every session.
+- **Cut always-on context up to ~16×.** Skills, MCPs, and plugins scoped per directory, not globally loaded into every session — reproduce it with `cue cost --compare`.
 - **Five-dimensional agents.** Persona + playbooks + quality gates + evals + failure loop. Not just "more tools loaded" — composable expertise.
 - **One cuecard, ten agents.** The same `profile.yaml` materializes into Claude Code, Codex, Cursor, Cline, Gemini, Copilot, Windsurf, Roo, Amp, and Aider native formats.
 
@@ -313,8 +317,7 @@ cue list                      # see all available profiles
 
 # Measure
 cue cost                      # token budget for active profile
-cue eval --breakdown          # per-message vs on-demand
-cue eval --compare a b        # side-by-side delta
+cue cost --compare            # every profile ranked vs the `full` baseline
 
 # System dependencies
 cue cli install --all --yes   # install every missing CLI
@@ -341,12 +344,13 @@ cue doctor --fix              # diff declared vs actual state, auto-repair
 npm install -g cue-ai
 ```
 
-Then in any project:
+Then activate the shim once, and pin a profile in any project:
 
 ```bash
+cue shell install             # one-time: installs the claude shim (--codex for codex)
 cd ~/projects/q4-launch
 echo marketing > .cue-profile
-claude
+claude                        # launches with the marketing cuecard
 ```
 
 <details>

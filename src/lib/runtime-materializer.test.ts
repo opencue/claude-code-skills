@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, rm, readlink } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, rm, readlink, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -790,6 +790,62 @@ describe("isRuntimeStale", () => {
     await mkdir(join(profilesRoot, "p3"), { recursive: true });
     await writeFile(join(profilesRoot, "p3", "profile.yaml"), "name: x\n");
     expect(await isRuntimeStale("p3", "claude-code", runtimeRoot)).toBe(false);
+  });
+
+  async function writeRuntimeSkill(name: string, runtimeRoot: string, slug: string): Promise<string> {
+    const skillDir = join(runtimeRoot, name, "claude", "skills", slug);
+    await mkdir(skillDir, { recursive: true });
+    const md = join(skillDir, "SKILL.md");
+    await writeFile(md, `# ${slug}\n`);
+    return md;
+  }
+
+  test("returns true when a resolved SKILL.md is newer than .cue-hash (yaml older)", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p4", runtimeRoot);
+    const mdPath = await writeRuntimeSkill("p4", runtimeRoot, "alpha");
+    await utimes(yamlPath, new Date(Date.now() - 120_000), new Date(Date.now() - 120_000));
+    await utimes(hashPath, new Date(Date.now() - 60_000), new Date(Date.now() - 60_000));
+    await utimes(mdPath, new Date(), new Date());
+    expect(await isRuntimeStale("p4", "claude-code", runtimeRoot)).toBe(true);
+  });
+
+  test("returns false when every SKILL.md is older than .cue-hash", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p5", runtimeRoot);
+    const mdPath = await writeRuntimeSkill("p5", runtimeRoot, "alpha");
+    const old = new Date(Date.now() - 60_000);
+    await utimes(yamlPath, old, old);
+    await utimes(mdPath, old, old);
+    await utimes(hashPath, new Date(), new Date());
+    expect(await isRuntimeStale("p5", "claude-code", runtimeRoot)).toBe(false);
+  });
+
+  test("skips a slug dir with no SKILL.md (broken symlink is non-fatal)", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p6", runtimeRoot);
+    await mkdir(join(runtimeRoot, "p6", "claude", "skills", "broken"), { recursive: true });
+    await utimes(yamlPath, new Date(Date.now() - 60_000), new Date(Date.now() - 60_000));
+    await utimes(hashPath, new Date(), new Date());
+    expect(await isRuntimeStale("p6", "claude-code", runtimeRoot)).toBe(false);
+  });
+
+  test("detects a newer SKILL.md through a symlinked skill dir (production layout)", async () => {
+    const runtimeRoot = join(root, "runtime");
+    const { yamlPath, hashPath } = await setup("p7", runtimeRoot);
+    // Production materialize symlinks skills/<slug> → the source skill dir; the
+    // SKILL.md inside is a real file, so lstat resolves through to its mtime.
+    const src = join(profilesRoot, "src-skill-p7");
+    await mkdir(src, { recursive: true });
+    const srcMd = join(src, "SKILL.md");
+    await writeFile(srcMd, "# s\n");
+    const skillsDir = join(runtimeRoot, "p7", "claude", "skills");
+    await mkdir(skillsDir, { recursive: true });
+    await symlink(src, join(skillsDir, "s"));
+    await utimes(yamlPath, new Date(Date.now() - 120_000), new Date(Date.now() - 120_000));
+    await utimes(hashPath, new Date(Date.now() - 60_000), new Date(Date.now() - 60_000));
+    await utimes(srcMd, new Date(), new Date());
+    expect(await isRuntimeStale("p7", "claude-code", runtimeRoot)).toBe(true);
   });
 });
 

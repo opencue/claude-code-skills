@@ -20,6 +20,7 @@ import { listProfiles } from "../lib/profile-loader";
 import { clusterByKeywords, clusterByEmbeddings, unclustered, type Cluster, type ClusterItem } from "../lib/cluster-skills";
 import { findRealClaudeBin } from "../lib/claude-binary";
 import { fetchCompanionFiles, detectSkillPath } from "../lib/companion-fetch";
+import { gateFreshSkill } from "./security";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 // Cache path resolved lazily so tests can redirect via XDG_CONFIG_HOME without
@@ -521,11 +522,11 @@ export function applyFilters(gems: GemRepo[], f: GemFilter): GemRepo[] {
 // Profile suggestion (keyword matching)
 // ---------------------------------------------------------------------------
 
-const PROFILE_KEYWORDS: Record<string, string[]> = {
+export const PROFILE_KEYWORDS: Record<string, string[]> = {
   backend: ["api", "server", "express", "fastapi", "django", "flask", "webhook", "database", "sql", "graphql", "deploy", "docker", "kubernetes", "microservice", "redis", "postgres", "mongo", "supabase", "prisma"],
   frontend: ["react", "vue", "svelte", "nextjs", "css", "tailwind", "component", "browser", "dom", "ui", "ux", "responsive", "animation", "spa"],
   nextjs: ["nextjs", "next.js", "vercel", "app-router", "server-component", "next-auth"],
-  "python-api": ["python", "fastapi", "django", "flask", "sqlalchemy", "pytest", "pip", "uvicorn", "pydantic", "celery"],
+  "python": ["python", "fastapi", "django", "flask", "sqlalchemy", "pytest", "pip", "uvicorn", "pydantic", "celery"],
   rust: ["rust", "cargo", "tokio", "crate", "wasm", "async-std"],
   "go-api": ["golang", "gin", "echo", "chi", "gorm", "goroutine"],
   cybersecurity: ["security", "pentest", "vulnerability", "exploit", "forensic", "dfir", "red-team", "blue-team", "malware", "audit", "cve", "owasp", "threat", "osint", "recon", "dork", "credential", "phishing"],
@@ -535,7 +536,7 @@ const PROFILE_KEYWORDS: Record<string, string[]> = {
   threejs: ["three.js", "threejs", "webgl", "shader", "3d", "scene", "geometry"],
   video: ["video", "ffmpeg", "transcription", "frame", "subtitle", "stream", "recording", "youtube"],
   marketing: ["seo", "marketing", "copywriting", "growth", "conversion", "analytics", "campaign", "funnel", "landing-page"],
-  medusa: ["medusa", "ecommerce", "storefront", "shop", "cart", "checkout", "product-catalog", "amazon", "seller"],
+  "medusa-dev": ["medusa", "ecommerce", "storefront", "shop", "cart", "checkout", "product-catalog", "amazon", "seller"],
   "fleet-control": ["multi-agent", "orchestrat", "coordinator", "dispatch", "parallel", "swarm", "colony"],
 };
 
@@ -554,8 +555,8 @@ const NICHE_SUBJECT_HINTS: RegExp[] = [
   /\b(bilibili|spotify|reddit|bbc|wechat|notion|jira|servicenow|obsidian|home\s?assistant|farming\s?simulator|gospel|grant)\b/i,
 ];
 
-const STACK_PROFILES: ReadonlySet<string> = new Set([
-  "frontend", "backend", "nextjs", "python-api", "rust", "go-api", "threejs",
+export const STACK_PROFILES: ReadonlySet<string> = new Set([
+  "frontend", "backend", "nextjs", "python", "rust", "go-api", "threejs",
 ]);
 
 export function suggestProfiles(repo: GemRepo): string[] {
@@ -588,7 +589,7 @@ export function suggestProfiles(repo: GemRepo): string[] {
     }
 
     // Language-based boost
-    if (profile === "python-api" && lang === "python") hits += 2;
+    if (profile === "python" && lang === "python") hits += 2;
     if (profile === "rust" && lang === "rust") hits += 2;
     if (profile === "go-api" && lang === "go") hits += 2;
     if (profile === "frontend" && (lang === "typescript" || lang === "javascript")) hits += 1;
@@ -656,7 +657,7 @@ export function buildProfileQueries(profile: string): { q: string; label: string
     backend: ["api server deploy", "webhook microservice", "database migration", "docker kubernetes skill", "ci cd pipeline"],
     frontend: ["react component skill", "ui design system", "tailwind css", "browser testing", "responsive web"],
     nextjs: ["nextjs skill", "next.js vercel", "app router server component", "next-auth"],
-    "python-api": ["python fastapi skill", "django api", "flask sqlalchemy", "pytest automation"],
+    "python": ["python fastapi skill", "django api", "flask sqlalchemy", "pytest automation"],
     rust: ["rust cargo skill", "rust cli tool", "tokio async", "rust wasm"],
     "go-api": ["golang api skill", "go gin echo", "golang microservice"],
     cybersecurity: ["security audit skill", "pentest tool", "vulnerability scanner", "red team blue team", "threat detection"],
@@ -666,7 +667,7 @@ export function buildProfileQueries(profile: string): { q: string; label: string
     threejs: ["three.js skill", "webgl shader", "3d scene interactive"],
     video: ["video processing skill", "ffmpeg automation", "transcription subtitle", "youtube tool"],
     marketing: ["seo optimization skill", "marketing automation", "copywriting ai", "conversion funnel", "growth hacking"],
-    medusa: ["medusa ecommerce", "storefront skill", "shopping cart", "product catalog", "amazon seller"],
+    "medusa-dev": ["medusa ecommerce", "storefront skill", "shopping cart", "product catalog", "amazon seller"],
     "fleet-control": ["multi-agent orchestration", "agent coordinator", "parallel agent", "task dispatch"],
     coolify: ["coolify deploy", "self-hosted paas", "server management"],
     hostinger: ["hosting dns", "vps management", "domain config"],
@@ -1973,7 +1974,19 @@ async function cmdNotify(repo: string | undefined, opts: { profile?: string; dry
 // Auto-install CLI dependencies from skill's SKILL.md
 // ---------------------------------------------------------------------------
 
-export function autoInstallClis(skillName: string): void {
+/**
+ * Surface (and optionally install) the CLI prerequisites a skill declares in
+ * its `## Prerequisites` block.
+ *
+ * SECURITY: the prerequisite lines come from a SKILL.md that was just fetched
+ * from an arbitrary GitHub repo, so the commands are untrusted input. We never
+ * run a package installer parsed out of them unless the caller explicitly opts
+ * in with `{ yes: true }` (wired to the `--yes` flag). Without it we only print
+ * the prerequisites as warnings and let the user install them deliberately —
+ * otherwise a typosquatted skill repo with one crafted `## Prerequisites` line
+ * could trigger arbitrary global package installs (npm/brew/cargo/pipx).
+ */
+export function autoInstallClis(skillName: string, opts: { yes?: boolean } = {}): void {
   const skillsDir = join(homedir(), ".claude", "skills");
   const skillMdPath = join(skillsDir, skillName, "SKILL.md");
   if (!existsSync(skillMdPath)) return;
@@ -2017,6 +2030,19 @@ export function autoInstallClis(skillName: string): void {
 
   if (installCmds.length === 0) return;
 
+  // Consent gate: never auto-run installers parsed from an untrusted SKILL.md.
+  // Default is warn-only; the caller must pass `{ yes: true }` (via `--yes`) to
+  // actually install. Keeps `cue discover install` and the interactive wizard
+  // from silently mutating the global toolchain.
+  if (!opts.yes) {
+    process.stdout.write(`     ⚠️  ${skillName} declares CLI prerequisites (not auto-installed):\n`);
+    for (const { label } of installCmds) {
+      process.stdout.write(`          ${label}\n`);
+    }
+    process.stdout.write(`     Review them, then install manually or re-run with --yes to auto-install.\n`);
+    return;
+  }
+
   for (const { cmd, args, label } of installCmds) {
     // Check if the package manager exists
     if (spawnSync("which", [cmd], { encoding: "utf8" }).status !== 0) {
@@ -2037,7 +2063,7 @@ export function autoInstallClis(skillName: string): void {
 // Install gems into profiles
 // ---------------------------------------------------------------------------
 
-async function cmdInstall(opts: { profile?: string; minScore: number; minQuality: number; dryRun: boolean; all: boolean; notify: boolean; digest: boolean }): Promise<number> {
+async function cmdInstall(opts: { profile?: string; minScore: number; minQuality: number; dryRun: boolean; all: boolean; notify: boolean; digest: boolean; yes: boolean; allowUnsafe: boolean }): Promise<number> {
   if (!existsSync(cacheFile())) {
     process.stderr.write("No cached gems. Run `cue discover search` first.\n");
     return 1;
@@ -2117,8 +2143,27 @@ async function cmdInstall(opts: { profile?: string; minScore: number; minQuality
       }
     }
 
-    // Auto-install CLI dependencies from the skill's SKILL.md Prerequisites
-    autoInstallClis(gem.name);
+    // Security gate: the skill files are now on disk but not yet registered to
+    // a profile. Scan the just-fetched (untrusted) skill and block on critical
+    // findings (secret/data exfiltration, prompt injection) unless --allow-unsafe.
+    const gate = gateFreshSkill(gem.name, { allowUnsafe: opts.allowUnsafe });
+    if (!gate.ok) {
+      process.stdout.write(`     🔴 BLOCKED: ${gem.full_name} has ${gate.critical.length} critical security finding(s):\n`);
+      for (const c of gate.critical) {
+        process.stdout.write(`        [${c.code}] ${c.message}${c.line ? ` (line ${c.line})` : ""}\n`);
+      }
+      process.stdout.write(`        Left on disk at ~/.claude/skills/${gem.name} but NOT registered to a profile.\n`);
+      process.stdout.write(`        Review it, then re-run with --allow-unsafe to register anyway.\n`);
+      skipped++;
+      continue;
+    }
+    if (!gate.scanned) {
+      process.stdout.write(`     ⚠️  ${gem.full_name}: no SKILL.md found at ~/.claude/skills/${gem.name} to scan — review manually.\n`);
+    }
+
+    // Surface CLI dependencies from the skill's SKILL.md Prerequisites.
+    // Only auto-installs when the user passed --yes (see autoInstallClis).
+    autoInstallClis(gem.name, { yes: opts.yes });
 
     // Add to profile.yaml
     const profileYaml = join(REPO_ROOT, "profiles", targetProfile, "profile.yaml");
@@ -2704,6 +2749,9 @@ Filters (any combination, no extra GitHub calls — read from cache):
 
 Install options:
   --dry-run                 Preview installs without making changes
+  --yes, -y                 Auto-install CLI prerequisites from a skill's SKILL.md
+  --allow-unsafe            Register a skill even if the security scan finds a
+                            critical issue (default: block + leave it unregistered)
   --notify                  Open a one-time GitHub issue on each indexed repo
   --digest                  Post a daily GitHub Discussion summarizing new gems
 
@@ -2776,8 +2824,10 @@ Examples:
     const all = args.includes("--all");
     const notify = args.includes("--notify");
     const digest = args.includes("--digest");
+    const yes = args.includes("--yes") || args.includes("-y");
+    const allowUnsafe = args.includes("--allow-unsafe");
     const minQuality = intFlag(args, "--min-quality", 7)!;
-    return cmdInstall({ profile, minScore, minQuality, dryRun, all, notify, digest });
+    return cmdInstall({ profile, minScore, minQuality, dryRun, all, notify, digest, yes, allowUnsafe });
   }
 
   if (rest[0] === "notify") {

@@ -6,9 +6,21 @@
  * Adds a cd wrapper that checks .cue-profile on directory change.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, statSync, accessSync, constants } from "node:fs";
 import { join, resolve } from "node:path";
 import { homedir } from "node:os";
+
+/** True when `p` is an executable regular file (mirrors how the shell resolves
+ * a command on PATH — skips directories and non-executable files). */
+function isExecutableFile(p: string): boolean {
+  try {
+    if (!statSync(p).isFile()) return false;
+    accessSync(p, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function hookBash(): string {
   return `# cue shell hook — auto-switch profile on cd
@@ -92,6 +104,52 @@ export interface ShimOptions {
   realCodex?: string;
 }
 
+/**
+ * True when the `claude` shim is already installed in ~/.local/bin and is a
+ * cue launch shim. Matches both shim formats cue writes: the user-facing
+ * `cue shell install` form (`exec "<abs-path>/cue" launch claude "$@"`) and the
+ * runInstall() helper form (`exec cue launch claude "$@"`) — both contain the
+ * literal `launch claude`. Used by `cue init` to detect that profile loading
+ * hasn't been activated yet. Conservative: any read error → false.
+ */
+export function shimInstalled(homeDir?: string): boolean {
+  const shimPath = join(homeDir ?? homedir(), ".local", "bin", "claude");
+  try {
+    return existsSync(shimPath) && readFileSync(shimPath, "utf8").includes("launch claude");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resolve the token to place after `exec ` in a shim so it works for BOTH
+ * npm-global installs (cue is on PATH, there is no source clone) and
+ * source-clone users.
+ *
+ * - Prefers the portable bare `cue` when it's resolvable on PATH (the
+ *   npm-global-correct form, and the form the docs advertise).
+ * - Otherwise falls back to an absolute path to the cue entrypoint
+ *   (CUE_REPO_ROOT is exported by both `bin/cue` and `bin/cue.mjs` when cue
+ *   runs itself), double-quoted for the shell.
+ *
+ * Either form keeps the literal `launch <agent>` substring the caller
+ * appends, so shimInstalled() detects both. Previously `cue shell install`
+ * hard-coded `~/Documents/cue/bin/cue`, which doesn't exist for npm-global
+ * users — the shim pointed at a missing file and `claude` broke.
+ */
+export function resolveCueInvocation(opts: { repoRoot?: string; pathDirs?: string[] } = {}): string {
+  const pathDirs = opts.pathDirs ?? (process.env.PATH ?? "").split(":").filter(Boolean);
+  for (const dir of pathDirs) {
+    if (dir && isExecutableFile(join(dir, "cue"))) return "cue";
+  }
+  // Prefer the node entrypoint (npm layout) then the bash one, then ~/Documents.
+  const root = opts.repoRoot ?? process.env.CUE_REPO_ROOT ?? join(homedir(), "Documents", "cue");
+  for (const candidate of [join(root, "bin", "cue.mjs"), join(root, "bin", "cue")]) {
+    if (existsSync(candidate)) return `"${candidate}"`;
+  }
+  return `"${process.argv[1] ?? "cue"}"`;
+}
+
 export async function runInstall(opts: ShimOptions = {}): Promise<number> {
   const home = opts.homeDir ?? homedir();
   const shimDir = join(home, ".local", "bin");
@@ -111,13 +169,14 @@ export async function runInstall(opts: ShimOptions = {}): Promise<number> {
   }
 
   mkdirSync(shimDir, { recursive: true });
+  const cueInvoke = resolveCueInvocation();
 
-  const claudeShim = `#!/usr/bin/env bash\nexec cue launch claude "$@"\n`;
+  const claudeShim = `#!/usr/bin/env bash\nexec ${cueInvoke} launch claude "$@"\n`;
   writeFileSync(join(shimDir, "claude"), claudeShim);
   chmodSync(join(shimDir, "claude"), 0o755);
 
   if (opts.realCodex) {
-    const codexShim = `#!/usr/bin/env bash\nexec cue launch codex "$@"\n`;
+    const codexShim = `#!/usr/bin/env bash\nexec ${cueInvoke} launch codex "$@"\n`;
     writeFileSync(join(shimDir, "codex"), codexShim);
     chmodSync(join(shimDir, "codex"), 0o755);
   }
@@ -160,11 +219,13 @@ export async function run(args: string[]): Promise<number> {
     const { mkdirSync, writeFileSync, chmodSync } = await import("node:fs");
     mkdirSync(shimDir, { recursive: true });
 
-    const cueBin = resolve(process.env.CUE_REPO_ROOT ?? join(homedir(), "Documents", "cue"), "bin", "cue");
+    // Portable invocation token: bare `cue` when on PATH (npm-global), else
+    // an absolute path to the cue entrypoint. See resolveCueInvocation.
+    const cueInvoke = resolveCueInvocation();
 
     // Claude shim
     const claudeShim = `#!/usr/bin/env bash
-exec "${cueBin}" launch claude "$@"
+exec ${cueInvoke} launch claude "$@"
 `;
     writeFileSync(join(shimDir, "claude"), claudeShim);
     chmodSync(join(shimDir, "claude"), 0o755);
@@ -173,7 +234,7 @@ exec "${cueBin}" launch claude "$@"
     // Codex shim (optional)
     if (args.includes("--codex")) {
       const codexShim = `#!/usr/bin/env bash
-exec "${cueBin}" launch codex "$@"
+exec ${cueInvoke} launch codex "$@"
 `;
       writeFileSync(join(shimDir, "codex"), codexShim);
       chmodSync(join(shimDir, "codex"), 0o755);

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "bin/**"
+      - "src/**"
       - "profiles/**"
       - "docs/profiles/**"
       - "test/e2e/**"
@@ -15,6 +16,7 @@ on:
     branches: ["main"]
     paths:
       - "bin/**"
+      - "src/**"
       - "profiles/**"
       - "docs/profiles/**"
       - "test/e2e/**"

@@ -67,6 +67,46 @@ concurrent running session never sees a partial state.
 For Codex the shape is identical under `runtime/<profile>/codex/` with
 `CODEX_HOME` and a `config.toml` instead of `settings.json`.
 
+## Per-profile memory (claude-mem)
+
+cue ships the [claude-mem] plugin in `core`, so most profiles inherit
+cross-session memory. By default claude-mem keys its entire store off one env
+var (`CLAUDE_MEM_DATA_DIR`, default `~/.claude-mem`) and reaches its background
+worker over a single TCP port — so every profile would share one memory pool,
+*and* two profiles launched at once would cross-write through whichever worker
+claimed the port first.
+
+To keep each role's memory clean, `cue launch` injects a per-profile overlay
+into the child environment (right before exec'ing the agent):
+
+```
+CLAUDE_MEM_DATA_DIR        ~/.claude-mem/profiles/<profile>
+CLAUDE_MEM_CHROMA_ENABLED  false   # SQLite-only — no Chroma daemon, no :8000
+CLAUDE_MEM_WORKER_PORT     30000 + 2·slot
+CLAUDE_MEM_SERVER_PORT     30000 + 2·slot + 1
+```
+
+Ports come from a small cue-owned registry at `~/.claude-mem/cue-ports.json`
+that assigns each profile the lowest free slot on first launch, so concurrent
+profiles never collide. The logic lives in `src/lib/claude-mem-env.ts`.
+
+**New profiles start with empty memory** by design — that is the isolation. To
+carry your existing global history into one profile instead, seed it:
+
+```bash
+cue mem seed <profile>          # copy ~/.claude-mem into the profile's store
+cue mem status                  # data dir, ports, DB size, worker state
+cue mem ports                   # the slot registry (flags any collision)
+cue mem path <profile>          # print a profile's CLAUDE_MEM_DATA_DIR
+```
+
+Opt out for a shell with `CUE_CLAUDE_MEM_ISOLATE=0` (claude-mem then uses its
+own default store). cue also stands down automatically if you set any of
+`CLAUDE_MEM_DATA_DIR` / `CLAUDE_MEM_WORKER_PORT` / `CLAUDE_MEM_SERVER_PORT`
+yourself, so hand-managed setups win.
+
+[claude-mem]: https://github.com/thedotmack/claude-mem
+
 ## Profile icons (emoji + Kitty inline images)
 
 Each profile can declare two icon fields:

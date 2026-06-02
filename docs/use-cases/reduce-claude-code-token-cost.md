@@ -1,8 +1,8 @@
 # How to reduce Claude Code token cost — the cue playbook
 
-_Last updated: 2026-05-24_
+_Last updated: 2026-06-01_
 
-**Short answer:** A typical Claude Code session that loads every skill globally costs **~$2.70 per session**. With cue's per-directory profile isolation it drops to **~$0.12**. With RTK and caveman terse-mode stacked on top, it drops to **~$0.08**. That's a **22–33× reduction** in real spend, plus better tool-selection accuracy because the model isn't drowning in 1,900 irrelevant tool descriptions.
+**Short answer:** Loading every skill globally (the `full` everything-loadout) costs **~81k always-on tokens — ~$24 / 100 messages** at Sonnet input pricing. cue's per-directory profile isolation cuts that to **~9k tokens (~$2.70 / 100 msgs)** on a `backend` profile — **~9× less** (up to ~16× on the leanest profiles). RTK and caveman terse-mode then trim *output* tokens on top, on a separate axis. Every number here is reproducible with `cue cost --compare`, and the model also picks the right tool faster because it isn't scanning irrelevant descriptions on every message.
 
 This page is the data-backed playbook for cutting Claude Code costs.
 
@@ -38,13 +38,13 @@ Naïve token estimation conflates these and over-reports cost by 20×+. `cue eva
 
 ## The 3 optimizations that actually compound
 
-### 1. Profile isolation (biggest single win — 10–25×)
+### 1. Profile isolation (biggest single win — up to ~16×)
 
 Without cue: `~/.claude/` is one global folder. Every session loads every skill, every MCP, every plugin you've ever installed. Frontend session loads cybersecurity skills. Marketing session loads Rust skills.
 
 With cue: `cue use backend` in your backend repo. `cue use marketing` in your marketing repo. Each session loads only the relevant profile's loadout.
 
-Run `cue eval --compare full backend` to see the delta in your own setup.
+Run `cue cost --compare` to see the delta in your own setup.
 
 ### 2. RTK shell-output filter (60–90% per shell command)
 
@@ -60,29 +60,28 @@ Activate per-session with `/caveman` or globally by triggering it at session sta
 
 ---
 
-## Real numbers (typical backend session, Claude Sonnet 4.6)
+## Real numbers (always-on context, Claude Sonnet 4.6 input pricing)
 
-| Setup | Per-message tokens | Cost per session (20 messages) | Annual cost (1 session/day) |
-|---|---|---|---|
-| **Naïve global Claude Code** (all skills + MCPs loaded) | ~9,000 | **~$2.70** | ~$985 |
-| **cue with `backend` profile** | ~400 | **~$0.12** | ~$44 |
-| **cue + RTK** | ~400 input + 60% less shell output | **~$0.08** | ~$29 |
-| **cue + RTK + caveman** | same + 40% less output | **~$0.05** | ~$18 |
+> Reproduce these with `cue cost --compare`. "Always-on" = skill descriptions + MCP tool schemas + CLAUDE.md loaded into *every* message; lazy skill bodies load on demand and aren't counted here. Input is $3/MTok.
 
-Sonnet 4.6 input is $3/MTok, output is $15/MTok. Numbers above use a typical 50/50 input/output mix per turn.
+| Setup | Always-on tokens | Cost / 100 msgs |
+|---|---|---|
+| **Naïve global Claude Code** — the `full` everything-loadout | ~81,000 | **~$24** |
+| **cue with `backend` profile** | ~9,000 | **~$2.70** |
+| **cue with `caveman-quick`** | ~6,800 | **~$2.00** |
 
-A team of 5 developers each doing 3 Claude Code sessions/day = **$5,400/year saved** by switching from naïve global config to cue + RTK + caveman.
+That's **~9× less always-on context** on `backend` (≈12× on `caveman-quick`, up to ≈16× on the leanest profiles). On a separate axis, **RTK** trims shell *output* tokens and **caveman** trims model *output* — both cut per-turn output cost further on top of the always-on savings above.
 
 ---
 
 ## How to actually measure your savings
 
 ```bash
-# 1. Establish a baseline
-cue eval --compare full backend --json > baseline.json
+# 1. Establish a baseline — full vs your profile
+cue cost --compare                      # every profile ranked vs the `full` baseline
+cue cost backend                        # always-on + lazy breakdown for one profile
 
 # 2. Track over time
-cue eval --all                          # all profiles ranked
 cue stats                               # session count + duration per profile
 rtk gain                                # cumulative RTK savings in tokens
 
@@ -95,7 +94,7 @@ cue failures backend --days 7           # see where the profile is failing (= wh
 
 ## What NOT to do
 
-- **Don't over-prune profiles.** Cutting skills makes the model worse at the things you actually do. The 25× savings comes from removing *irrelevant* skills, not from minimalism for its own sake.
+- **Don't over-prune profiles.** Cutting skills makes the model worse at the things you actually do. The savings come from removing *irrelevant* skills, not from minimalism for its own sake.
 - **Don't disable hooks to save tokens.** The safety hooks (bash-preflight, secrets-guard, commit-message-guard) cost ~120 tokens/message total. They prevent real failures that cost orders of magnitude more.
 - **Don't stack token-saving prompts.** `caveman` mode is enough; adding "be terse" + "no filler" + "short answer" in custom prompts is double-counting and confuses the model.
 

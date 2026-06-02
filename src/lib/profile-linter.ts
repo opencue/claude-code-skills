@@ -614,19 +614,27 @@ async function checkNpxSkills(
   }
 
   let resolvedCount = 0;
+  let skippedOffline = 0;
   for (const entry of entries) {
     for (const skill of entry.skills) {
       try {
-        await resolveOneNpxSkill(entry, skill, opts);
-        resolvedCount += 1;
+        const status = await resolveOneNpxSkill(entry, skill, opts);
+        if (status === "skipped-offline") skippedOffline += 1;
+        else resolvedCount += 1;
       } catch (err) {
         addResolverIssue(result, "npx skill", `${entry.repo}:${skill}`, err);
       }
     }
   }
 
-  if (resolvedCount === total) {
-    addCheck(result, "npx skills", `${resolvedCount} resolved or fetchable`);
+  if (resolvedCount + skippedOffline === total) {
+    addCheck(
+      result,
+      "npx skills",
+      skippedOffline > 0
+        ? `${resolvedCount} resolved, ${skippedOffline} not cached (offline; run --online to fetch)`
+        : `${resolvedCount} resolved or fetchable`,
+    );
   }
 }
 
@@ -634,7 +642,7 @@ async function resolveOneNpxSkill(
   entry: NpxSkillRef,
   skill: string,
   opts: ProfileLinterOptions,
-): Promise<void> {
+): Promise<"resolved" | "skipped-offline"> {
   const single: Profile = {
     name: "lint-npx",
     description: "single npx resolver check",
@@ -649,9 +657,13 @@ async function resolveOneNpxSkill(
       fetch: opts.npxFetch,
       offline: true,
     });
-    return;
+    return "resolved";
   } catch (err) {
-    if (opts.npxOffline || (process.env.CUE_OFFLINE ?? process.env.SOUL_OFFLINE) === "1") {
+    const offline = opts.npxOffline || (process.env.CUE_OFFLINE ?? process.env.SOUL_OFFLINE) === "1";
+    if (offline) {
+      // Offline mode: a cache miss is a benign "not cached", not a lint error.
+      // Real problems (PinNotFound, schema, etc.) still propagate to E3.
+      if (err instanceof NpxFetchFailed) return "skipped-offline";
       throw err;
     }
     if (!(err instanceof NpxFetchFailed || err instanceof ProfileError)) {
@@ -670,6 +682,7 @@ async function resolveOneNpxSkill(
   } finally {
     await rm(tempRepo, { recursive: true, force: true });
   }
+  return "resolved";
 }
 
 async function checkPlugins(

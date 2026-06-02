@@ -66,6 +66,7 @@ function printHelp(): void {
       ["stats", "Profile usage analytics"],
       ["scan", "Tree of installed skills/plugins by domain"],
       ["why", "Trace why a skill/MCP is loaded"],
+      ["mem", "Inspect/manage per-profile claude-mem stores"],
     ],
     "Launch & Shell": [
       ["launch", "Resolve + materialize + exec claude/codex"],
@@ -214,11 +215,22 @@ async function checkForUpdate(currentVersion: string): Promise<void> {
 async function main(argv: string[]): Promise<number> {
   const args = argv.slice(2);
 
-  // Non-blocking update check (shows prompt if outdated). Skipped for trivial or
-  // non-interactive invocations so it never auto-installs or races command output.
+  // Update check — never during a live agent launch. The `claude`/`codex`
+  // shim is `exec cue launch ...`, so running it here would open a readline on
+  // the agent's stdin (stealing keystrokes) and could fire a blocking
+  // `npm install -g` mid-session. Skip for any command that spawns an agent
+  // (`launch`, plus `quick`/`playground`), for trivial or non-interactive
+  // invocations, when launching (CUE_LAUNCHING), or in CI.
+  const AGENT_LAUNCH_COMMANDS = new Set(["launch", "quick", "playground"]);
   const TRIVIAL_ARGS = new Set(["--version", "-v", "version", "--help", "-h", "help"]);
-  const skipUpdate = !process.stdout.isTTY || TRIVIAL_ARGS.has(args[0] ?? "");
-  if (!skipUpdate) checkForUpdate(readVersion()).catch(() => {});
+  const skipUpdateCheck =
+    AGENT_LAUNCH_COMMANDS.has(args[0] ?? "") ||
+    TRIVIAL_ARGS.has(args[0] ?? "") ||
+    process.env.CUE_LAUNCHING === "1" ||
+    !!process.env.CI ||
+    !process.stdin.isTTY ||
+    !process.stdout.isTTY;
+  if (!skipUpdateCheck) checkForUpdate(readVersion()).catch(() => {});
 
   if (args.length === 0) {
     // Show status dashboard by default (like `git status`)

@@ -27,11 +27,11 @@ interface MatchedProfile {
 }
 
 // Keywords → profile mapping
-const PROFILE_KEYWORDS: Record<string, string[]> = {
+export const PROFILE_KEYWORDS: Record<string, string[]> = {
   "nextjs": ["next", "nextjs", "next.js", "vercel", "app router", "server components", "react ssr"],
   "frontend": ["react", "vue", "svelte", "frontend", "ui", "tailwind", "vite", "css", "component"],
   "backend": ["api", "express", "fastify", "hono", "webhook", "rest", "graphql", "node server", "prisma", "drizzle"],
-  "python-api": ["python", "fastapi", "django", "flask", "sqlalchemy", "alembic", "uvicorn", "pytest", "pip"],
+  "python": ["python", "fastapi", "django", "flask", "sqlalchemy", "alembic", "uvicorn", "pytest", "pip"],
   "rust": ["rust", "cargo", "tokio", "async rust", "cli tool", "systems", "wasm"],
   "go-api": ["go", "golang", "gin", "echo", "chi", "gorm", "goroutine"],
   "medusa-dev": ["medusa", "ecommerce", "storefront", "shop", "cart", "checkout"],

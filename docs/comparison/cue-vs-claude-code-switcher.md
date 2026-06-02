@@ -40,7 +40,7 @@ Pick **claude-code-switcher** if your only need is "different MCPs per project."
 - You want **automatic switching by directory** instead of running `switch` every time you `cd`
 - You want to scope **skills + plugins + hooks + persona**, not just MCPs
 - You want your agent to **inherit a common baseline** across projects (claude-mem, common rules, safety hooks) and only diverge where needed
-- You want **token-cost reduction** — cue's per-profile isolation cuts context by 10–25×
+- You want **token-cost reduction** — cue's per-profile isolation cuts always-on context by up to ~16× (verify with `cue cost --compare`)
 
 ---
 

@@ -237,6 +237,43 @@ describe("lintProfile", () => {
     expect(messages).toContain("MCP");
     expect(hasLintErrors(result)).toBe(true);
   });
+
+  test("offline mode skips uncached npx skills instead of erroring", async () => {
+    await writeProfile(
+      "npxoffline",
+      [
+        "name: npxoffline",
+        "description: npx offline test",
+        "skills:",
+        "  npx:",
+        "    - repo: anthropics/skills",
+        "      skills: [ghost-uncached]",
+        "",
+      ].join("\n"),
+    );
+
+    let fetched = false;
+    const trackingFetch = async () => {
+      fetched = true;
+    };
+
+    // Offline (the validate default): an uncached npx skill is a benign skip,
+    // not an E3, and the network fetcher is never invoked.
+    const offline = await lintProfile(
+      "npxoffline",
+      opts({ npxOffline: true, npxFetch: trackingFetch }),
+    );
+    expect(fetched).toBe(false);
+    expect(rules(offline).filter((rule) => rule === "E3")).toHaveLength(0);
+    const npxCheck = offline.checks.find((check) => check.name === "npx skills");
+    expect(npxCheck?.message).toContain("not cached (offline");
+    expect(hasLintErrors(offline)).toBe(false);
+
+    // Online (--online): the fetcher IS invoked, preserving fetchability checks.
+    fetched = false;
+    await lintProfile("npxoffline", opts({ npxOffline: false, npxFetch: trackingFetch }));
+    expect(fetched).toBe(true);
+  });
 });
 
 describe("lintAllProfiles", () => {

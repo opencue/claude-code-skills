@@ -124,10 +124,20 @@ export const npxFetch: NpxFetchFn = async (repo, pin, skill, destDir) => {
     const ref = pin.replace(/^git@/, "").replace(/^tag@/, "");
     args.push("--ref", ref);
   }
+  // Defense-in-depth: a single wedged `npx skills add` must never hang the
+  // whole run. On timeout spawnSync sets res.error (ETIMEDOUT), which maps to
+  // NpxFetchFailed below. CUE_NPX_TIMEOUT_MS overrides; a non-positive or
+  // non-numeric value (incl. "" → 0, which would DISABLE the timeout) falls
+  // back to the 45s default rather than silently defeating the guard.
+  const envTimeout = Number(process.env.CUE_NPX_TIMEOUT_MS);
+  const npxTimeoutMs = Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : 45000;
   const res = spawnSync("npx", args, {
     cwd: destDir,
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
+    timeout: npxTimeoutMs,
+    killSignal: "SIGKILL",
+    windowsHide: true,
   });
   if (res.error) {
     throw new NpxFetchFailed(repo, res.error.message, res.error);

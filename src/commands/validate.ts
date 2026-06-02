@@ -19,6 +19,7 @@ const RESET = "\x1b[0m";
 interface ParsedArgs {
   all: boolean;
   profile?: string;
+  online: boolean;
 }
 
 export async function run(args: string[]): Promise<number> {
@@ -33,9 +34,14 @@ export async function run(args: string[]): Promise<number> {
     return 1;
   }
 
+  // Offline by default: the npx fetchability check otherwise does one network
+  // `npx skills add` spawn per skill (thousands across --all, no cache), which
+  // hangs for minutes. `--online` opts back into the real fetch. An explicit
+  // CUE_OFFLINE=1 always wins (enforced inside the linter).
+  const lintOpts = { npxOffline: !parsed.online };
   const results = parsed.all
-    ? await lintAllProfiles()
-    : [await lintProfile(parsed.profile!)];
+    ? await lintAllProfiles(lintOpts)
+    : [await lintProfile(parsed.profile!, lintOpts)];
 
   if (parsed.all && results.length === 0) {
     process.stdout.write("No profiles found in profiles/.\n");
@@ -55,16 +61,17 @@ function parseArgs(args: string[]): ParsedArgs | "help" | string {
   if (args.includes("-h") || args.includes("--help")) return "help";
 
   const all = args.includes("--all");
+  const online = args.includes("--online") || args.includes("--no-offline");
   const positional = args.filter((arg) => !arg.startsWith("-"));
 
   if (all && positional.length > 0) {
     return "cue validate: use either --all or <profile>, not both";
   }
-  if (all) return { all: true };
+  if (all) return { all: true, online };
   if (positional.length !== 1) {
     return "cue validate: expected exactly one <profile>";
   }
-  return { all: false, profile: positional[0] };
+  return { all: false, profile: positional[0], online };
 }
 
 function printHelp(stream: Pick<NodeJS.WriteStream, "write"> = process.stdout): void {
@@ -77,6 +84,11 @@ function printHelp(stream: Pick<NodeJS.WriteStream, "write"> = process.stdout): 
       "Checks:",
       "  schema validity, inheritance, local/npx/plugin skill resolution, MCP registry resolution",
       "  W1-W5 warnings and E1-E3 lint errors",
+      "",
+      "Options:",
+      "  --online   Fetch uncached npx skills over the network (one `npx skills add`",
+      "             per skill). Default is offline: uncached npx skills are reported",
+      "             as 'not cached', not errors — keeps `--all` fast and hang-free.",
       "",
     ].join("\n"),
   );

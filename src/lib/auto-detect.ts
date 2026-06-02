@@ -12,7 +12,7 @@ interface Signal {
   profile: string;
 }
 
-const SIGNALS: Signal[] = [
+export const SIGNALS: Signal[] = [
   // Frontend / Next.js
   { file: "next.config.js", weight: 5, profile: "nextjs" },
   { file: "next.config.ts", weight: 5, profile: "nextjs" },
@@ -41,15 +41,15 @@ const SIGNALS: Signal[] = [
   { file: ".github/workflows/", weight: 1, profile: "backend" },
 
   // Python API
-  { file: "pyproject.toml", weight: 4, profile: "python-api" },
-  { file: "setup.py", weight: 3, profile: "python-api" },
-  { file: "requirements.txt", weight: 3, profile: "python-api" },
-  { file: "app/main.py", weight: 5, profile: "python-api" },
-  { file: "main.py", weight: 3, profile: "python-api" },
-  { file: "manage.py", weight: 5, profile: "python-api" },
-  { file: "uvicorn.ini", weight: 4, profile: "python-api" },
-  { file: "alembic.ini", weight: 4, profile: "python-api" },
-  { file: ".python-version", weight: 2, profile: "python-api" },
+  { file: "pyproject.toml", weight: 4, profile: "python" },
+  { file: "setup.py", weight: 3, profile: "python" },
+  { file: "requirements.txt", weight: 3, profile: "python" },
+  { file: "app/main.py", weight: 5, profile: "python" },
+  { file: "main.py", weight: 3, profile: "python" },
+  { file: "manage.py", weight: 5, profile: "python" },
+  { file: "uvicorn.ini", weight: 4, profile: "python" },
+  { file: "alembic.ini", weight: 4, profile: "python" },
+  { file: ".python-version", weight: 2, profile: "python" },
 
   // Rust
   { file: "Cargo.toml", weight: 5, profile: "rust" },
@@ -57,10 +57,6 @@ const SIGNALS: Signal[] = [
   { file: "src/main.rs", weight: 4, profile: "rust" },
   { file: "src/lib.rs", weight: 3, profile: "rust" },
   { file: ".cargo/config.toml", weight: 2, profile: "rust" },
-
-  // Rust CLI sub-profile
-  { file: "src/main.rs", weight: 3, profile: "rust-cli" },
-  { file: "Cargo.toml", weight: 3, profile: "rust-cli" },
 
   // Go API
   { file: "go.mod", weight: 5, profile: "go-api" },
@@ -97,9 +93,9 @@ const SIGNALS: Signal[] = [
   // Three.js
   { file: "three.js", weight: 4, profile: "threejs" },
 
-  // ECC
-  { file: "CLAUDE.md", weight: 2, profile: "ecc" },
-  { file: ".claude/", weight: 2, profile: "ecc" },
+  // Generic Claude-managed repo → baseline profile
+  { file: "CLAUDE.md", weight: 2, profile: "core" },
+  { file: ".claude/", weight: 2, profile: "core" },
 
   // Full (meta)
   { file: "profiles/", weight: 2, profile: "full" },
@@ -183,7 +179,7 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
   // ── Rust ──
   if (ex(cwd, "Cargo.toml")) {
     add("rust", 0.9, "Cargo.toml");
-    if (ex(cwd, "src/main.rs")) add("rust-cli", 0.7, "src/main.rs");
+    if (ex(cwd, "src/main.rs")) add("rust", 0.7, "src/main.rs");
     if (ex(cwd, "src/lib.rs")) add("rust", 0.6, "src/lib.rs");
   }
 
@@ -193,10 +189,10 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
   if (exAny(cwd, ["cmd", "internal"])) add("go-api", 0.4, "cmd/ or internal/");
 
   // ── Python ──
-  if (ex(cwd, "pyproject.toml")) add("python-api", 0.7, "pyproject.toml");
-  if (ex(cwd, "requirements.txt")) add("python-api", 0.7, "requirements.txt");
-  if (ex(cwd, "manage.py")) add("python-api", 0.8, "manage.py");
-  if (exAny(cwd, ["alembic.ini", "app/main.py"])) add("python-api", 0.6, "alembic.ini or app/main.py");
+  if (ex(cwd, "pyproject.toml")) add("python", 0.7, "pyproject.toml");
+  if (ex(cwd, "requirements.txt")) add("python", 0.7, "requirements.txt");
+  if (ex(cwd, "manage.py")) add("python", 0.8, "manage.py");
+  if (exAny(cwd, ["alembic.ini", "app/main.py"])) add("python", 0.6, "alembic.ini or app/main.py");
 
   // ── Backend (containers / CI / DB) ──
   if (exAny(cwd, ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"])) {
@@ -223,7 +219,7 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
 
   // ── Fleet / meta ──
   if (exAny(cwd, [".colony", ".omx", "scripts/codex-fleet"])) add("fleet-control", 0.6, "fleet markers");
-  if (exAny(cwd, ["CLAUDE.md", ".claude"])) add("ecc", 0.4, "CLAUDE.md or .claude/");
+  if (exAny(cwd, ["CLAUDE.md", ".claude"])) add("core", 0.4, "CLAUDE.md or .claude/");
   if (ex(cwd, "profiles")) add("full", 0.3, "profiles/ dir");
 
   // ── package.json deps ──

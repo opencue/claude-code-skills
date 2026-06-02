@@ -4,7 +4,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, resolve, dirname } from "node:path";
+import { join } from "node:path";
 import { homedir } from "node:os";
 
 import { loadProfile } from "../lib/profile-loader";

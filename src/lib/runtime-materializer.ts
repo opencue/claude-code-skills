@@ -74,25 +74,58 @@ function profilesDir(): string {
 
 /**
  * Staleness predicate shared with `cue doctor`'s D5 check: a materialized
- * runtime is stale when the profile's source `profile.yaml` was modified more
- * recently than the stored `.cue-hash`. Mirror, not duplicate — doctor reports
- * it, launch acts on it (auto-rebuild). Returns false when either file is
- * absent (no runtime yet, or no source to compare against): the normal
- * content-hash path in materializeRuntime handles those cases.
+ * runtime is stale when the profile's source `profile.yaml` OR any resolved
+ * skill's `SKILL.md` was modified more recently than the stored `.cue-hash`.
+ * Mirror, not duplicate — doctor reports it, launch acts on it (auto-rebuild).
+ *
+ * The SKILL.md check makes "edit a skill → relaunch → see the change" work:
+ * the materialized runtime's own `skills/<slug>` entries are symlinks to the
+ * source skill dirs, so lstat'ing `skills/<slug>/SKILL.md` resolves through to
+ * the real source file's mtime (only the final path component is treated
+ * specially by lstat, and SKILL.md is never itself a symlink). This is
+ * automatically scoped to the agent and to any conditional/subset pruning.
+ *
+ * Returns false when there's no runtime yet (no `.cue-hash`): the content-hash
+ * path in materializeRuntime handles a fresh build. Fail-open per entry — a
+ * deleted skill source (broken symlink) is skipped, not fatal (the profile.yaml
+ * edit that removed it already trips the yaml branch).
  */
 export async function isRuntimeStale(
   profileName: string,
   agent: AgentKind,
   runtimeRoot: string,
 ): Promise<boolean> {
-  const hashFile = join(runtimeRoot, profileName, agentSubdir(agent), ".cue-hash");
-  const yamlPath = join(profilesDir(), profileName, "profile.yaml");
+  const runtimeDir = join(runtimeRoot, profileName, agentSubdir(agent));
+  const hashFile = join(runtimeDir, ".cue-hash");
+  let hashMtime: number;
   try {
-    const [hashStat, yamlStat] = await Promise.all([lstat(hashFile), lstat(yamlPath)]);
-    return yamlStat.mtimeMs > hashStat.mtimeMs;
+    hashMtime = (await lstat(hashFile)).mtimeMs;
   } catch {
-    return false;
+    return false; // no runtime yet — materializeRuntime's content hash handles it
   }
+
+  // (a) Source profile.yaml newer than the hash. Its own try/catch so a missing
+  //     yaml doesn't short-circuit the skill check below.
+  try {
+    if ((await lstat(join(profilesDir(), profileName, "profile.yaml"))).mtimeMs > hashMtime) {
+      return true;
+    }
+  } catch { /* no source yaml — fall through to the skill check */ }
+
+  // (b) Any resolved SKILL.md newer than the hash.
+  const skillsDir = join(runtimeDir, "skills");
+  let slugs: string[];
+  try {
+    slugs = await readdir(skillsDir);
+  } catch {
+    return false; // no skills/ dir → nothing more to compare
+  }
+  for (const slug of slugs) {
+    try {
+      if ((await lstat(join(skillsDir, slug, "SKILL.md"))).mtimeMs > hashMtime) return true;
+    } catch { /* broken symlink / no SKILL.md under this slug — skip */ }
+  }
+  return false;
 }
 
 function appliesToAgent(scoped: { agents?: AgentKind[] }, agent: AgentKind): boolean {

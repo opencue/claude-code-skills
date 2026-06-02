@@ -25,6 +25,9 @@ import { listProfiles, loadProfile } from "../lib/profile-loader";
 import { listAllSkillIds } from "../lib/resolver-local";
 import { findIncompleteSkills, fetchCompanionFiles, readSourceFile } from "../lib/companion-fetch";
 import { detectMissingDependencies } from "../lib/skill-dependencies";
+import { shimInstalled, runInstall } from "./shell";
+import { findRealClaudeBin } from "../lib/claude-binary";
+import { homedir } from "node:os";
 
 const REPO_ROOT = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const PROFILES_DIR = process.env.CUE_PROFILES_DIR ?? join(REPO_ROOT, "profiles");
@@ -201,6 +204,67 @@ async function checkProfile(profileName: string, allSkillIds: Set<string>, allMc
   return issues;
 }
 
+/**
+ * D9 — Activation health (environment-scoped, runs once, not per profile).
+ * Verifies the claude shim is installed, the real binary resolves, and
+ * ~/.local/bin precedes it on PATH. Injectable for testing.
+ */
+export function checkActivation(
+  opts: { homeDir?: string; pathDirs?: string[]; realBin?: string | null } = {},
+): Issue[] {
+  const issues: Issue[] = [];
+  const PROF = "(activation)";
+
+  // 1. The claude shim must be installed (and be a cue shim). Gating check —
+  //    the rest is moot without it.
+  if (!shimInstalled(opts.homeDir)) {
+    // Warning, not error: a user may legitimately not have run `cue shell
+    // install` yet (or use `cue launch` directly). Surfacing it shouldn't flip
+    // `cue doctor`'s exit code, which should track actual profile breakage.
+    issues.push({
+      code: "D9",
+      severity: "warning",
+      profile: PROF,
+      message: "~/.local/bin/claude shim missing or not a cue shim — `claude` won't load profiles (run `cue shell install`)",
+      fix: "cue shell install",
+    });
+    return issues;
+  }
+
+  // 2. The real claude binary must resolve.
+  const realBin = opts.realBin !== undefined ? opts.realBin : findRealClaudeBin();
+  if (!realBin) {
+    issues.push({
+      code: "D9",
+      severity: "warning",
+      profile: PROF,
+      message: "Real claude binary not found on PATH (only the cue shim resolves)",
+      fix: "Install Claude Code, or set CUE_REAL_CLAUDE",
+    });
+    return issues;
+  }
+
+  // 3. ~/.local/bin must precede the real binary's dir on PATH (else the real
+  //    binary shadows the shim). Only meaningful when both dirs are on PATH.
+  const home = opts.homeDir ?? homedir();
+  const shimDir = join(home, ".local", "bin");
+  const pathDirs = opts.pathDirs ?? (process.env.PATH ?? "").split(":");
+  const shimIdx = pathDirs.indexOf(shimDir);
+  const realDir = resolve(realBin, "..");
+  const realIdx = pathDirs.indexOf(realDir);
+  if (shimIdx >= 0 && realIdx >= 0 && shimIdx > realIdx) {
+    issues.push({
+      code: "D9",
+      severity: "error",
+      profile: PROF,
+      message: `Real binary dir ${realDir} precedes ${shimDir} on PATH — the shim is shadowed`,
+      fix: "Reorder PATH so ~/.local/bin comes before the real claude/codex",
+    });
+  }
+
+  return issues;
+}
+
 async function applyFix(issue: Issue): Promise<boolean> {
   const yamlPath = join(PROFILES_DIR, issue.profile, "profile.yaml");
 
@@ -286,6 +350,14 @@ async function applyFix(issue: Issue): Promise<boolean> {
       });
       return fetched.length > 0;
     }
+    case "D9": {
+      // Install/repair the shim. runInstall returns 1 (no throw) when PATH
+      // ordering is wrong — that case can't be auto-fixed (user must reorder
+      // their shell PATH), so success is keyed on rc === 0.
+      const realBin = findRealClaudeBin();
+      const rc = await runInstall({ realClaude: realBin ?? undefined });
+      return rc === 0;
+    }
     default:
       return false;
   }
@@ -310,6 +382,7 @@ Checks:
   D6  Broken symlink in runtime
   D7  Incomplete skill (companions declared but missing)
   D8  Quality gate declared but the .sh under resources/quality-gates/ is missing
+  D9  Activation: claude shim installed, real claude resolves, ~/.local/bin precedes it
 
 Flags:
   --fix             Auto-repair issues
@@ -361,6 +434,10 @@ Examples:
       }
     } catch { /* skip */ }
   }
+
+  // D9: activation health (shim + real binary + PATH order). Environment-
+  // scoped, so run once regardless of --profile.
+  issues.push(...checkActivation());
 
   // D3 only when checking all profiles, and only if no profile globs everything.
   if (!targetProfile && !hasGlobAll) {
