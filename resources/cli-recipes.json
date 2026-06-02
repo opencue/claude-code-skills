@@ -140,5 +140,8 @@
   "uv":               { "script": "curl -LsSf https://astral.sh/uv/install.sh | sh", "brew": "uv", "pacman": "uv", "needs": "Astral's ultra-fast Python package manager. Used by MiroFish and many modern Python projects in place of pip+venv. After install: source $HOME/.cargo/env or open a new shell" },
 
   "scc":              { "brew": "scc", "snap": "scc", "manual": "go install github.com/boyter/scc/v3@latest", "needs": "Sloc Cloc and Code — fast code line counter. Used by gstack throughput metrics and retro skills" },
-  "playwright":       { "npm": "playwright", "needs": "Browser automation. After install run: npx playwright install chromium (downloads ~150MB headless Chromium to ~/.cache/ms-playwright/)" }
+  "playwright":       { "npm": "playwright", "needs": "Browser automation. After install run: npx playwright install chromium (downloads ~150MB headless Chromium to ~/.cache/ms-playwright/)" },
+
+  "create-strapi":    { "npm": "create-strapi@latest", "needs": "Strapi v5 project scaffolder. Run via `npx create-strapi@latest my-app` (no global install needed); installs into a new project folder, not your PATH" },
+  "strapi":           { "npm": "@strapi/strapi", "needs": "Strapi CLI is project-local — invoke as `npm run strapi <cmd>`, `yarn strapi <cmd>`, or `npx strapi <cmd>` inside a Strapi project. Interactive commands (admin:create-user) need yarn, not npm" }
 }
