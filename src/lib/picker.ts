@@ -174,7 +174,7 @@ export type AsciiMSOption = {
  * = [B]` on either side blocks both A→B and B→A so authors only have to write
  * the relationship once.
  */
-function buildConflictMap(options: AsciiMSOption[]): Map<string, Set<string>> {
+export function buildConflictMap(options: AsciiMSOption[]): Map<string, Set<string>> {
   const map = new Map<string, Set<string>>();
   for (const o of options) {
     for (const c of o.conflicts ?? []) {
@@ -560,12 +560,19 @@ export function compressCombo(parts: string[], max = 3): string {
  * preserving first-seen order. The combine picker's primary may already be a
  * composite, so a companion inside it — or one picked twice — must not double
  * up in the final selector, the runtime dir name, or the summary. Pure.
+ *
+ * Control sentinels (SHOW_ALL / SKIP_COMBINE) are dropped here as a write-
+ * boundary backstop: the upstream filters (asciiMultiselect strips SHOW_ALL,
+ * runPicker guards on SKIP_COMBINE) are the primary defense, but this is the
+ * last transform before the selector is joined and persisted to .cue-profile,
+ * so a sentinel must never survive it even if an upstream path regresses.
  */
+const CONTROL_SENTINELS = new Set<string>([SHOW_ALL, SKIP_COMBINE]);
 export function dedupeSelectorParts(picks: string[]): string[] {
   const out: string[] = [];
   for (const pick of picks) {
     for (const part of pick.split("+")) {
-      if (part.length > 0 && !out.includes(part)) out.push(part);
+      if (part.length > 0 && !CONTROL_SENTINELS.has(part) && !out.includes(part)) out.push(part);
     }
   }
   return out;
@@ -621,11 +628,17 @@ export function renderCombineFrame(state: CombineFrameState): string {
   const renderRow = (o: AsciiMSOption, idx: number) => {
     const isCursor = idx === state.cursor;
     const isSel = effective.has(o.value);
+    // The `→`/"recommended" affordance flags a curated *companion* pairing; it
+    // must never decorate a control row (skip-combine / show-all), so guard on
+    // the row kind even though `buildCompanionOptions` only sets `recommended`
+    // on real companions today. Keeps `renderCombineFrame` honest for callers
+    // (and tests) that hand-build options.
+    const isRecommended = o.recommended === true && o.kind === undefined;
     // Gutter glyph: the cursor `›` always wins; otherwise a `→` flags a
     // recommended companion so the suggested pairing reads at a glance.
     const arrow = isCursor
       ? styleText("cyan", "›")
-      : o.recommended
+      : isRecommended
         ? styleText("magenta", "→")
         : " ";
 
@@ -706,7 +719,7 @@ export function renderCombineFrame(state: CombineFrameState): string {
     const hint = o.hint && isCursor ? styleText("dim", ` (${o.hint})`) : "";
     // A dim trailing tag labels the `→` marker, so it reads "recommended" even
     // when the cursor sits on the row (gutter shows `›`, not `→`).
-    const recTag = o.recommended ? styleText("dim", "  recommended") : "";
+    const recTag = isRecommended ? styleText("dim", "  recommended") : "";
     lines.push(`${BAR}  ${arrow} ${box} ${labelStyled}${deltaStr}${hint}${recTag}`);
   };
 
@@ -722,7 +735,13 @@ export function renderCombineFrame(state: CombineFrameState): string {
     lines.push(`${BAR}  ${styleText("dim", "─".repeat(28))}`);
     const max = state.maxRows && state.maxRows > 0 ? state.maxRows : companions.length;
     const cursorPos = companions.findIndex((r) => r.idx === state.cursor);
-    const win = windowOptions(companions, cursorPos < 0 ? 0 : cursorPos, max);
+    // Cursor off the companions (on the trailing expand / "show all" row) →
+    // findIndex returns -1. Pin the window to the *bottom* of the list, not the
+    // top: the user reaches the expand row by arrowing down off the last
+    // companion, so keeping the bottom in view makes that step seamless instead
+    // of snapping the long curated list back to its first rows.
+    const activePos = cursorPos < 0 ? companions.length - 1 : cursorPos;
+    const win = windowOptions(companions, activePos, max);
     if (win.hiddenAbove > 0) lines.push(`${BAR}  ${styleText("dim", `↑ ${win.hiddenAbove} more`)}`);
     for (const r of win.items) renderRow(r.o, r.idx);
     if (win.hiddenBelow > 0) lines.push(`${BAR}  ${styleText("dim", `↓ ${win.hiddenBelow} more`)}`);
@@ -733,8 +752,11 @@ export function renderCombineFrame(state: CombineFrameState): string {
   for (const r of expandRows) {
     const isCursor = r.idx === state.cursor;
     const arrow = isCursor ? styleText("cyan", "›") : " ";
-    const glyph = styleText(isCursor ? "cyan" : "dim", "↩");
-    const text = `show all ${r.o.expandCount} profiles ↓`;
+    // Reveal is a SPACE toggle, not enter. Don't reuse the action row's ↩ (enter)
+    // glyph here — pressing enter on this row confirms the whole prompt. A ▾ +
+    // explicit "(space)" hint points at the key that actually expands.
+    const glyph = styleText(isCursor ? "cyan" : "dim", "▾");
+    const text = `show all ${r.o.expandCount} profiles  (space)`;
     const labelStyled = isCursor ? text : styleText("dim", text);
     lines.push(`${BAR}  ${styleText("dim", "─".repeat(28))}`);
     lines.push(`${BAR}  ${arrow} ${glyph}  ${labelStyled}`);
@@ -831,7 +853,16 @@ async function asciiMultiselect(opts: {
     onReveal?: () => Promise<void> | void;
   };
 }): Promise<string[] | symbol> {
-  const conflictMap = buildConflictMap(opts.options);
+  // Build from curated + overflow so the confirm-time strip knows every
+  // declarable conflict, including one between two profiles that only appear
+  // after "show all" is revealed. resolveConflicts acts only on values actually
+  // selected, so seeding the map with not-yet-revealed options is harmless — and
+  // skipping them is the CRITICAL bug where medusa-vite + medusa-next both
+  // survive into the written .cue-profile.
+  const conflictMap = buildConflictMap([
+    ...opts.options,
+    ...(opts.overflow?.options ?? []),
+  ]);
   const prompt = new MultiSelectPrompt<AsciiMSOption>({
     options: opts.options,
     initialValues: opts.initialValues,

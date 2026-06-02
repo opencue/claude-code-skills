@@ -5,6 +5,7 @@ import {
   filterOptions,
   renderProfileList,
   resolveConflicts,
+  buildConflictMap,
   windowOptions,
   SKIP_COMBINE,
   SHOW_ALL,
@@ -239,6 +240,25 @@ describe("buildCompanionOptions", () => {
     });
     expect(companionOptions.find((o) => o.value === "blog-writer")!.recommended).toBe(true);
     expect(companionOptions.find((o) => o.value === "higgsfield")!.recommended).toBeFalsy();
+  });
+
+  test("confirm-time conflict map (curated + overflow) drops two mutually-exclusive overflow profiles", () => {
+    // postizz conflicts with neither medusa profile, so both land in overflow.
+    const { companionOptions, overflowOptions } = build({ recommends: [] });
+    const ov = overflowOptions.map((o) => o.value);
+    expect(ov).toContain("medusa-next");
+    expect(ov).toContain("medusa-vite");
+    // The fix: asciiMultiselect builds the confirm-time map from curated + overflow,
+    // so a conflict declared only between two revealed profiles is still enforced.
+    const full = buildConflictMap([...companionOptions, ...overflowOptions]);
+    expect(resolveConflicts(["medusa-next", "medusa-vite"], full)).toEqual(["medusa-next"]);
+    // Regression guard: the old curated-only map (the CRITICAL bug) let BOTH survive
+    // into the written .cue-profile while the live UI showed the conflict blocked.
+    const stale = buildConflictMap(companionOptions);
+    expect(resolveConflicts(["medusa-next", "medusa-vite"], stale)).toEqual([
+      "medusa-next",
+      "medusa-vite",
+    ]);
   });
 
   test("a detected companion already in recommends is not duplicated", () => {
@@ -579,6 +599,16 @@ describe("renderCombineFrame · show-all expand row", () => {
   test("renders the 'show all N profiles' row from expandCount", () => {
     const out = strip(renderCombineFrame({ message: "Combine postizz with…", options, cursor: 1, selected: [], ascii: false }));
     expect(out).toContain("show all 12 profiles");
+  });
+
+  test("expand row signals SPACE (▾ + '(space)'), not the ↩ enter glyph that would confirm", () => {
+    const out = strip(renderCombineFrame({ message: "m", options, cursor: 2, selected: [], ascii: false }));
+    expect(out).toContain("show all 12 profiles  (space)");
+    const expandLine = out.split("\n").find((l) => l.includes("show all 12 profiles"));
+    expect(expandLine).toContain("▾");
+    // The ↩ glyph means "enter"; the expand row must not reuse it, or users press
+    // enter (which confirms the prompt) instead of space (which reveals).
+    expect(expandLine).not.toContain("↩");
   });
 
   test("the expand sentinel never counts toward the staged selection", () => {
@@ -942,6 +972,12 @@ describe("dedupeSelectorParts", () => {
   test("a single profile passes through; empty parts are ignored", () => {
     expect(dedupeSelectorParts(["gstack"])).toEqual(["gstack"]);
     expect(dedupeSelectorParts(["a+", "+b", "a"])).toEqual(["a", "b"]);
+  });
+
+  test("control sentinels never survive into the persisted selector (write-boundary backstop)", () => {
+    expect(dedupeSelectorParts(["postizz", SHOW_ALL, "blog-writer"])).toEqual(["postizz", "blog-writer"]);
+    expect(dedupeSelectorParts(["postizz", SKIP_COMBINE, "blog-writer"])).toEqual(["postizz", "blog-writer"]);
+    expect(dedupeSelectorParts([`postizz+${SHOW_ALL}`, "blog-writer"])).toEqual(["postizz", "blog-writer"]);
   });
 });
 
