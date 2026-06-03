@@ -6,6 +6,8 @@ import {
   renderProfileList,
   resolveConflicts,
   buildConflictMap,
+  combineCategoryOf,
+  groupByCategory,
   windowOptions,
   SKIP_COMBINE,
   SHOW_ALL,
@@ -21,6 +23,7 @@ import {
   stripIconIfAscii,
   renderCombineFrame,
   compressCombo,
+  displayWidth,
   dedupeSelectorParts,
   applyShowAllExpansion,
   formatOverheadBadge,
@@ -240,6 +243,45 @@ describe("buildCompanionOptions", () => {
     });
     expect(companionOptions.find((o) => o.value === "blog-writer")!.recommended).toBe(true);
     expect(companionOptions.find((o) => o.value === "higgsfield")!.recommended).toBeFalsy();
+  });
+
+  test("autoSelect companions start checked with no detection signal", () => {
+    const { companionOptions, initialValues } = build({
+      autoSelect: ["blog-writer", "trendradar"],
+      companions: [], // crucially: no cwd detection
+    });
+    const values = companionOptions.map((o) => o.value);
+    expect(values).toContain("blog-writer");
+    expect(values).toContain("trendradar");
+    // The whole point: checked even though nothing was detected in the cwd.
+    expect(initialValues).toContain("blog-writer");
+    expect(initialValues).toContain("trendradar");
+    // An autoSelect row is also tagged recommended (it gets the → marker).
+    expect(companionOptions.find((o) => o.value === "blog-writer")!.recommended).toBe(true);
+  });
+
+  test("autoSelect overrides recommends origin without duplicating the row", () => {
+    const { companionOptions, initialValues } = build({
+      autoSelect: ["blog-writer"],
+      recommends: ["blog-writer"],
+    });
+    expect(companionOptions.filter((o) => o.value === "blog-writer")).toHaveLength(1);
+    expect(initialValues).toContain("blog-writer"); // autoSelect wins → checked
+  });
+
+  test("an autoSelect companion that conflicts with the primary is still dropped", () => {
+    const { companionOptions, initialValues } = buildCompanionOptions({
+      primary: "medusa-next",
+      primaryLabel: "medusa-next",
+      options: OPTS,
+      recommends: [],
+      autoSelect: ["medusa-vite"], // declared, but conflicts with medusa-next
+      pairSuggested: [],
+      companions: [],
+      autoCheckThreshold: 0.7,
+    });
+    expect(companionOptions.map((o) => o.value)).not.toContain("medusa-vite");
+    expect(initialValues).not.toContain("medusa-vite");
   });
 
   test("confirm-time conflict map (curated + overflow) drops two mutually-exclusive overflow profiles", () => {
@@ -765,7 +807,7 @@ describe("renderCombineFrame", () => {
   });
 
   test("footer reports the staged count", () => {
-    expect(frame({ selected: ["vercel"] })).toContain("1 selected · ↑↓ move");
+    expect(frame({ selected: ["vercel"] })).toContain("enter to continue with 1 selected");
   });
 
   test("a recommended companion (not cursored) shows the → gutter marker + tag", () => {
@@ -796,9 +838,9 @@ describe("renderCombineFrame", () => {
     expect(out).toContain("use 🏭 gstack alone");
     expect(out).not.toContain("↵ enter to confirm");
     expect(out).toContain("→ skills 31  ·  mcps 1  ·  plugins 1  ·  cmds 2");
-    // no "N selected ·" prefix — footer starts at the nav hints
-    expect(out).toMatch(/│ {2}↑↓ move/);
-    expect(out).not.toContain("selected ·");
+    // nothing staged → the footer's enter affordance carries no count
+    expect(out).toContain("⏎ enter to continue ·");
+    expect(out).not.toContain("enter to continue with");
   });
 
   test("skip row on overrides the ticks: alone label, collapsed preview, zero count", () => {
@@ -834,6 +876,23 @@ describe("renderCombineFrame", () => {
     );
     expect(out).toContain("[x] medusa-next");
     expect(out).toContain("[—] medusa-vite (conflicts with medusa-next)");
+  });
+});
+
+describe("displayWidth", () => {
+  test("ascii text counts one cell per char", () => {
+    expect(displayWidth("blog-writer")).toBe(11);
+  });
+
+  test("a leading emoji icon counts as two cells", () => {
+    // 📝(2) + space(1) + blog-writer(11) = 14
+    expect(displayWidth("📝 blog-writer")).toBe(14);
+    expect(displayWidth("🌱 growth")).toBe(9);
+  });
+
+  test("variation selectors and ZWJ add no width", () => {
+    // ⚡ + VS16 still measures as the base symbol's two cells, not three
+    expect(displayWidth("⚡️ vite")).toBe(displayWidth("⚡ vite"));
   });
 });
 
@@ -1069,5 +1128,52 @@ describe("renderCombineFrame · overhead warning + windowing", () => {
     expect(out).toContain("c0");
     expect(out).toContain("c11");
     expect(out).not.toContain("more");
+  });
+});
+
+describe("combine category grouping (cue-combine design)", () => {
+  const strip = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, "");
+
+  test("combineCategoryOf buckets known profiles; unknown -> other", () => {
+    expect(combineCategoryOf("growth")).toBe("orchestrators");
+    expect(combineCategoryOf("vercel")).toBe("backend & infra");
+    expect(combineCategoryOf("stripe")).toBe("commerce");
+    expect(combineCategoryOf("slack")).toBe("integrations");
+    expect(combineCategoryOf("totally-unknown-xyz")).toBe("other");
+  });
+
+  test("groupByCategory sorts profiles by category; action leads, expand trails", () => {
+    const opts: AsciiMSOption[] = [
+      { value: SKIP_COMBINE, label: "alone", kind: "action" },
+      { value: "stripe", label: "stripe" },   // commerce
+      { value: "growth", label: "growth" },    // orchestrators
+      { value: "vercel", label: "vercel" },    // backend & infra
+      { value: SHOW_ALL, label: "", kind: "expand", expandCount: 1 },
+    ];
+    const out = groupByCategory(opts);
+    expect(out[0]!.value).toBe(SKIP_COMBINE);
+    expect(out[out.length - 1]!.value).toBe(SHOW_ALL);
+    const profiles = out.filter((o) => !o.kind).map((o) => o.value);
+    expect(profiles).toEqual(["growth", "vercel", "stripe"]); // orchestrators < backend < commerce
+    expect(out.find((o) => o.value === "growth")!.category).toBe("orchestrators");
+  });
+
+  test("renderCombineFrame prints a category header with the group count", () => {
+    const opts = groupByCategory([
+      { value: "growth", label: "growth" },
+      { value: "builder", label: "builder" },
+      { value: "vercel", label: "vercel" },
+    ]);
+    const out = strip(renderCombineFrame({ message: "m", options: opts, cursor: 0, selected: [], ascii: false }));
+    expect(out).toContain("orchestrators");
+    expect(out).toContain("backend & infra");
+    // group count: 2 orchestrators (growth, builder), 1 backend (vercel)
+    expect(out).toMatch(/orchestrators ─+ 2/);
+  });
+
+  test("a danger profile renders its red tag (full · never use this)", () => {
+    const opts = groupByCategory([{ value: "full", label: "🦄 full", danger: "never use this" }]);
+    const out = strip(renderCombineFrame({ message: "m", options: opts, cursor: 0, selected: [], ascii: false }));
+    expect(out).toContain("never use this");
   });
 });

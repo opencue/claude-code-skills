@@ -34,6 +34,12 @@ export interface PickerOption {
    */
   recommends?: string[];
   /**
+   * Companion profile `value`s that start CHECKED when this option is the
+   * combine primary, regardless of cwd detection (the profile's `autoSelect:`).
+   * Stronger than `recommends`; still opt-out (the user can uncheck).
+   */
+  autoSelect?: string[];
+  /**
    * Other profile `value`s that are mutually exclusive with this one. In the
    * combine multiselect, checking this option auto-disables every conflict
    * (and vice versa). Used to stop e.g. medusa-vite + medusa-next being
@@ -167,7 +173,75 @@ export type AsciiMSOption = {
    *  (when not the cursor) and a dim "recommended" tag so the suggested pairing
    *  stands out from history/detected/overflow rows. */
   recommended?: boolean;
+  /** Category bucket for the grouped combine view (see `combineCategoryOf`).
+   *  Drives the category headers rendered between groups in `renderCombineFrame`. */
+  category?: string;
+  /** Render a danger marker (⚠ + label) — e.g. `full` profile "never use this". */
+  danger?: string;
 };
+
+// Profile categories for the grouped combine list (from the cue-combine design):
+// turn the flat 40-item wall into scannable groups. Names not listed fall into
+// "other", which sorts last so the catalogue still shows everything.
+export const COMBINE_CATEGORY_ORDER = [
+  "orchestrators",
+  "content & research",
+  "frontend & design",
+  "backend & infra",
+  "commerce",
+  "integrations",
+  "other",
+] as const;
+
+const COMBINE_CATEGORY_OF: Record<string, string> = {
+  growth: "orchestrators", builder: "orchestrators", studio: "orchestrators",
+  maker: "orchestrators", improver: "orchestrators", agency: "orchestrators", full: "orchestrators",
+  "blog-writer": "content & research", "docs-writer": "content & research",
+  marketing: "content & research", research: "content & research", "readme-writer": "content & research",
+  frontend: "frontend & design", nextjs: "frontend & design", vite: "frontend & design",
+  "react-native": "frontend & design", designer: "frontend & design",
+  "designer-medusa-next": "frontend & design", "designer-medusa-vite": "frontend & design",
+  threejs: "frontend & design", browser: "frontend & design", wordpress: "frontend & design",
+  "web-frontend-base": "frontend & design", "creative-media": "frontend & design", "event-design": "frontend & design",
+  backend: "backend & infra", postgres: "backend & infra", supabase: "backend & infra",
+  strapi: "backend & infra", aws: "backend & infra", vercel: "backend & infra",
+  resend: "backend & infra", secops: "backend & infra", ops: "backend & infra",
+  coolify: "backend & infra", hostinger: "backend & infra", "backend-base": "backend & infra",
+  python: "backend & infra", "go-api": "backend & infra", rust: "backend & infra", "rust-core": "backend & infra",
+  cybersecurity: "backend & infra",
+  commerce: "commerce", webshop: "commerce", "webshop-google": "commerce", stripe: "commerce",
+  finance: "commerce", "medusa-stack": "commerce", "medusa-dev": "commerce",
+  "medusa-next": "commerce", "medusa-vite": "commerce",
+  slack: "integrations", linear: "integrations", "claude-api": "integrations", ssh: "integrations",
+  video: "integrations", postizz: "integrations", higgsfield: "integrations",
+  "google-ads": "integrations", "google-analytics": "integrations", "google-drive": "integrations",
+  instagram: "integrations", nvidia: "integrations",
+};
+
+/** Bucket a profile into a combine category. Unknown names → "other" (sorts last). */
+export function combineCategoryOf(name: string): string {
+  return COMBINE_CATEGORY_OF[name] ?? "other";
+}
+
+/** Stable sort an option list into category order (see COMBINE_CATEGORY_ORDER),
+ *  preserving the incoming order within each category. Tags each option's
+ *  `category` so the renderer can emit group headers. */
+export function groupByCategory(opts: AsciiMSOption[]): AsciiMSOption[] {
+  const order = (c: string) => {
+    const i = COMBINE_CATEGORY_ORDER.indexOf(c as (typeof COMBINE_CATEGORY_ORDER)[number]);
+    return i < 0 ? COMBINE_CATEGORY_ORDER.length : i;
+  };
+  // Keep control rows pinned — the skip-combine action leads, the show-all
+  // expand row trails — and only group the actual profile rows by category.
+  const lead = opts.filter((o) => o.kind === "action");
+  const trail = opts.filter((o) => o.kind === "expand");
+  const middle = opts
+    .filter((o) => o.kind !== "action" && o.kind !== "expand")
+    .map((o, i) => ({ o: { ...o, category: combineCategoryOf(o.value) }, i }))
+    .sort((a, b) => order(a.o.category!) - order(b.o.category!) || a.i - b.i)
+    .map((x) => x.o);
+  return [...lead, ...middle, ...trail];
+}
 
 /**
  * Build a symmetric conflict map from a list of options. Declaring `A.conflicts
@@ -255,6 +329,8 @@ export interface BuildCompanionArgs {
   options: PickerOption[];
   /** The primary's `recommends:` names. */
   recommends: string[];
+  /** The primary's `autoSelect:` names — start checked, regardless of cwd. */
+  autoSelect: string[];
   /** Historical partners for the primary (from session-log pair mining). */
   pairSuggested: string[];
   /** Content-detected companions for the cwd. */
@@ -300,6 +376,7 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
   overflowOptions: AsciiMSOption[];
 } {
   const { primary, primaryLabel, options, recommends, pairSuggested, companions } = args;
+  const autoSelect = args.autoSelect ?? [];
   const universalSuggestions = args.universalSuggestions ?? [];
   const firstOpt = options.find((o) => o.value === primary);
   const primaryConflicts = new Set(firstOpt?.conflicts ?? []);
@@ -314,7 +391,7 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
   // Earlier (stronger) sources keep the slot and the row hint on overlap; the
   // origin drives the hint only for rows that appear *because* they're featured,
   // frequently used, or a pinned always-on companion (gstack).
-  type CandidateOrigin = "recommends" | "history" | "detected" | UniversalOrigin;
+  type CandidateOrigin = "autoSelect" | "recommends" | "history" | "detected" | UniversalOrigin;
   const candidates: Array<{ name: string; origin: CandidateOrigin }> = [];
   const seen = new Set<string>();
   const addCandidate = (name: string, origin: CandidateOrigin) => {
@@ -322,6 +399,9 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
     seen.add(name);
     candidates.push({ name, origin });
   };
+  // autoSelect is the strongest source: added first so it keeps the slot/origin
+  // even when the same name also appears in recommends or detection.
+  for (const a of autoSelect) addCandidate(a, "autoSelect");
   for (const r of recommends) addCandidate(r, "recommends");
   for (const r of pairSuggested) addCandidate(r, "history");
   for (const c of companions) addCandidate(c.profile, "detected");
@@ -354,9 +434,12 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
       label: opt.label,
       hint,
       conflicts: opt.conflicts,
-      recommended: origin === "recommends",
+      recommended: origin === "recommends" || origin === "autoSelect",
     });
 
+    // autoSelect rows start checked unconditionally — that's the whole point of
+    // the field (a profile that declares it needs the companion by default).
+    const checkByAutoSelect = origin === "autoSelect";
     const checkByPreselect = opt.preselect === true;
     const checkByDetect = detected !== undefined && detected.confidence >= args.autoCheckThreshold;
     // Profiles you use often start checked — opt-out, not opt-in — but only the
@@ -366,7 +449,7 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
     // History partners (a remembered combo) are *offered unchecked* — a
     // recommendation surfaced with the HISTORY_HINT, never silently re-pinned.
     const checkByFrequent = origin === "frequent" && frequentChecked < MAX_FREQUENT_AUTOCHECK;
-    if (checkByPreselect || checkByDetect || checkByFrequent) {
+    if (checkByAutoSelect || checkByPreselect || checkByDetect || checkByFrequent) {
       initialValues.push(name);
       if (checkByFrequent) frequentChecked += 1;
     }
@@ -417,7 +500,18 @@ export function buildCompanionOptions(args: BuildCompanionArgs): {
       expandCount: overflowOptions.length,
     });
   }
-  return { companionOptions, initialValues, overflowOptions };
+  // Mark the catalogue's "never use this" profile so the row carries a danger
+  // tag (matches the cue-combine design).
+  for (const o of overflowOptions) if (o.value === "full") o.danger = "never use this";
+  for (const o of companionOptions) if (o.value === "full") o.danger = "never use this";
+  // Group both lists into scannable category buckets. Navigation follows the
+  // option order, so sorting here (not just at render) keeps ↑↓ in step with
+  // the visible groups.
+  return {
+    companionOptions: groupByCategory(companionOptions),
+    initialValues,
+    overflowOptions: groupByCategory(overflowOptions),
+  };
 }
 
 /**
@@ -545,6 +639,40 @@ export function stripIconIfAscii(label: string, ascii: boolean): string {
 }
 
 /**
+ * Approximate the rendered cell width of a string in a monospace terminal.
+ * Emoji and CJK glyphs occupy two cells; variation selectors, ZWJ, and skin-
+ * tone modifiers occupy none; everything else one. Good enough to column-align
+ * the combine rows (whose labels carry leading emoji icons) — not a full
+ * grapheme segmenter. Pure.
+ */
+export function displayWidth(s: string): number {
+  let w = 0;
+  for (const ch of s) {
+    const cp = ch.codePointAt(0)!;
+    // zero-width: ZWJ, variation selectors, skin-tone modifiers
+    if (cp === 0x200d || (cp >= 0xfe00 && cp <= 0xfe0f) || (cp >= 0x1f3fb && cp <= 0x1f3ff)) {
+      continue;
+    }
+    // wide: CJK blocks, fullwidth forms, and the emoji/supplementary planes
+    if (
+      (cp >= 0x1100 && cp <= 0x115f) ||
+      (cp >= 0x2e80 && cp <= 0xa4cf) ||
+      (cp >= 0xac00 && cp <= 0xd7a3) ||
+      (cp >= 0xf900 && cp <= 0xfaff) ||
+      (cp >= 0xfe30 && cp <= 0xfe4f) ||
+      (cp >= 0xff00 && cp <= 0xff60) ||
+      (cp >= 0xffe0 && cp <= 0xffe6) ||
+      cp >= 0x1f000
+    ) {
+      w += 2;
+      continue;
+    }
+    w += 1;
+  }
+  return w;
+}
+
+/**
  * Collapse a profile combo to "first +N more" once it exceeds `max` parts, so
  * the confirm row never wraps. `<= max` parts render in full. Used for the
  * skip-combine action label, where the primary may itself be a composite
@@ -620,9 +748,20 @@ export function renderCombineFrame(state: CombineFrameState): string {
   const skipping = effective.has(SKIP_COMBINE);
   const ascii = state.ascii ?? asciiIconsEnabled();
   const icon = (s: string) => stripIconIfAscii(s, ascii);
+  // Column where every companion's "+N skills" delta starts. Measured across
+  // the full companion set (not just the visible window) so the deltas line up
+  // in a stable column as the list scrolls. Capped so one long name can't push
+  // the whole table off a narrow terminal.
+  const labelCol = Math.min(
+    24,
+    state.options
+      .filter((o) => o.kind === undefined)
+      .reduce((m, o) => Math.max(m, displayWidth(icon(o.label))), 0),
+  );
   const lines: string[] = [];
   lines.push(`${BAR}`);
   lines.push(`${BAR}  ${state.message}`);
+  lines.push(`${BAR}`);
   // One row's rendering, shared by the pinned action row and the windowed
   // companion list below it.
   const renderRow = (o: AsciiMSOption, idx: number) => {
@@ -701,7 +840,8 @@ export function renderCombineFrame(state: CombineFrameState): string {
     }
 
     const box = isSel ? styleText("green", "[x]") : styleText("dim", "[ ]");
-    const labelStyled = isSel || isCursor ? icon(o.label) : styleText("dim", icon(o.label));
+    const rawLabel = icon(o.label);
+    const labelStyled = isSel || isCursor ? rawLabel : styleText("dim", rawLabel);
     // Contribution at a glance: every row shows just the headline "+N skills"
     // (one token, never wraps); the focused row expands to the full
     // "+N skills · +M mcps · …" breakdown so detail is one keystroke away.
@@ -713,14 +853,22 @@ export function renderCombineFrame(state: CombineFrameState): string {
           ? `+${tally.skills.length} skills`
           : ""
       : "";
-    const deltaStr = delta ? styleText("dim", `  ${delta}`) : "";
     // The verbose reason / description (detection signal, profile blurb)
     // stays cursor-only to keep the unfocused rows scannable.
     const hint = o.hint && isCursor ? styleText("dim", ` (${o.hint})`) : "";
     // A dim trailing tag labels the `→` marker, so it reads "recommended" even
     // when the cursor sits on the row (gutter shows `›`, not `→`).
     const recTag = isRecommended ? styleText("dim", "  recommended") : "";
-    lines.push(`${BAR}  ${arrow} ${box} ${labelStyled}${deltaStr}${hint}${recTag}`);
+    // Pad the label out to the shared delta column so every "+N skills" lines
+    // up in a clean table (≥2-space gap even for an over-long name). Skip the
+    // pad entirely when there's no trailer, so bare rows carry no trailing
+    // whitespace.
+    const hasTrailer = delta !== "" || (Boolean(o.hint) && isCursor) || Boolean(o.danger);
+    const pad = hasTrailer ? " ".repeat(Math.max(2, labelCol + 2 - displayWidth(rawLabel))) : "";
+    const deltaStr = delta ? styleText("dim", delta) : "";
+    // Danger profiles (e.g. `full`, "never use this") carry a red trailing tag.
+    const dangerTag = o.danger ? styleText("red", `${delta ? " · " : ""}${o.danger}`) : "";
+    lines.push(`${BAR}  ${arrow} ${box} ${labelStyled}${pad}${deltaStr}${dangerTag}${hint}${recTag}`);
   };
 
   // The lead action row ("use X alone / + …") stays pinned on top; only the
@@ -743,7 +891,28 @@ export function renderCombineFrame(state: CombineFrameState): string {
     const activePos = cursorPos < 0 ? companions.length - 1 : cursorPos;
     const win = windowOptions(companions, activePos, max);
     if (win.hiddenAbove > 0) lines.push(`${BAR}  ${styleText("dim", `↑ ${win.hiddenAbove} more`)}`);
-    for (const r of win.items) renderRow(r.o, r.idx);
+    // Per-category totals (across the whole list, not just the window) for the
+    // header counts — turns the flat wall into scannable groups (cue-combine
+    // design). A header prints before the first visible row of each category,
+    // including when the window opens mid-group.
+    const catTotals = new Map<string, number>();
+    for (const r of companions) {
+      const c = r.o.category;
+      if (c) catTotals.set(c, (catTotals.get(c) ?? 0) + 1);
+    }
+    let lastCat: string | undefined;
+    for (const r of win.items) {
+      const cat = r.o.category;
+      if (cat && cat !== lastCat) {
+        const n = catTotals.get(cat) ?? 0;
+        const label = styleText("blue", cat);
+        const ruleLen = Math.max(4, labelCol + 6 - displayWidth(cat) - String(n).length);
+        const rule = styleText("gray", "─".repeat(ruleLen));
+        lines.push(`${BAR}  ${label} ${rule} ${styleText("dim", String(n))}`);
+        lastCat = cat;
+      }
+      renderRow(r.o, r.idx);
+    }
     if (win.hiddenBelow > 0) lines.push(`${BAR}  ${styleText("dim", `↓ ${win.hiddenBelow} more`)}`);
   }
   // "Show all profiles" expand row — pinned below the window so a long curated
@@ -765,6 +934,7 @@ export function renderCombineFrame(state: CombineFrameState): string {
   // Live combined-total preview: the resources you'd actually pin, updated
   // as you toggle. Skipping (action row on) collapses it to the primary.
   if (state.preview) {
+    lines.push(`${BAR}`);
     const { primary, tallies } = state.preview;
     const baseTally = tallies.get(primary) ?? EMPTY_TALLY;
     const selected = skipping
@@ -788,10 +958,16 @@ export function renderCombineFrame(state: CombineFrameState): string {
   const staged = skipping
     ? 0
     : [...effective].filter((v) => v !== SKIP_COMBINE && v !== SHOW_ALL).length;
-  const countLabel = staged > 0 ? `${staged} selected · ` : "";
-  lines.push(
-    `${BAR}  ${styleText("dim", `${countLabel}↑↓ move · space toggle · enter confirm · esc cancel`)}`,
-  );
+  // Lead the footer with the enter affordance — the #1 question at this screen
+  // is "how do I move on with what I ticked". Brighten it (cyan) and name the
+  // count once something is staged, so "press enter to continue" is never a
+  // guess. Nav keys trail behind, dim.
+  const enterText =
+    staged > 0 ? `enter to continue with ${staged} selected` : "enter to continue";
+  const enterStyled = styleText(staged > 0 ? "cyan" : "dim", `⏎ ${enterText}`);
+  const navStyled = styleText("dim", " · space toggle · ↑↓ move · esc cancel");
+  lines.push(`${BAR}`);
+  lines.push(`${BAR}  ${enterStyled}${navStyled}`);
   return lines.join("\n");
 }
 
@@ -994,7 +1170,7 @@ export function windowOptions<T>(
 // backspace) and only the real arrow keys emit `cursor` events — j/k/h/l type
 // into the filter instead of moving the cursor, which is what you want in a
 // search box.
-class FilterSelectPrompt extends Prompt<string> {
+export class FilterSelectPrompt extends Prompt<string> {
   message: string;
   allOptions: PickerOption[];
   display: PickerOption[] = [];
@@ -1117,9 +1293,16 @@ class FilterSelectPrompt extends Prompt<string> {
       lines.push(`${BAR}  ${styleText("dim", `↓ ${win.hiddenBelow} more`)}`);
     }
 
-    lines.push(
-      `${BAR}  ${styleText("dim", "type to filter · ↑↓ move · enter select · esc cancel")}`,
-    );
+    // Footer mirrors the combine screen: lead with the bright enter affordance,
+    // nav keys trail dim. Enter only lights up when a row is actually
+    // selectable (an empty filter result blocks submit, so don't promise it).
+    // No label in the footer — the cursored row is already highlighted, and a
+    // long composite-stack label would wrap the line on a narrow terminal.
+    const canSelect = this.selectable.length > 0;
+    const enterStyled = styleText(canSelect ? "cyan" : "dim", "⏎ enter to select");
+    const navStyled = styleText("dim", " · type to filter · ↑↓ move · esc cancel");
+    lines.push(`${BAR}`);
+    lines.push(`${BAR}  ${enterStyled}${navStyled}`);
     return lines.join("\n");
   }
 }
@@ -1188,6 +1371,7 @@ export async function runPicker(input: PickerInput): Promise<PickerOutput> {
     primaryLabel: firstOpt?.label ?? first,
     options: input.options,
     recommends: firstOpt?.recommends ?? [],
+    autoSelect: firstOpt?.autoSelect ?? [],
     pairSuggested: input.pairSuggestions?.get(first) ?? [],
     companions: input.companions ?? [],
     universalSuggestions: input.universalSuggestions ?? [],
