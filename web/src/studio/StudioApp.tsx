@@ -18,13 +18,14 @@ import { McpsView } from "./views/Mcps";
 import { PluginsView } from "./views/Plugins";
 import { MarketView } from "./views/Market";
 import { HooksView } from "./views/Hooks";
+import { EnvView } from "./views/Env";
 import { SettingsView } from "./views/Settings";
 import { ProfilesView } from "./views/Profiles";
 import { OfflineBanner } from "./views/OfflineBanner";
 
 export type View =
   | "explorer" | "dashboard" | "profiles" | "search" | "merge"
-  | "workflows" | "mcps" | "plugins" | "market" | "hooks" | "settings";
+  | "workflows" | "mcps" | "plugins" | "market" | "hooks" | "env" | "settings";
 
 export interface OpenTarget { kind: "skill" | "mcp" | "plugin" | "command"; key: string; ts: number; highlightCli?: string }
 
@@ -42,6 +43,7 @@ const RAIL_ICONS: Record<string, string> = {
   panel: "M4 4h16v16H4z M9 4v16",
   gear: "M12 9a3 3 0 100 6 3 3 0 000-6zM19 12a7 7 0 00-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 00-1.7-1L14.4 2H9.6L9.2 4.6a7 7 0 00-1.7 1l-2.4-1-2 3.4L5.1 11a7 7 0 000 2l-2 1.6 2 3.4 2.4-1a7 7 0 001.7 1l.4 2.6h4.8l.4-2.6a7 7 0 001.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z",
   git: "M6 3v12M6 21a3 3 0 100-6 3 3 0 000 6zM6 6a3 3 0 100-6 3 3 0 000 6zM18 12a3 3 0 100-6 3 3 0 000 6zM18 9c0 4-6 2-6 9",
+  key: "M7 18a3 3 0 100-6 3 3 0 000 6z M9.2 13.8 19 4 M16 5l2 2 M18.5 5.5l1.5 1.5",
 };
 
 function Ico({ name }: { name: string }) {
@@ -232,7 +234,8 @@ export function StudioApp() {
     ["profiles", "profiles", "Profiles"], ["search", "search", "Search"],
     ["merge", "merge", "Merge studio"], ["flow", "workflows", "Workflows"],
     ["plug", "mcps", "MCP servers"], ["puzzle", "plugins", "Plugins"],
-    ["hook", "hooks", "Hooks"], ["market", "market", "Marketplace"],
+    ["hook", "hooks", "Hooks"], ["key", "env", "Environment"],
+    ["market", "market", "Marketplace"],
   ];
 
   const counts = detail.data?.counts;
@@ -249,6 +252,7 @@ export function StudioApp() {
       case "plugins": return <>extensions · <b>plugins</b></>;
       case "market": return <>community · <b>marketplace</b></>;
       case "hooks": return <>automation · <b>hooks</b></>;
+      case "env": return <>secrets · <b>environment</b></>;
       case "search": return <>search · <b>workspace</b></>;
       case "settings": return <>preferences · <b>settings</b></>;
       default: return <>workspace · <b>overview</b></>;
@@ -323,6 +327,7 @@ export function StudioApp() {
               {view === "plugins" && <PluginsView profile={profile} />}
               {view === "market" && <MarketView />}
               {view === "hooks" && <HooksView profile={profile} />}
+              {view === "env" && <EnvView profile={profile} />}
               {view === "settings" && <SettingsView />}
               {view === "search" && <SearchView profile={profile} onOpen={handleOpen} setView={setView} />}
             </>

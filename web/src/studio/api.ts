@@ -392,3 +392,45 @@ export function useMarket() {
     staleTime: 60_000,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Environment variables (per-folder .env, secrets masked server-side)
+// ---------------------------------------------------------------------------
+
+export type EnvKind = "secret" | "url" | "bool" | "num" | "plain";
+/** One parsed var. `masked` true → `value` is the dotted mask, not the secret. */
+export interface EnvVarRow { key: string; value: string; kind: EnvKind; masked: boolean }
+export interface EnvFolderRow { path: string; tag: string; count: number }
+export interface EnvFoldersData { folders: EnvFolderRow[] }
+export interface EnvData { folder: string; tag: string; exists: boolean; vars: EnvVarRow[] }
+
+/** The allowlisted project folders + their .env var counts (rail list). */
+export function useEnvFolders() {
+  return useQuery({
+    queryKey: ["env-folders"],
+    queryFn: () => fetcher<EnvFoldersData>("/env/folders"),
+    staleTime: 30_000,
+  });
+}
+
+/** Parsed vars for one folder's .env. Secrets masked unless `revealAll` (the
+ *  global "Reveal secrets" toggle → server returns every secret raw). Empty
+ *  folder → no fetch. */
+export function useEnv(folder: string | null, revealAll = false) {
+  const qs = `?folder=${encodeURIComponent(folder ?? "")}${revealAll ? "&reveal=*" : ""}`;
+  return useQuery({
+    queryKey: ["env", folder, revealAll],
+    queryFn: () => fetcher<EnvData>(`/env${qs}`),
+    enabled: Boolean(folder),
+  });
+}
+
+/**
+ * One-shot fetch of a single secret's RAW value (reveal click). Kept off the
+ * react-query cache so revealed plaintext never lingers in the query store; the
+ * caller holds it transiently in component state.
+ */
+export async function fetchEnvReveal(folder: string, key: string): Promise<string> {
+  const data = await fetcher<EnvData>(`/env?folder=${encodeURIComponent(folder)}&reveal=${encodeURIComponent(key)}`);
+  return data.vars.find((v) => v.key === key)?.value ?? "";
+}

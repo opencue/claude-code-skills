@@ -1539,8 +1539,91 @@ export async function handleWorkflowSave(body: unknown): Promise<ApiResult<unkno
   }
 }
 
+// ════════ ENV VARIABLES ════════
+// Per-folder .env viewer. Reads real `<folder>/.env` from an allowlist of
+// project folders, parses KEY=value, classifies each var, and MASKS secret
+// values server-side — a raw secret value is returned only when the request
+// names that key in `reveal`. Loopback-only trust boundary (see binding note).
+
+/** Project folders whose `.env` the studio may read. `~` expands to $HOME.
+ *  Mirrors the design's folder list; the canonical home for the user's repos. */
+const ENV_FOLDER_DEFS: ReadonlyArray<{ path: string; tag: string }> = [
+  { path: "~/Documents/cue", tag: "cue" },
+  { path: "~/Documents/recodee/authmux", tag: "authmux" },
+  { path: "~/Documents/x-growth-bot", tag: "x-growth-bot" },
+  { path: "~/work/medusa", tag: "medusa" },
+  { path: "~/Documents/medusa-shops/marva", tag: "marva" },
+  { path: "~/Documents/gitguardex", tag: "gitguardex" },
+];
+
+const expandHome = (p: string): string => (p.startsWith("~/") ? join(homedir(), p.slice(2)) : p);
+
+const ENV_SECRET_RE = /(SECRET|_KEY|TOKEN|PASSWORD|PASSWD|_PASS|CREDENTIAL|DATABASE_URL|_DSN|PRIVATE)/i;
+type EnvKind = "secret" | "url" | "bool" | "num" | "plain";
+function classifyEnvVar(key: string, val: string): EnvKind {
+  if (ENV_SECRET_RE.test(key)) return "secret";
+  if (/^https?:\/\//.test(val)) return "url";
+  if (/^(true|false)$/i.test(val)) return "bool";
+  if (/^\d+$/.test(val)) return "num";
+  return "plain";
+}
+interface EnvVarRow { key: string; value: string; kind: EnvKind; masked: boolean }
+/** Mask all but the first/last 3 chars (mirrors the design's mask()). */
+function maskSecretValue(v: string): string {
+  return v.length <= 8 ? "•".repeat(v.length) : v.slice(0, 3) + "•".repeat(Math.min(18, v.length - 6)) + v.slice(-3);
+}
+function parseEnvText(raw: string, revealKey: string): EnvVarRow[] {
+  const out: EnvVarRow[] = [];
+  for (const line of raw.split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq < 0) continue;
+    const key = line.slice(0, eq).trim();
+    let value = line.slice(eq + 1).trim();
+    // Strip a single layer of surrounding quotes, like dotenv does.
+    if (value.length >= 2 && ((value[0] === '"' && value.at(-1) === '"') || (value[0] === "'" && value.at(-1) === "'"))) {
+      value = value.slice(1, -1);
+    }
+    const kind = classifyEnvVar(key, value);
+    const isSecret = kind === "secret";
+    // `reveal` names a single key, or "*" to reveal every secret at once.
+    const reveal = isSecret && (revealKey === "*" || revealKey === key);
+    out.push({ key, value: isSecret && !reveal ? maskSecretValue(value) : value, kind, masked: isSecret && !reveal });
+  }
+  return out;
+}
+
+/** GET /api/v1/env/folders → the allowlisted project folders + their var counts. */
+export async function handleEnvFolders(): Promise<ApiResult<unknown>> {
+  const folders = ENV_FOLDER_DEFS.map((f) => {
+    const abs = join(expandHome(f.path), ".env");
+    let count = 0;
+    try { if (existsSync(abs)) count = parseEnvText(readFileSync(abs, "utf8"), "").length; } catch { /* unreadable → 0 */ }
+    return { path: f.path, tag: f.tag, count };
+  });
+  return { ok: true, data: { folders } };
+}
+
+/** GET /api/v1/env?folder=<path>[&reveal=<KEY>] → parsed, masked vars for one
+ *  allowlisted folder. `reveal` returns the raw value for that single key. */
+export async function handleEnv(params: URLSearchParams): Promise<ApiResult<unknown>> {
+  const folder = params.get("folder") ?? "";
+  const reveal = params.get("reveal") ?? "";
+  // Allowlist: the requested folder must be one we offer — no arbitrary paths.
+  const def = ENV_FOLDER_DEFS.find((f) => f.path === folder);
+  if (!def) return { ok: false, error: "unknown-folder" };
+  const abs = join(expandHome(def.path), ".env");
+  if (!existsSync(abs)) return { ok: true, data: { folder: def.path, tag: def.tag, exists: false, vars: [] } };
+  let raw = "";
+  try { raw = readFileSync(abs, "utf8"); } catch (err) { return { ok: false, error: `read failed: ${(err as Error).message}` }; }
+  return { ok: true, data: { folder: def.path, tag: def.tag, exists: true, vars: parseEnvText(raw, reveal) } };
+}
+
 const ROUTES: Record<string, (params: URLSearchParams) => Promise<ApiResult<unknown>>> = {
   "/api/v1/status":             () => handleStatus(),
+  "/api/v1/env/folders":        () => handleEnvFolders(),
+  "/api/v1/env":                (p) => handleEnv(p),
   "/api/v1/plugins/discovered": () => handleDiscoveredPlugins(),
   "/api/v1/workflows":          () => handleWorkflows(),
   "/api/v1/workflow":           (p) => handleWorkflow(p),
