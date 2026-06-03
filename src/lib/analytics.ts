@@ -238,6 +238,68 @@ export function computeStats(optsOrSince: Date | ComputeStatsOptions = {}): Prof
     .sort((a, b) => b.sessions - a.sessions);
 }
 
+export interface DailyActivity {
+  /** Calendar day, `YYYY-MM-DD` (UTC). */
+  date: string;
+  sessions: number;
+}
+
+/**
+ * Sessions per calendar day over the window, gap-filled so a sparkline/area
+ * chart is continuous (days with no activity render as 0, not a missing point).
+ * Dedupes a session that appears in both the `start` events and the Stop-hook
+ * session log by `session_id`, mirroring computeStats' intent.
+ */
+export function computeDailyActivity(sinceDays: number): DailyActivity[] {
+  const days = Math.max(1, Math.floor(sinceDays));
+  const since = new Date(Date.now() - days * 86_400_000);
+  const counts = new Map<string, number>();
+  const seen = new Set<string>();
+  const bump = (ts: string, id: string): void => {
+    if (seen.has(id)) return;
+    seen.add(id);
+    const day = ts.slice(0, 10);
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  };
+  for (const e of readEvents(since)) {
+    if (e.event !== "start" || !e.profile) continue;
+    bump(e.ts, e.session_id || `start|${e.ts}|${e.cwd ?? ""}`);
+  }
+  for (const e of readSessionLog(since)) {
+    bump(e.ts, e.session_id || `log|${e.ts}|${e.cwd}`);
+  }
+  const out: DailyActivity[] = [];
+  const now = Date.now();
+  for (let i = days - 1; i >= 0; i--) {
+    const key = new Date(now - i * 86_400_000).toISOString().slice(0, 10);
+    out.push({ date: key, sessions: counts.get(key) ?? 0 });
+  }
+  return out;
+}
+
+export interface DurationSummary {
+  /** Average length of *ended* sessions, in seconds. */
+  avgS: number;
+  /** Total tracked session time, in seconds. */
+  totalS: number;
+  /** How many sessions had a recorded end (the basis for avgS). */
+  ended: number;
+}
+
+/**
+ * Aggregate session-duration stats from `end` events (the only ones carrying
+ * `duration_s`). Reported separately from session *counts* because many
+ * sessions start but never log a clean end — averaging over starts would
+ * understate real session length.
+ */
+export function sessionDurationSummary(since?: Date): DurationSummary {
+  const ends = readEvents(since).filter(
+    (e) => e.event === "end" && typeof e.duration_s === "number",
+  );
+  const totalS = ends.reduce((a, e) => a + (e.duration_s ?? 0), 0);
+  return { avgS: ends.length ? Math.round(totalS / ends.length) : 0, totalS, ended: ends.length };
+}
+
 export interface SkillUsageStats {
   skill: string;
   hits: number;
