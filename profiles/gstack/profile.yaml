@@ -72,6 +72,8 @@ skills:
     - gstack/plan-devex-review
     # Safety rails (only the one with no core command equivalent)
     - gstack/health
+    # gitguardex (gx) — worktree/lock/PR safety + the gated auto-ship flow
+    - github/gitguardex
 # MCPs: cue-tty-watch + lightpanda inherited from core. gbrain dropped along
 # with the setup-gbrain / sync-gbrain skills.
 rules:
@@ -91,4 +93,5 @@ commands:
   - feature-dev
   - build-fix
   - aside
+  - autoship   # /autoship — gated gx create → review → merge (pre-auth opt-in)
 # hooks: inherited from core — bash-quality-preflight + session-summary + safety rails
