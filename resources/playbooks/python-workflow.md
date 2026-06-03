@@ -1,4 +1,4 @@
-# Playbook: Build a Python API Endpoint
+# Playbook: Build a Python API Endpoint (contract → test-first → implement → gate → ship)
 
 Use when the user asks to add or change a FastAPI/Django/Flask endpoint backed
 by a SQLAlchemy/Alembic model: "add a POST /orders route", "expose a new
@@ -11,7 +11,9 @@ ahead is how a route ships with no migration or an untested model.
   response shape, status codes, auth boundary.
 - Name the one acceptance assertion (e.g. `POST /orders returns 201 + the row`).
 - Run `/goal` so the success check is runnable, not a vibe.
-- **Check:** you can state the passing assertion in one sentence.
+- Modifying an existing endpoint? Document the breaking change and the
+  deprecation window as part of the `/goal` so the contract shift is explicit.
+- **Verify:** the passing assertion is stated in one sentence.
 
 ## 2. Read the seam with /analyze
 
@@ -19,8 +21,8 @@ ahead is how a route ships with no migration or an untested model.
 - Match the project's layer split (router → service → repository), Pydantic
   schema location, and session-handling pattern before adding anything.
 - Use `/analyze` for a grounded cross-file read when the layout is unfamiliar.
-- **Check:** you can name the file each new piece (route, model, schema, test)
-  lands in.
+- **Verify:** the file each new piece (route, model, schema, test) lands in is
+  named.
 
 ## 3. Model the data, then generate the migration
 
@@ -30,7 +32,7 @@ ahead is how a route ships with no migration or an untested model.
   misses server defaults, enum changes, and index renames. Edit before applying.
 - Apply to a scratch DB: `alembic upgrade head`, then `alembic downgrade -1` to
   prove the rollback works.
-- **Check:** `upgrade head` then `downgrade -1` both run clean.
+- **Verify:** `upgrade head` then `downgrade -1` both run clean.
 
 ## 4. Write the failing pytest first
 
@@ -39,7 +41,8 @@ ahead is how a route ships with no migration or an untested model.
 - Use fixtures and `parametrize` for the edge cases named in step 1.
 - Run it: `pytest path/to/test_x.py -x`. Confirm it fails because the feature is
   absent, not from an import error or typo.
-- **Check:** the test fails for the right reason. That failure is the goalpost.
+- **Verify:** the test fails because the feature is absent, not from an import
+  error or typo. That failure is the goalpost.
 
 ## 5. Implement the smallest green slice
 
@@ -48,14 +51,14 @@ ahead is how a route ships with no migration or an untested model.
   when a second caller appears. No config knobs that weren't asked for.
 - Async for I/O-bound handlers, sync for CPU-bound.
 - Run the test from step 4 until green.
-- **Check:** the step-4 test passes.
+- **Verify:** the step-4 test passes.
 
 ## 6. Exercise the live route with api-tester
 
-- Boot the app and hit the real endpoint with `review/api-tester` (or `curl` /
+- Boot the app and hit the real endpoint with `/api-tester` (or `curl` /
   `httpie`): happy path, one validation failure, one auth-denied case.
 - Confirm status codes and the error body shape match the step-1 contract.
-- **Check:** the live response matches the contract, not just the mock.
+- **Verify:** the live response matches the contract, not just the mock.
 
 ## 7. Verify the full gate at 80% coverage
 
@@ -64,7 +67,7 @@ ahead is how a route ships with no migration or an untested model.
   don't pad with assertion-free tests.
 - Lint and typecheck: `ruff check .` and `mypy <pkg>` (or the project's
   equivalent).
-- **Check:** suite green, coverage ≥ 80% on changed files, ruff + mypy clean.
+- **Verify:** suite green, coverage ≥ 80% on changed files, ruff + mypy clean.
 
 ## 8. Review the diff before landing
 
@@ -73,15 +76,17 @@ ahead is how a route ships with no migration or an untested model.
 - For auth, input-handling, or secrets changes, run `/verify` to escalate the
   decision-relevant claims to an independent pass.
 - Fix every CRITICAL/HIGH finding or state why it's a false positive.
-- **Check:** no open CRITICAL/HIGH findings.
+- **Verify:** no open CRITICAL/HIGH findings.
 
 ## 9. Ship it
 
-- `/commit` writes the Conventional Commit. Subject names the capability; body
+- `/caveman-commit` writes the Conventional Commit. Subject names the capability; body
   explains the user need, not the diff.
 - `/ship` runs the merge-base sync, full test gate, and opens the PR.
 - Note the applied migration in the PR body so the deployer runs `upgrade head`.
-- **Check:** PR open, CI green, migration step called out.
+- **Verify:** PR open, CI green, migration step called out.
+
+**See also:** `playbooks/backend-workflow.md` (framework-agnostic API flow), `playbooks/improver-workflow.md` (measured improvement loop).
 
 ## Anti-patterns to avoid
 

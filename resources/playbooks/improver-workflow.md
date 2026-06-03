@@ -12,7 +12,7 @@ instead.
   you prove moved at the end.
 - Run `/analyze` on the target area for a grounded cross-file read before you
   touch anything. Don't propose a fix for code you haven't read.
-- Verify: you can name the baseline number and the file(s) the change lands in.
+- **Verify:** you can name the baseline number and the file(s) the change lands in.
 
 ## 2. Confirm this is the right single change
 
@@ -20,21 +20,21 @@ instead.
   This playbook ships ONE item; the tail is a separate pass.
 - State the one improvement in a sentence and the dimension it moves
   (speed, security, test coverage, DX).
-- Verify: one improvement is chosen, and its ROI tag justifies doing it first.
+- **Verify:** one improvement is chosen, and its ROI tag justifies doing it first.
 
 ## 3. Set a goal with a runnable check
 
 - Run `/goal` to restate the change as a measurable goal plus a command that
   proves it: a test, a metric, a before/after capture. No check is not a goal.
 - For a performance claim, make the check a `/benchmark` number, not a vibe.
-- Verify: you have one command whose output, today, shows the goal is NOT yet met.
+- **Verify:** you have one command whose output, today, shows the goal is NOT yet met.
 
 ## 4. Sharpen scope if the change is bigger than a few lines
 
 - Run `/spec` to turn vague intent into a precise contract when the change
   touches schema, config, auth, or more than one seam.
 - Skip this for a sub-10-line fix where the seam and the check are already clear.
-- Verify: inputs, outputs, and the one acceptance check are written down.
+- **Verify:** inputs, outputs, and the one acceptance check are written down.
 
 ## 5. Change in one tight verified loop
 
@@ -43,14 +43,14 @@ instead.
   shared code) before edits that are hard to reverse.
 - Resist riders: a cleanup that isn't the goal is a flagged follow-up, not part
   of this diff.
-- Verify: the Step 3 check now passes, and the diff traces only to the goal.
+- **Verify:** the Step 3 check now passes, and the diff traces only to the goal.
 
 ## 6. Review the diff before calling it done
 
 - Run `/code-review-deep` on the diff for correctness and safety.
 - Run `/cso` when the change touched auth, user input, or secrets.
 - Run `/verify` to have an independent agent audit any decision-relevant claim.
-- Verify: no CRITICAL or HIGH findings remain open.
+- **Verify:** no CRITICAL or HIGH findings remain open.
 
 ## 7. Re-measure and prove the delta
 
@@ -58,7 +58,7 @@ instead.
   before/after numbers in one line.
 - Re-run the Step 3 check one last time so the proof and the commit agree.
 - Run `/retro` if this closed a chunk of work worth learning from.
-- Verify: the health number moved the right way, or you say plainly that it
+- **Verify:** the health number moved the right way, or you say plainly that it
   didn't and why.
 
 ## Anti-patterns to avoid

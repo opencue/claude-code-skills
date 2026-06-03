@@ -1,4 +1,4 @@
-# Playbook: Ship a Vite + React + TanStack feature
+# Playbook: Ship a Vite + React + TanStack feature (contract → type → build → test → ship)
 
 Use when the user asks for a new route, screen, or data-backed component on a
 Vite + React + TanStack app (file-based route → Query/loader data → typed
@@ -15,7 +15,10 @@ type-first, verify visually, and never call a green build "done."
   reads the query string.
 - Smart-load `/spec` (via `/smart-loader`; not loaded in this profile) when the
   shape is fuzzy (3+ unknowns or a data contract to lock).
-- Check: you can state the route path, its param/search types, and which
+- For API-backed routes, coordinate the data contract with the backend first.
+  Match the response shape to `playbooks/backend-workflow.md` so loader/query
+  types and the server's payload stay in sync.
+- **Verify:** you can state the route path, its param/search types, and which
   fetch is a loader vs a query in one sentence.
 
 ## 2. Read the seam before writing
@@ -24,7 +27,7 @@ type-first, verify visually, and never call a green build "done."
   split, error/pending wiring, and import style.
 - Confirm `vite.config.ts` has `tanstackRouter()` in `plugins` so the new file
   generates a typed route.
-- Check: the new route file matches an existing one's structure, not a
+- **Verify:** the new route file matches an existing one's structure, not a
   hand-written `Route` definition.
 
 ## 3. Create the file-based route
@@ -34,8 +37,8 @@ type-first, verify visually, and never call a green build "done."
   `Route.useLoaderData()` in the component, never `useEffect` data fetch.
 - Add `pendingComponent`, `errorComponent`, `notFoundComponent` on the route
   config when the route can stall or 404.
-- Check: `<Link to="/your/route">` autocompletes the path and params with no
-  type error.
+- **Verify:** `<Link to="/your/route">` autocompletes the path and params with
+  no type error.
 
 ## 4. Type the data layer
 
@@ -44,8 +47,8 @@ type-first, verify visually, and never call a green build "done."
 - Query data: structure `queryKey` like an API path (`['products', region,
   filters]`) and set a deliberate `staleTime`, not the default 0.
 - Write paths: mutation + `invalidateQueries` on the affected key.
-- Check: `tsc --noEmit` (or `vite build`'s type pass) is clean with no `any`
-  on loader or query results.
+- **Verify:** `tsc --noEmit` (or `vite build`'s type pass) is clean with no
+  `any` on loader or query results.
 
 ## 5. Build the typed component
 
@@ -53,7 +56,7 @@ type-first, verify visually, and never call a green build "done."
 - Keep the slow fetch in the loader so it streams; render the pending state
   while it resolves.
 - Honor WCAG AA: role, label, and keyboard path on every interactive element.
-- Check: the component reads its data from `Route.useLoaderData()` /
+- **Verify:** the component reads its data from `Route.useLoaderData()` /
   `useQuery`, and no branch renders `undefined`.
 
 ## 6. Write the Vitest test first
@@ -64,7 +67,7 @@ type-first, verify visually, and never call a green build "done."
   branches. Mock the fetch, assert the rendered result (AAA).
 - Run `vitest run <file>` and confirm it fails for the right reason before you
   make it pass.
-- Check: the new test is green and `vitest run` (full suite) stays green.
+- **Verify:** the new test is green and `vitest run` (full suite) stays green.
 
 ## 7. Verify visually, not just structurally
 
@@ -75,8 +78,8 @@ type-first, verify visually, and never call a green build "done."
 - Smart-load `/design-review` (via `/smart-loader`; not loaded in this profile)
   when the route is user-facing and polish matters; drive `browser/playwright`
   (or smart-load `/qa`) for multi-step flows.
-- Check: the screenshot shows the intended UI at the target viewport, not a
-  blank or error frame.
+- **Verify:** the screenshot shows the intended UI at the target viewport, not
+  a blank or error frame.
 
 ## 8. Gate, then ship
 
@@ -87,9 +90,12 @@ type-first, verify visually, and never call a green build "done."
   score. Add `/careful` or `/freeze <dir>` when the blast radius is real.
 - Smart-load `/ship` (via `/smart-loader`; not loaded in this profile) for the
   commit + PR; `/canary` after deploy to watch the live route.
-- Check: build green, review clean, and the smart-loaded `/ship` opened the PR.
+- **Verify:** build green, review clean, and the smart-loaded `/ship` opened
+  the PR.
 
-## Anti-patterns
+**See also:** `playbooks/backend-workflow.md` (sync the data contract).
+
+## Anti-patterns to avoid
 
 - ❌ `useEffect` data fetch when a typed loader fits. You lose the type chain
   and the parallel render.

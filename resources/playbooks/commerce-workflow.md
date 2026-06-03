@@ -1,4 +1,4 @@
-# Playbook: Full-stack commerce change
+# Playbook: Full-stack commerce change (contract → model → wire → pay → ship)
 
 Use when a change spans the whole stack (a new product field, a checkout
 tweak, a payment behavior) touching Medusa v2 backend, the Vite + TanStack
@@ -13,7 +13,7 @@ layer is how carts charge the wrong amount.
   change, run `/autoplan` to force the design questions first.
 - Name the acceptance test up front: the one order flow that, if it
   completes and charges correctly, proves the change works end-to-end.
-- Verify: the contract names a concrete data shape, a route, a UI surface,
+- **Verify:** the contract names a concrete data shape, a route, a UI surface,
   and a Stripe outcome before any code.
 
 ## 2. Model the data and migrate forward
@@ -21,7 +21,7 @@ layer is how carts charge the wrong amount.
 - Edit the Medusa module model, then `db:generate` to produce the migration,
   then `db:migrate` against local Postgres. Migrations are forward-only.
 - Never patch Medusa core. Model changes live in your module.
-- Verify: `db:migrate` exits clean and the new column/table shows in the
+- **Verify:** `db:migrate` exits clean and the new column/table shows in the
   local DB. Confirm before running migrate against any shared DB.
 
 ## 3. Build the backend module and route
@@ -30,8 +30,8 @@ layer is how carts charge the wrong amount.
   `medusa/building-with-medusa`. Keep the route thin, push logic to the service.
 - Validate every inbound field at the route boundary. Never trust the
   storefront payload.
-- Verify: hit the route with the `review/api-tester` skill (or `curl`) and
-  get the expected JSON for one happy and one bad-input case.
+- **Verify:** the route returns the expected JSON for one happy-path and one
+  bad-input case.
 
 ## 4. Wire the storefront
 
@@ -39,8 +39,7 @@ layer is how carts charge the wrong amount.
   surface and route cart state through TanStack Query per
   `medusa/building-storefronts`.
 - Match the existing loader and component style before inventing a new pattern.
-- Verify: load the page with `browser/playwright`, confirm the new data
-  renders and the cart reflects it.
+- **Verify:** the new data renders and the cart reflects it on page load.
 
 ## 5. Wire and verify the payment path
 
@@ -48,28 +47,28 @@ layer is how carts charge the wrong amount.
   matching event in `stripe/stripe-webhooks`. Use test keys only.
 - Confirm idempotency: a replayed webhook must not double-charge or
   double-fulfill.
-- Verify: run one full checkout against Stripe test mode, watch the webhook
-  fire, and confirm the order moves to the right state.
+- **Verify:** one full checkout completes in Stripe test mode, the webhook
+  fires, and the order reaches the correct state.
 
 ## 6. Review the diff before landing
 
 - Run `/code-review-deep` on the full diff across all three layers.
 - Run `/cso` when the change touched payment, auth, secrets, or user input.
   Stripe and order data both qualify.
-- Verify: no CRITICAL or HIGH findings open; secrets stay in env, never in code.
+- **Verify:** no CRITICAL or HIGH findings open; secrets stay in env, never in code.
 
 ## 7. Check repo health and ship
 
 - Run `/health` for the type/lint/test composite, then `/ship` to commit,
   bump, and open the PR.
 - Body explains the why (the order-flow need) over the what.
-- Verify: `/health` holds or improves and the PR opens green.
+- **Verify:** `/health` holds or improves and the PR opens green.
 
 ## 8. Watch the live checkout after deploy
 
 - After merge, run `/canary` to watch the storefront for console errors and
   page failures, with eyes on the checkout and payment screens.
-- Verify: one real test order completes on the deployed site and the canary
+- **Verify:** one real test order completes on the deployed site and the canary
   reports no regression.
 
 ## When it breaks instead of builds
@@ -79,7 +78,9 @@ layer is how carts charge the wrong amount.
 - Guard live work: `/careful` before destructive bash, `/guard <dir>` when the
   blast radius reaches prod DB, env, or `sk_live_` keys.
 
-## Anti-patterns
+**See also:** `playbooks/medusa-dev-workflow.md` (Medusa backend loop), `playbooks/backend-workflow.md` (service and route patterns)
+
+## Anti-patterns to avoid
 
 - ❌ Editing the storefront before the route returns the new shape. You build
   against a contract that doesn't exist yet.

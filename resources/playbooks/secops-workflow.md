@@ -1,4 +1,4 @@
-# Playbook: Security Audit and Pentest
+# Playbook: Security Audit and Pentest (scope → map → review → prove → report)
 
 Use when the user says "audit this for security", "run a pentest", "OWASP
 review", "threat model this", "harden the agent config", or otherwise asks to
@@ -16,13 +16,15 @@ issue that matters.
 If the boundary is fuzzy, ask now. Probing an out-of-bounds target is the one
 mistake you cannot take back.
 
+- **Verify:** the trust boundary is named, in-bounds and out-of-bounds targets are written down, and no probe has started until scope is settled.
+
 ## 2. Map the attack surface
 
 - Run `/analyze` for a grounded cross-file read of auth, input handling, and
   trust boundaries.
 - Run `/health` to baseline repo quality and surface obvious smells.
 - List every entry point: routes, webhooks, env reads, agent tool calls.
-- Verify: you can name each boundary where untrusted data enters the system.
+- **Verify:** every boundary where untrusted data enters the system is named and listed.
 
 ## 3. Run the OWASP/STRIDE review
 
@@ -30,8 +32,7 @@ mistake you cannot take back.
   input-touching path.
 - For API surfaces, drive `review/api-tester` against each endpoint.
 - Cross-check code patterns with `review/security-best-practices`.
-- Verify: each OWASP category and STRIDE letter is marked covered or N/A, with a
-  reason. No silent gaps.
+- **Verify:** each OWASP category and STRIDE letter is marked covered or N/A with a reason, and no category is left unaddressed.
 
 ## 4. Harden agent config and secrets
 
@@ -39,16 +40,15 @@ mistake you cannot take back.
   trust boundaries, injection surface.
 - Grep for hardcoded secrets, then confirm every secret reads from env or vault.
 - For payment paths, check Stripe webhook signature verification.
-- For data layer, check Supabase RLS and `pnpm` supply-chain integrity.
-- Verify: no secret in source, no over-broad tool grant, no unsigned webhook.
+- For data layer, check Supabase RLS, and run `/pnpm` to check supply-chain integrity.
+- **Verify:** no secret sits in source, no tool grant is over-broad, and no webhook is unsigned.
 
 ## 5. Prove each finding
 
 - Reproduce the issue: a request, a payload, or a test that triggers it.
 - Run `/code-review-deep` on the suspect diff or module to confirm the root cause.
 - Capture the evidence inline: the `file:line`, the failing curl, the log line.
-- Verify: every finding has a reproduction. Drop or downgrade anything you
-  cannot trigger to "unconfirmed."
+- **Verify:** every finding has a working reproduction, and anything you cannot trigger is dropped or downgraded to "unconfirmed."
 
 ## 6. Rank by severity
 
@@ -56,7 +56,7 @@ mistake you cannot take back.
   bounded impact percent, so the user sorts by blast radius, not by count.
 - Map severity to crown jewels from Step 1: a prod-auth bypass outranks a
   cosmetic header gap.
-- Verify: the list is ordered worst-first, and the top item names the asset at risk.
+- **Verify:** the list is ordered worst-first, and the top item names the asset at risk.
 
 ## 7. Report and remediate
 
@@ -64,7 +64,10 @@ mistake you cannot take back.
 - If find-and-fix scope, take the top item first: smallest diff that closes it,
   re-run the Step 5 reproduction to confirm it no longer triggers.
 - Run `/careful` or `/freeze <dir>` when the fix touches a live or prod path.
-- Verify the fixes with `/verify`, then ship the report and any patches with `/ship`.
+- Run `/verify` on the fixes, then ship the report and any patches with `/ship`.
+- **Verify:** the Step 5 reproduction no longer triggers, the report names severity plus asset impact for each finding, and the patches are shipped.
+
+**See also:** `playbooks/backend-workflow.md` (fix-then-ship loop)
 
 ## Anti-patterns to avoid
 

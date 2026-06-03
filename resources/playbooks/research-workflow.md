@@ -1,4 +1,4 @@
-# Playbook: Source-Backed Research
+# Playbook: Source-Backed Research (scope → fan-out → cite → verify → synthesize)
 
 Use when the user asks a question that needs an answer from outside this repo:
 "research X", "what's the state of Y", "find me sources on Z", "is claim C
@@ -13,15 +13,15 @@ cite everything, verify adversarially, then synthesize with confidence tags.
   searching. One question beats a research pass aimed at the wrong target.
 - Write the success check: the one sentence that, if sourced and verified,
   ends the research.
-- **Check:** you can state what answer would make the user stop asking.
+- **Verify:** you can state what answer would make the user stop asking.
 
 ## 2. Inventory what you already have
 
 - Run `/find-skills` (research/find-skills) to surface the research skills that
   fit this topic before reaching for raw search.
-- Run `/analyze` if part of the answer lives in this repo. Don't web-search
-  what's already on disk.
-- **Check:** you know which skill owns each slice of the question.
+- Run `/analyze` first to search this repo. Skip the web pass for any slice the
+  repo already owns. Don't web-search what's already on disk.
+- **Verify:** you know which skill owns each slice of the question.
 
 ## 3. Fan out across sources
 
@@ -29,11 +29,11 @@ cite everything, verify adversarially, then synthesize with confidence tags.
   angle: primary docs, the original paper, a contrarian take, a dated source.
 - Seed the query set with `/keyword-research` (research/keyword-research) so the
   fan-out covers the terms users actually search, not just your first phrasing.
-- Use `lightpanda` or `/scrape` (gstack/scrape) for pages that need a real DOM,
-  and `/hackernews-frontpage` for current discussion.
+- Use `/lightpanda` (the browser MCP) or `/scrape` (gstack/scrape) for pages
+  that need a real DOM, and `/hackernews-frontpage` for current discussion.
 - For market or forecast questions, pull `polymarket/polymarket-research` and
   `predict-everything/mirofish` for a priced or simulated view.
-- **Check:** every sub-question has at least two independent sources queued.
+- **Verify:** every sub-question has at least two independent sources queued.
 
 ## 4. Extract and cite
 
@@ -41,7 +41,7 @@ cite everything, verify adversarially, then synthesize with confidence tags.
   it to clean text before reading. Don't reason over ad-wrapped HTML.
 - For every claim worth keeping, capture the URL, the paper, or the data point
   next to it. A claim with no source is a note, not a finding.
-- **Check:** no claim sits in your notes without a source attached.
+- **Verify:** no claim sits in your notes without a source attached.
 
 ## 5. Verify claims adversarially
 
@@ -51,7 +51,7 @@ cite everything, verify adversarially, then synthesize with confidence tags.
   fact. One source is a lead, not a conclusion.
 - Run `/liedetector` over the draft findings so each claim carries a 🟢🟡🟠🔴
   tag; `/integrity-tags` explains the scale if the user asks.
-- **Check:** the strongest claim survived an explicit attempt to break it.
+- **Verify:** the strongest claim survived an explicit attempt to break it.
 
 ## 6. Synthesize with confidence tags
 
@@ -63,7 +63,7 @@ cite everything, verify adversarially, then synthesize with confidence tags.
   so the user ranks by impact, not by row count.
 - Write the deliverable with `/document-generate` (gstack/document-generate)
   when it needs to be a shareable doc or PDF.
-- **Check:** a reader can act on the summary alone and trace every claim down.
+- **Verify:** a reader can act on the summary alone and trace every claim down.
 
 ## 7. Verify and close
 
@@ -73,7 +73,9 @@ cite everything, verify adversarially, then synthesize with confidence tags.
 - Stop digging once deeper search stops moving the conclusion. Note the open
   gaps instead of padding.
 - Close with `/next-steps`: the one follow-up worth running next.
-- **Check:** the success check from step 1 is met, with sources to prove it.
+- **Verify:** the success check from step 1 is met, with sources to prove it.
+
+**See also:** `playbooks/improver-workflow.md` (rank findings by ROI).
 
 ## Anti-patterns to avoid
 

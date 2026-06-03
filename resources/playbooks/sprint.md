@@ -14,7 +14,7 @@ Each stage feeds the next.
 3. BUILD         (exit plan mode, write code)
 4. REVIEW        /code-review-deep    pre-landing diff review
 5. TEST          run the test suite, verify the feature manually
-6. SHIP          /commit  +  open PR
+6. SHIP          /caveman-commit  +  open PR
 7. REFLECT       /retro (weekly) or note open follow-ups
 ```
 
@@ -50,7 +50,7 @@ For a bug rather than a feature:
 3. BUILD         smallest fix that addresses the stated cause
 4. REVIEW        /code-review-deep     check for regressions
 5. TEST          run the test added in step 1 + full suite
-6. SHIP          /commit
+6. SHIP          /caveman-commit
 ```
 
 `/investigate` enforces the iron law: no fix without a root cause. If

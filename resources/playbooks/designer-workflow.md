@@ -11,45 +11,45 @@ locked first.
   anchors to. If the user gave none, infer from the existing brand or ask.
 - Run `/design-consultation` to pin the visual direction, target viewport, and
   the bar (Awwwards, clean SaaS, brutalist) as an explicit contract.
-- **Check:** you can name the design language in one sentence and the user
-  agrees with it.
+- **Verify:** the design language reads in one sentence and the user agrees
+  with it.
 
 ## 2. Extract the style and brand system
 
 - Run `/brandkit` to derive palette, type scale, spacing rhythm, and motion
   tokens from the brief or an existing site.
-- For a redesign of a live project, run `/redesign-existing-projects` to read
-  the current source and surface what to keep vs. replace.
-- **Check:** tokens exist as named values (colors, type ramp, spacing units),
+- When redesigning a live site, run `/redesign-existing-projects` to read the
+  current source and surface what to keep vs. replace.
+- **Verify:** tokens exist as named values (colors, type ramp, spacing units),
   not vibes in a paragraph.
 
 ## 3. Generate or refine the layout
 
 - Run `/imagegen-frontend-web` (or `/imagegen-frontend-mobile` for mobile) to
   produce layout directions from the locked tokens.
-- Want a stronger look? Run `/design-taste-frontend` to push the variants past
+- Want a stronger look? Run `/gpt-tasteskill` to push the variants past
   default toward the step-1 reference before you pick a winner.
 - Lock ONE direction before writing code. Don't carry three half-layouts into
   step 4.
-- **Check:** one chosen layout, every section accounted for, no placeholder
-  blocks left undesigned.
+- **Verify:** one chosen layout exists, every section accounted for, no
+  placeholder blocks left undesigned.
 
 ## 4. Review the layout before it becomes code
 
 - Run `/plan-design-review` on the chosen direction. It rates each dimension
   0–10 and says what would make it a 10, while changes are still cheap.
 - Fix the layout to clear the bar set in step 1 before any image-to-code.
-- **Check:** no dimension sits below the target score; hierarchy and spacing
-  read intentionally.
+- **Verify:** no dimension sits below the target score, and hierarchy and
+  spacing read intentionally.
 
 ## 5. Convert image to code
 
-- Run `/image-to-code` to turn the locked layout into real components in
+- Run `/image-to-code-skill` to turn the locked layout into real components in
   the project's stack and conventions.
-- For a from-scratch redesign of existing markup, `/redesign-existing-projects`
+- For a new design dropped onto existing HTML markup, `/redesign-existing-projects`
   ports the new look onto the current structure.
 - Match existing component patterns and naming. Read 2–3 neighbors first.
-- **Check:** the page renders in a browser at the target viewport and matches
+- **Verify:** the page renders in a browser at the target viewport and matches
   the chosen layout, with real content, not lorem ipsum.
 
 ## 6. Audit the live result and fix in place
@@ -59,16 +59,18 @@ locked first.
   source and re-verifies with before/after screenshots.
 - Visual claims need visual proof: confirm at the target viewport with a real
   screenshot or a computed-style measurement, not a read of the CSS.
-- **Check:** before/after screenshots show each flagged issue resolved; no new
-  regression introduced.
+- **Verify:** before/after screenshots show each flagged issue resolved, with
+  no new regression introduced.
 
 ## 7. Polish to the Awwwards bar
 
 - Tighten motion (purposeful only), micro-interactions, and the type rhythm
   against the step-1 reference. Re-run `/design-review` until it stops finding.
 - Run `/code-review-deep` on the diff for correctness and reuse before landing.
-- **Check:** the page clears the bar named in step 1, the diff is review-clean,
-  and you can point at the screenshot that proves it.
+- **Verify:** the page clears the bar named in step 1, the diff is review-clean,
+  and a screenshot proves it.
+
+**See also:** `playbooks/frontend-workflow.md` (ship the design in code).
 
 ## Anti-patterns to avoid
 

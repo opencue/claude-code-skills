@@ -13,7 +13,7 @@ how a backend feature ships exploitable or broken.
 - Write the one acceptance assertion that proves the endpoint works end-to-end.
 - If inputs, auth, or edges are ambiguous, ask now. One question beats three
   corrections after the schema ships.
-- **Check:** you can state the success assertion as a single `curl`/test-client call.
+- **Verify:** the success assertion is stated as a single `curl`/test-client call.
 
 ## 2. Find the seam
 
@@ -21,7 +21,7 @@ how a backend feature ships exploitable or broken.
   error-handling, and migration style before inventing anything.
 - For a tangled or unfamiliar area, run `/investigate` to root-cause how the
   current flow behaves before you touch it.
-- **Check:** you can point to the file and pattern the new code will mirror.
+- **Verify:** the file and pattern the new code will mirror are identified.
 
 ## 3. Write the failing contract test
 
@@ -29,7 +29,7 @@ how a backend feature ships exploitable or broken.
   assertions for the new endpoint.
 - Run it. Confirm it fails because the feature is absent, not from a typo or
   import error. This is the goalpost; do not move it while implementing.
-- **Check:** the test fails for the right reason.
+- **Verify:** the test fails because the feature is absent, not from a typo or import error.
 
 ## 4. Validate at the boundary, then minimal impl
 
@@ -39,14 +39,14 @@ how a backend feature ships exploitable or broken.
   abstraction, config knobs, and optional params nobody asked for.
 - Secrets come from env or a vault. Never hardcode, log, or return them in an
   error.
-- **Check:** the step-3 test passes and the full suite stays green.
+- **Verify:** the step-3 test passes and the full suite stays green.
 
 ## 5. Migrate the schema (only if data changed)
 
 - New schema change gets a new migration file. Never edit an applied migration.
 - Generate and apply via the `supabase` skill, then re-run the test against the
   migrated schema.
-- **Check:** migration applies clean on a fresh DB and the suite still passes.
+- **Verify:** the migration applies clean on a fresh DB and the suite still passes.
 
 ## 6. Security gate (mandatory for backend)
 
@@ -55,43 +55,47 @@ how a backend feature ships exploitable or broken.
   STRIDE).
 - Fix every CRITICAL before moving on. A HIGH gets fixed or an explicit reason
   it is a false positive.
-- **Check:** no CRITICAL findings remain open.
+- **Verify:** no CRITICAL findings remain open.
 
 ## 7. Deep review the diff
 
 - Run `/code-review-deep` for the pre-landing two-pass review (race conditions,
   enum completeness, trust boundaries, the rest).
 - Address CRITICAL and HIGH findings before you commit.
-- **Check:** review is clean or every flagged item is resolved or waived.
+- **Verify:** the review is clean or every flagged item is resolved or waived.
 
 ## 8. Verify the whole gate, then commit
 
 - Run lint, typecheck, build, and the full test suite. "Compiles" is not done.
 - Run `/health` to confirm the quality score did not regress.
-- Commit with `/commit`: conventional subject, body explains the user need.
-- **Check:** every local check is green before the commit lands.
+- Commit with `/caveman-commit`: conventional subject, body explains the user need.
+- **Verify:** every local check is green before the commit lands.
 
 ## 9. Get CI green and package
 
 - Push the branch. If CI fails, run `/gh-fix-ci` to diagnose and fix it. Fix CI
   first; a red pipeline blocks merge.
-- **Check:** CI is green on the PR.
+- **Verify:** CI is green on the PR.
 
-## 10. Deploy and watch
+## 10. Open the PR, then land and watch
 
-- Run `/ship` to merge-base, bump version, and open the PR. Deploy the backend
-  via the `coolify` skill once merged.
-- Run `/canary` to watch the live service for errors and regressions against the
-  pre-deploy baseline.
-- **Check:** production health is green and the acceptance call from step 1
-  succeeds against the live endpoint.
+- Run `/ship` to merge-base, bump version, run tests, and open the PR. `/ship`
+  stops at the open PR; it does not merge or deploy.
+- Run `/land-and-deploy` to merge the PR, wait for CI and deploy, then deploy the
+  backend via the `coolify` skill. Follow with `/canary` to watch the live
+  service for errors and regressions against the pre-deploy baseline.
+- **Verify:** the PR is open with CI green; after `/land-and-deploy` + `/canary`,
+  production health is green and the acceptance call from step 1 succeeds against
+  the live endpoint.
 
 ## Safety rails (any time)
 
 - `/careful`: block softer destructive bash (DROP TABLE, force-push, rm -rf).
 - `/freeze <dir>`: lock edits to the service dir while you debug.
 
-## Anti-patterns
+**See also:** `playbooks/gstack-workflow.md` (full ship pipeline), `playbooks/improver-workflow.md` (measured improvement loop).
+
+## Anti-patterns to avoid
 
 - ❌ Implementing before the contract test exists.
 - ❌ Treating `/security-review` as optional on a backend diff.
