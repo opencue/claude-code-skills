@@ -93,6 +93,7 @@ skills:
     - meta/smithery-usage            # MCP marketplace usage
     - meta/soul                      # soul identity management
     - meta/upgrade-stack             # upgrade cue stack
+    - meta/cue-dashboard             # query/drive the live cue studio dashboard (cue dash CLI + cue-dashboard MCP)
 
 playbooks:
   - write-skill-from-scratch
@@ -120,3 +121,6 @@ hooks:
 
 mcps:
   - gbrain
+  # cue-dashboard — query/drive the running cue studio dashboard (mcp__cue-dashboard__*).
+  # Needs `cue dashboard` running; tool calls fail gracefully when it isn't.
+  - cue-dashboard

@@ -382,6 +382,10 @@ export const COMMANDS = {
     summary: "Boot the local read-only dashboard server (JSON endpoints; React UI in next turn)",
     load: () => import("./dashboard"),
   },
+  dash: {
+    summary: "Query + drive the running dashboard's API (status/profiles/profile/add-mcp/kill/...)",
+    load: () => import("./dash"),
+  },
   mcp: {
     summary: "Expose cue data over MCP (stdio JSON-RPC) so Claude can query it as tool calls",
     load: () => import("./mcp"),
