@@ -275,20 +275,33 @@ export function Dashboard({ profile, status }: { profile: string | null; status?
         ) : live.length === 0 ? (
           <div className="ap-note">No live cue-launched sessions right now.</div>
         ) : (
-          <table className="sess-table">
-            <thead><tr><th>profile</th><th>agent cwd</th><th>pid</th><th>up</th><th></th></tr></thead>
-            <tbody>
-              {live.map((s) => (
-                <tr key={s.pid}>
-                  <td><span className="live-dot sm"></span><span className="mono sess-prof">{s.profile}</span></td>
-                  <td className="mono dim">{s.cwd ?? "—"}</td>
-                  <td className="mono">{s.pid}</td>
-                  <td className="dim">{fmtAge(s.startedAt)}</td>
-                  <td><button className="stop" onClick={() => stop(s.pid)}>stop</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="sess-list">
+            <div className="sess-head">
+              <span>profile</span><span>working dir</span><span>pid</span><span>uptime</span><span></span>
+            </div>
+            {live.map((s) => {
+              const cwd = s.cwd ?? "";
+              const folder = cwd.split("/").pop() ?? "";
+              const base = cwd.slice(0, cwd.length - folder.length);
+              const up = fmtAge(s.startedAt);
+              // green only for sub-30-minute sessions; the "^\d+m$" guard keeps
+              // "1h 04m" out (parseInt would otherwise read the leading hour as <30).
+              const fresh = up.includes("now") || (/^\d+m$/.test(up) && parseInt(up) < 30);
+              return (
+                <div className="srow" key={s.pid}>
+                  <div className="sr-prof"><span className="sr-pulse"></span><span className="sr-pname" title={s.profile}>{s.profile}</span></div>
+                  <div className="sr-cwd" title={cwd || undefined}>
+                    {cwd
+                      ? <><span className="sr-base">{base}</span><span className="sr-folder">{folder}</span></>
+                      : <span className="sr-base">—</span>}
+                  </div>
+                  <div className="sr-pid">{s.pid}</div>
+                  <div className="sr-up"><span className={"sr-upbadge" + (fresh ? " fresh" : "")}>{up}</span></div>
+                  <div className="sr-act"><button className="sr-stop" onClick={() => stop(s.pid)}>stop</button></div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
