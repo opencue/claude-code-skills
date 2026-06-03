@@ -413,24 +413,36 @@ export function useEnvFolders() {
   });
 }
 
-/** Parsed vars for one folder's .env. Secrets masked unless `revealAll` (the
- *  global "Reveal secrets" toggle → server returns every secret raw). Empty
- *  folder → no fetch. */
-export function useEnv(folder: string | null, revealAll = false) {
-  const qs = `?folder=${encodeURIComponent(folder ?? "")}${revealAll ? "&reveal=*" : ""}`;
+/** Parsed vars for one folder's .env — ALWAYS masked. Revealing (per-row or
+ *  global) goes through the one-shot fetchers below, never this cached query,
+ *  so plaintext secrets never enter the react-query store. Empty folder → no fetch. */
+export function useEnv(folder: string | null) {
   return useQuery({
-    queryKey: ["env", folder, revealAll],
-    queryFn: () => fetcher<EnvData>(`/env${qs}`),
+    queryKey: ["env", folder],
+    queryFn: () => fetcher<EnvData>(`/env?folder=${encodeURIComponent(folder ?? "")}`),
     enabled: Boolean(folder),
   });
 }
 
 /**
- * One-shot fetch of a single secret's RAW value (reveal click). Kept off the
- * react-query cache so revealed plaintext never lingers in the query store; the
- * caller holds it transiently in component state.
+ * One-shot fetch of a single secret's RAW value (per-row reveal click). Kept off
+ * the react-query cache so revealed plaintext never lingers; the caller holds it
+ * transiently in component state and drops it on hide / folder change.
  */
 export async function fetchEnvReveal(folder: string, key: string): Promise<string> {
   const data = await fetcher<EnvData>(`/env?folder=${encodeURIComponent(folder)}&reveal=${encodeURIComponent(key)}`);
   return data.vars.find((v) => v.key === key)?.value ?? "";
+}
+
+/**
+ * One-shot fetch of EVERY secret's raw value (global "Reveal secrets" toggle).
+ * Also bypasses the query cache — returns a {key: rawValue} map the caller holds
+ * transiently and clears on hide / folder change. This is the fix for the
+ * cache-poisoning path where a cached reveal=* response lingered after hide.
+ */
+export async function fetchEnvRevealAll(folder: string): Promise<Record<string, string>> {
+  const data = await fetcher<EnvData>(`/env?folder=${encodeURIComponent(folder)}&reveal=*`);
+  const out: Record<string, string> = {};
+  for (const v of data.vars) if (v.kind === "secret") out[v.key] = v.value;
+  return out;
 }
