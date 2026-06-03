@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useEnvFolders, useEnv, fetchEnvReveal, addMcp, type EnvVarRow } from "../api";
+import { useEnvFolders, useEnv, fetchEnvReveal, fetchEnvRevealAll, addMcp, type EnvVarRow } from "../api";
 
 export function EnvView({ profile }: { profile: string | null }) {
   const folders = useEnvFolders();
@@ -33,8 +33,20 @@ export function EnvView({ profile }: { profile: string | null }) {
   }, [list, sel]);
   useEffect(() => { setRevealed({}); setRevealAll(false); }, [sel]);
 
-  const env = useEnv(sel, revealAll);
+  // Baseline is ALWAYS masked; revealed plaintext lives only in `revealed`
+  // (transient state), never in the cached query — so it can't linger after Hide.
+  const env = useEnv(sel);
   const vars = env.data?.vars ?? [];
+
+  // Global reveal: fetch every secret raw once into the transient map; Hide
+  // clears it. Per-row reveal uses the same map, so both paths stay cache-free.
+  const toggleRevealAll = async () => {
+    if (revealAll) { setRevealAll(false); setRevealed({}); return; }
+    if (!sel) return;
+    const all = await fetchEnvRevealAll(sel);
+    setRevealed(all);
+    setRevealAll(true);
+  };
 
   const copy = (key: string, value: string) => {
     try { void navigator.clipboard.writeText(value); } catch { /* clipboard blocked */ }
@@ -99,7 +111,7 @@ export function EnvView({ profile }: { profile: string | null }) {
               <button className={mode === "table" ? "on" : ""} onClick={() => setMode("table")}>Table</button>
               <button className={mode === "raw" ? "on" : ""} onClick={() => setMode("raw")}>Raw</button>
             </div>
-            <button className="env-revealbtn" onClick={() => setRevealAll((r) => !r)}>{revealAll ? "🙈 Hide" : "👁 Reveal"} secrets</button>
+            <button className="env-revealbtn" onClick={() => void toggleRevealAll()}>{revealAll ? "🙈 Hide" : "👁 Reveal"} secrets</button>
           </div>
         </div>
 

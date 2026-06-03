@@ -1713,6 +1713,19 @@ export function createHandler(): (req: Request) => Promise<Response> {
     }
 
     if (url.pathname.startsWith("/api/v1/")) {
+      // Defense-in-depth for the secret-revealing path: a `reveal` request to
+      // /api/v1/env returns raw .env secrets. Even though the server has no
+      // permissive CORS (so a cross-origin tab can't read the response) and
+      // binds loopback by default, refuse a reveal whose Sec-Fetch-Site marks
+      // it cross-origin — so a drive-by tab can't pull plaintext even if CORS
+      // or the bind host were ever loosened. Same-origin (the studio SPA),
+      // `none` (address-bar), and header-absent (curl / tests) are allowed.
+      if (url.pathname === "/api/v1/env" && url.searchParams.get("reveal")) {
+        const site = req.headers.get("sec-fetch-site");
+        if (site === "cross-site" || site === "same-site") {
+          return Response.json({ ok: false, error: "reveal-cross-origin-blocked" }, { status: 403 });
+        }
+      }
       const handler = ROUTES[url.pathname];
       if (!handler) {
         return Response.json({ ok: false, error: "not-found" }, { status: 404 });
