@@ -41,12 +41,15 @@ export function SourcePicker({ profiles, selected, conflictNames, onToggle }: Pr
             <div className="picker-group-label">{g.label}</div>
             {g.rows.map((p) => {
               const isSel = selected.has(p.name);
-              const blocked = !isSel && conflictNames.has(p.name);
+              // A profile that failed to resolve can't be merged: block it and
+              // surface the reason on hover instead of showing it as 0 sk · 0 mcp.
+              const failed = Boolean(p.error);
+              const blocked = failed || (!isSel && conflictNames.has(p.name));
               return (
                 <label
                   key={p.name}
                   className={`picker-row${isSel ? " sel" : ""}${blocked ? " blocked" : ""}`}
-                  title={blocked ? "Conflicts with a selected profile" : p.description}
+                  title={failed ? `Failed to load: ${p.error}` : blocked ? "Conflicts with a selected profile" : p.description}
                 >
                   <input
                     type="checkbox"
@@ -54,8 +57,8 @@ export function SourcePicker({ profiles, selected, conflictNames, onToggle }: Pr
                     disabled={blocked}
                     onChange={() => onToggle(p.name)}
                   />
-                  <span className="picker-name">{p.icon ?? "•"} {p.name}</span>
-                  <span className="picker-meta dim">{p.skills} sk · {p.mcps} mcp</span>
+                  <span className="picker-name">{failed ? "⚠" : p.icon ?? "•"} {p.name}</span>
+                  <span className="picker-meta dim">{failed ? "failed to load" : `${p.skills} sk · ${p.mcps} mcp`}</span>
                 </label>
               );
             })}

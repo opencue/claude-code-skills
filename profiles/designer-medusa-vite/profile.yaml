@@ -4,6 +4,9 @@ description: Designer + Medusa + Vite — premium storefront design with Medusa 
 inherits:
   - designer
   - medusa-vite
+autoSelect:
+  - medusa-dev    # always combine the Medusa backend with the storefront
+  - medusa-vite   # storefront framework — start checked in the combine picker
 conflicts:
   - designer-medusa-next   # one Medusa storefront framework per project
   - medusa-next            # same conflict via the bare medusa-next profile

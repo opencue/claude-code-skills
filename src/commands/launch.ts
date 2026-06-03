@@ -976,8 +976,9 @@ async function listProfileOptions(pinnedProfile?: string): Promise<PickerOption[
       const label = warning ? `${nameLabel}${warning.labelSuffix}` : nameLabel;
       const hint = warning ? warning.hint : p.description;
       const recommends = p.recommends.filter((r) => r !== name && knownNames.has(r));
+      const autoSelect = p.autoSelect.filter((r) => r !== name && knownNames.has(r));
       const conflicts = p.conflicts.filter((c) => c !== name && knownNames.has(c));
-      opts.push({ value: name, label, hint, recommends, conflicts });
+      opts.push({ value: name, label, hint, recommends, autoSelect, conflicts });
     } catch {
       opts.push({ value: name, label: name, hint: "" });
     }
@@ -1382,7 +1383,11 @@ export async function run(args: string[]): Promise<number> {
     try {
       const { computeAffinityMap, suggestionsByProfile } = await import("../lib/pair-suggestions");
       affinity = computeAffinityMap();
-      const sug = suggestionsByProfile(affinity);
+      // Surface a partner after a *single* prior combo: these now render
+      // unchecked + hinted ("you paired these before"), so a low bar is a gentle
+      // recommendation, not an auto-pin. (The stricter defaults still apply to
+      // `cue suggest-pairs`, which reports rather than pre-fills.)
+      const sug = suggestionsByProfile(affinity, { minCount: 1, minAffinity: 0, limit: 6 });
       pairSuggestions = new Map();
       for (const [name, partners] of sug) {
         pairSuggestions.set(name, partners.map((p) => p.name));

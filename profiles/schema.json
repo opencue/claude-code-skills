@@ -55,6 +55,16 @@
       "default": [],
       "description": "Companion profile names suggested at activation time (cue use prints them and offers to compose via 'a+b+c'). Metadata only — does not auto-merge skills/MCPs."
     },
+    "autoSelect": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{1,63}$"
+      },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Companion profile names that start CHECKED in the combine-multiselect when this profile is the primary, regardless of cwd detection. Stronger than 'recommends' (which only tags a row). Still opt-out: the user can uncheck before confirming."
+    },
     "conflicts": {
       "type": "array",
       "items": {

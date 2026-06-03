@@ -4,6 +4,9 @@ description: Designer + Medusa + Next.js — premium storefront design with Medu
 inherits:
   - designer
   - medusa-next
+autoSelect:
+  - medusa-dev    # always combine the Medusa backend with the storefront
+  - medusa-next   # storefront framework — start checked in the combine picker
 conflicts:
   - designer-medusa-vite   # one Medusa storefront framework per project
   - medusa-vite            # same conflict via the bare medusa-vite profile

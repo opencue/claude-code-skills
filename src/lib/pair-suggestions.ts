@@ -13,6 +13,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { readComboHistoryLines } from "./combo-history";
 
 /** Resolved path mirrors `lib/telemetry-consent` to avoid a circular import. */
 function sessionLogPath(): string {
@@ -245,11 +246,18 @@ export function buildUniversalSuggestions(opts: BuildUniversalOptions): Universa
 }
 
 function defaultReadLines(): string[] {
+  const lines: string[] = [];
   const path = sessionLogPath();
-  if (!existsSync(path)) return [];
-  try {
-    return readFileSync(path, "utf8").split("\n");
-  } catch {
-    return [];
+  if (existsSync(path)) {
+    try {
+      lines.push(...readFileSync(path, "utf8").split("\n"));
+    } catch {
+      /* session log unreadable — fall through to combo history */
+    }
   }
+  // Combos picked in the interactive picker (combo-history.jsonl) share the
+  // `{profile}` row shape, so they fold straight into the affinity map. This is
+  // the telemetry-free source: it exists even when session logging is off.
+  lines.push(...readComboHistoryLines());
+  return lines;
 }

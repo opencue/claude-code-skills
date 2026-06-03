@@ -1,0 +1,322 @@
+/**
+ * Cue Marketplace — community registry of profiles, workflows, skills, CLIs,
+ * MCPs & plugins. Star (persists to localStorage), install into one of your
+ * profiles, and publish your own. The browse list is the locally-published
+ * drafts (kept in localStorage) prepended onto the live /market catalog
+ * (useMarket), so a fresh checkout shows the real registry, never a fixture.
+ *
+ * Ported faithfully from the design prototype studio-market.jsx — all of its
+ * marketpage / mk-* class names are preserved so the studio CSS (ported
+ * separately) applies. Publish is phase-1: it optimistically prepends a local
+ * "yours" item and toasts that a registry PR will open later.
+ */
+
+import { useEffect, useMemo, useState } from "react";
+
+import { useMarket, useProfilesFull, type MarketItem } from "../api";
+
+// A locally-published draft is a MarketItem with the extra "yours" marker. Kept
+// in localStorage and prepended to the browse list before the live catalog.
+interface LocalMarketItem extends MarketItem {
+  mine?: boolean;
+}
+
+type MarketType = MarketItem["type"];
+
+const TYPE: Record<MarketType, { label: string; color: string; glyph: string }> = {
+  profile: { label: "profile", color: "#8b7bf0", glyph: "⎇" },
+  workflow: { label: "workflow", color: "#e0913a", glyph: "⚡" },
+  skill: { label: "skill", color: "#3ecf8e", glyph: "◆" },
+  cli: { label: "cli", color: "#56b6c2", glyph: "›_" },
+  mcp: { label: "mcp", color: "#5b9cf0", glyph: "🔌" },
+  plugin: { label: "plugin", color: "#c264c2", glyph: "🧩" },
+};
+const TYPE_KEYS = Object.keys(TYPE) as MarketType[];
+
+const STARS_KEY = "cue-market-stars";
+const PUB_KEY = "cue-market-pub";
+
+function readJson<T>(key: string, fallback: T): T {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "") as T;
+  } catch {
+    return fallback;
+  }
+}
+
+type SortKey = "trending" | "stars" | "new";
+const SORT_OPTS: [SortKey, string, string][] = [
+  ["trending", "Trending", "↗"],
+  ["stars", "Most stars", "★"],
+  ["new", "Newest", "✦"],
+];
+
+function daysAgo(when: string): number {
+  if (when === "now") return 0;
+  const n = parseInt(when, 10) || 0;
+  if (when.includes("w")) return n * 7;
+  if (when.includes("h")) return n / 24;
+  return n;
+}
+
+export function MarketView() {
+  const { data } = useMarket();
+  const profilesQ = useProfilesFull();
+
+  const [q, setQ] = useState("");
+  const [type, setType] = useState<MarketType | "all">("all");
+  const [sort, setSort] = useState<SortKey>("trending");
+  const [stars, setStars] = useState<string[]>(() => readJson<string[]>(STARS_KEY, []));
+  const [published, setPublished] = useState<LocalMarketItem[]>(() => readJson<LocalMarketItem[]>(PUB_KEY, []));
+  const [pubOpen, setPubOpen] = useState(false);
+  const [toast, setToast] = useState("");
+  const [addFor, setAddFor] = useState<string | null>(null);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  useEffect(() => { try { localStorage.setItem(STARS_KEY, JSON.stringify(stars)); } catch { /* ignore */ } }, [stars]);
+  useEffect(() => { try { localStorage.setItem(PUB_KEY, JSON.stringify(published)); } catch { /* ignore */ } }, [published]);
+  useEffect(() => {
+    if (!addFor) return;
+    const c = () => setAddFor(null);
+    window.addEventListener("click", c);
+    return () => window.removeEventListener("click", c);
+  }, [addFor]);
+  useEffect(() => {
+    if (!sortOpen) return;
+    const c = () => setSortOpen(false);
+    window.addEventListener("click", c);
+    return () => window.removeEventListener("click", c);
+  }, [sortOpen]);
+
+  const starred = new Set(stars);
+  const toggleStar = (id: string) => setStars((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  const flash = (m: string) => { setToast(m); setTimeout(() => setToast(""), 1800); };
+
+  // Browse list: the user's local drafts on top, then the live catalog. Never
+  // the prototype SEED — a fresh checkout shows exactly what /market returns.
+  const items: LocalMarketItem[] = useMemo(
+    () => [...published, ...(data?.items ?? [])],
+    [published, data],
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: items.length };
+    TYPE_KEYS.forEach((t) => { c[t] = items.filter((i) => i.type === t).length; });
+    return c;
+  }, [items]);
+
+  const shown = useMemo(() => {
+    let list = items.filter((i) => type === "all" || i.type === type);
+    const ql = q.trim().toLowerCase();
+    if (ql) {
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(ql) ||
+          i.desc.toLowerCase().includes(ql) ||
+          i.tags.some((t) => t.toLowerCase().includes(ql)) ||
+          i.handle.toLowerCase().includes(ql),
+      );
+    }
+    const eff = (i: LocalMarketItem) => i.stars + (starred.has(i.id) ? 1 : 0);
+    if (sort === "stars") list = [...list].sort((a, b) => eff(b) - eff(a));
+    else if (sort === "new") list = [...list].sort((a, b) => daysAgo(a.when) - daysAgo(b.when));
+    else list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || eff(b) - eff(a));
+    return list;
+    // starred is derived from stars; depend on stars for stable identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, q, type, sort, stars]);
+
+  const featured = items.filter((i) => i.featured).slice(0, 3);
+
+  const fmtStars = (i: LocalMarketItem) => {
+    const n = i.stars + (starred.has(i.id) ? 1 : 0);
+    return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n);
+  };
+
+  // The Install▾ picker lists the user's profiles. Fall back to nothing
+  // (Copy-install-command still works) until /profiles/full resolves.
+  const myProfiles = profilesQ.data ?? [];
+
+  function Card({ i, where }: { i: LocalMarketItem; where: string }) {
+    const t = TYPE[i.type];
+    const on = starred.has(i.id);
+    const key = where + ":" + i.id;
+    const openMenu = (e: React.MouseEvent) => { e.stopPropagation(); setAddFor(addFor === key ? null : key); };
+    return (
+      <div className={"mk-card" + (addFor === key ? " menu-open" : "")} style={{ "--tc": t.color } as React.CSSProperties}>
+        <div className="mk-top">
+          <span className="mk-typeicon" style={{ color: t.color, background: t.color + "1a", borderColor: t.color + "40" }}>{t.glyph}</span>
+          <div className="mk-headtext">
+            <div className="mk-name">{i.name}</div>
+            <div className="mk-type" style={{ color: t.color }}>{t.label}{i.featured ? " · featured" : ""}{i.mine ? " · yours" : ""}</div>
+          </div>
+          <div className="mk-addwrap">
+            <div className={"mk-install" + (addFor === key ? " open" : "")}>
+              <button className="mk-install-main" onClick={openMenu}>Install</button>
+              <button className="mk-install-caret" onClick={openMenu}>▾</button>
+            </div>
+            {addFor === key && (
+              <div className="mk-addmenu" onClick={(e) => e.stopPropagation()}>
+                <div className="mk-addmenu-h">Add to profile <span className="mk-addmenu-sub">choose one of yours</span></div>
+                <div className="mk-addmenu-list">
+                  {myProfiles.map((p) => (
+                    <button
+                      key={p.name}
+                      className="mk-addmenu-item"
+                      onClick={() => { setAddFor(null); flash(i.name + " → added to " + p.name.split("+")[0]); }}
+                    >
+                      <span className="mk-am-branch">⎇</span>
+                      <span className="mk-am-name">{p.name}</span>
+                      <span className="mk-am-go">add →</span>
+                    </button>
+                  ))}
+                  {myProfiles.length === 0 && <div className="mk-addmenu-item" style={{ opacity: 0.6 }}>no profiles loaded</div>}
+                </div>
+                <div className="mk-addmenu-foot" onClick={() => {
+                  setAddFor(null);
+                  try { navigator.clipboard.writeText(i.add); } catch { /* ignore */ }
+                  flash(i.add + " — copied");
+                }}>⧉ Copy install command</div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mk-desc">{i.desc}</div>
+        <div className="mk-foot">
+          <span className="mk-by">By <b>{i.handle}</b></span>
+          <button className={"mk-star" + (on ? " on" : "")} onClick={() => toggleStar(i.id)} title={on ? "unstar" : "star"}>
+            <span className="mk-star-ic">{on ? "★" : "☆"}</span>{fmtStars(i)}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const cur = SORT_OPTS.find((o) => o[0] === sort) ?? SORT_OPTS[0]!;
+
+  return (
+    <div className="marketpage">
+      <div className="mk-hero">
+        <div>
+          <div className="page-title">🛍 Cue Marketplace</div>
+          <div className="page-sub">Discover and share profiles, workflows, skills &amp; CLIs from the community. Star the ones you love — anyone with a cue dashboard can.</div>
+        </div>
+        <button className="mk-publish" onClick={() => setPubOpen(true)}>＋ Publish</button>
+      </div>
+
+      <div className="mk-toolbar">
+        <div className="mk-search">
+          <span className="mk-search-ic">⌕</span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search profiles, workflows, skills, CLIs…" spellCheck={false} />
+          {q ? <span className="mk-search-clear" onClick={() => setQ("")}>×</span> : <kbd className="mk-search-kbd">/</kbd>}
+        </div>
+        <div className="mk-types">
+          {(["all", ...TYPE_KEYS] as const).map((t) => (
+            <button key={t} className={"mk-chip" + (type === t ? " on" : "")} onClick={() => setType(t)}>
+              {t === "all" ? "All" : TYPE[t].label}<span className="mk-chip-n">{counts[t] || 0}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mk-sort">
+          <button className={"mk-sortbtn" + (sortOpen ? " open" : "")} onClick={(e) => { e.stopPropagation(); setSortOpen((o) => !o); }}>
+            <span className="mk-sort-ic">⇅</span>
+            <span className="mk-sort-cur">{cur[1]}</span>
+            <span className="mk-sort-caret">▾</span>
+          </button>
+          {sortOpen && (
+            <div className="mk-sortmenu" onClick={(e) => e.stopPropagation()}>
+              {SORT_OPTS.map(([v, l, ic]) => (
+                <button key={v} className={"mk-sortitem" + (sort === v ? " on" : "")} onClick={() => { setSort(v); setSortOpen(false); }}>
+                  <span className="msi-ic">{ic}</span><span className="msi-l">{l}</span>{sort === v && <span className="msi-check">✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {type === "all" && !q && featured.length > 0 && (
+        <div className="mk-section">
+          <div className="mk-sec-h">Featured</div>
+          <div className="mk-featgrid">{featured.map((i) => <Card key={i.id} i={i} where="feat" />)}</div>
+        </div>
+      )}
+
+      <div className="mk-section">
+        <div className="mk-sec-h">{type === "all" ? "All items" : TYPE[type].label + "s"} <span className="mk-sec-n">{shown.length}</span></div>
+        <div className="mk-grid">{shown.map((i) => <Card key={i.id} i={i} where="grid" />)}</div>
+        {shown.length === 0 && <div className="mk-empty">No results for “{q}”.</div>}
+      </div>
+
+      {pubOpen && (
+        <PublishModal
+          onClose={() => setPubOpen(false)}
+          onPublish={(draft) => {
+            const item: LocalMarketItem = {
+              ...draft,
+              id: "u" + Date.now(),
+              author: "you",
+              handle: "you",
+              stars: 0,
+              installs: "0",
+              when: "now",
+              featured: false,
+              source: "local",
+              add: "cue add you/" + draft.name,
+              addKind: draft.type,
+              mine: true,
+            };
+            setPublished((p) => [item, ...p]);
+            setPubOpen(false);
+            setType("all");
+            setQ("");
+            setSort("new");
+            flash("Published locally ✓ — will open a registry PR");
+          }}
+        />
+      )}
+      {toast && <div className="mk-toast">{toast}</div>}
+    </div>
+  );
+}
+
+// The publish form yields just the editable fields; the view fills the rest.
+type PublishDraft = { type: MarketType; name: string; desc: string; tags: string[] };
+
+function PublishModal({ onClose, onPublish }: { onClose: () => void; onPublish: (draft: PublishDraft) => void }) {
+  const [type, setType] = useState<MarketType>("profile");
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [tags, setTags] = useState("");
+  const valid = name.trim() && desc.trim();
+  return (
+    <div className="mk-modal-bg" onClick={onClose}>
+      <div className="mk-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="mk-modal-h">Publish to marketplace <span className="mk-modal-x" onClick={onClose}>×</span></div>
+        <div className="mk-modal-sub">Share a profile, workflow, skill or CLI with everyone running cue.</div>
+        <label className="mk-field"><span>Type</span>
+          <div className="mk-typesel">{TYPE_KEYS.map((t) => (
+            <button key={t} className={type === t ? "on" : ""} style={type === t ? { borderColor: TYPE[t].color, color: TYPE[t].color } : undefined} onClick={() => setType(t)}>{TYPE[t].glyph} {TYPE[t].label}</button>
+          ))}</div>
+        </label>
+        <label className="mk-field"><span>Name</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. ship-fast" spellCheck={false} />
+        </label>
+        <label className="mk-field"><span>Description</span>
+          <textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What does it do? When should someone reach for it?" rows={3} />
+        </label>
+        <label className="mk-field"><span>Tags <span className="mk-hint">comma-separated</span></span>
+          <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="gstack, build, review" spellCheck={false} />
+        </label>
+        <div className="mk-modal-foot">
+          <button className="de-btn" onClick={onClose}>Cancel</button>
+          <button
+            className="de-btn primary"
+            disabled={!valid}
+            onClick={() => onPublish({ type, name: name.trim(), desc: desc.trim(), tags: tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 4) })}
+          >Publish</button>
+        </div>
+      </div>
+    </div>
+  );
+}

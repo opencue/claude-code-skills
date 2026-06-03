@@ -10,6 +10,19 @@ export function fmtTokens(bytes: number | null | undefined): string {
   return `${Math.round(bytes / 4).toLocaleString()} tok`;
 }
 
+/** Seconds → compact human duration: "45s", "12m", "2h 14m", "1d 3h". */
+export function fmtDuration(seconds: number | null | undefined): string {
+  if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) return "—";
+  const s = Math.round(seconds);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ${m % 60}m`;
+  const d = Math.floor(h / 24);
+  return `${d}d ${h % 24}h`;
+}
+
 export function fmtRelative(iso: string | null | undefined, now = Date.now()): string {
   if (!iso) return "—";
   const then = new Date(iso).getTime();

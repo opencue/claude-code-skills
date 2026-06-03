@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_CONFIG_DIR}/hooks/auto-review.sh",
+            "description": "Stop hook (opt-in): after a code-producing turn, spawn an INDEPENDENT reviewer agent (code-review-deep on Sonnet) over the working-tree diff and BLOCK until CRITICAL/HIGH findings are addressed and verified. OFF by default; enable with `touch ~/.config/cue/auto-review-enabled`. Recursion-guarded, round-capped (2), fail-open. Suppress one turn with [skip-auto-review].",
+            "id": "cue:stop:auto-review"
+          }
+        ]
+      }
+    ]
+  }
+}

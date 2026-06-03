@@ -4,6 +4,7 @@ import { ActiveProfile } from "./components/ActiveProfile";
 import { ActiveSessions } from "./components/ActiveSessions";
 import { SkillActivation } from "./components/SkillActivation";
 import { TokenCostChart } from "./components/TokenCostChart";
+import { ActivityChart } from "./components/ActivityChart";
 import { PairSuggestions } from "./components/PairSuggestions";
 import { TriggerGaps } from "./components/TriggerGaps";
 import { GateTimeline } from "./components/GateTimeline";
@@ -69,6 +70,7 @@ export function App() {
       ) : (
         <main className="app-grid">
           <StatsOverview />
+          <ActivityChart />
           <ActiveProfile />
           <ActiveSessions />
           <SkillActivation />

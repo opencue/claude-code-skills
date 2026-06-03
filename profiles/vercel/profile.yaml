@@ -8,6 +8,13 @@ recommends:
   - vite          # non-Next frontends deployed to Vercel
   - frontend      # UI implementation that ships to Vercel
   - backend       # API routes / serverless functions
+skills:
+  # The official Vercel plugin (below) bundles these 26 skills; wiring them via
+  # npx from the same repo (vercel/vercel-plugin) makes them explicit and
+  # visible in the profile, not only loaded through the plugin.
+  npx:
+    - repo: vercel/vercel-plugin
+      skills: [vercel-cli, deployments-cicd, env-vars, vercel-functions, vercel-storage, vercel-firewall, vercel-sandbox, vercel-agent, ai-sdk, ai-gateway, chat-sdk, nextjs, next-upgrade, next-forge, next-cache-components, turbopack, routing-middleware, runtime-cache, react-best-practices, shadcn, auth, bootstrap, marketplace, workflow, verification, knowledge-update]
 plugins:
   # Official Vercel plugin (github.com/vercel/vercel-plugin). Bundles the hosted
   # MCP (mcp.vercel.com, OAuth), 26 skills (vercel-cli, deployments-cicd,

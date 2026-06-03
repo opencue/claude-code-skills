@@ -138,9 +138,29 @@ code { font-family: var(--mono); font-size: 0.9em; }
 .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; }
 
 /* ---------- stats overview (top-of-dashboard metric row) ---------- */
+/* Grouped overview: Scale / Usage / Health (DESIGN.md gap #1). */
 .stats-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.stats-group {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.stats-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  padding-left: 2px;
+}
+.stats-group-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -149,18 +169,18 @@ code { font-family: var(--mono); font-size: 0.9em; }
 }
 .stat-tile {
   background: var(--bg-card);
-  padding: 18px 20px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   transition: background 0.15s ease;
 }
 .stat-tile:hover { background: #111111; }
 .stat-tile .tile-num {
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 600;
-  line-height: 1;
-  letter-spacing: -1px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
@@ -175,6 +195,35 @@ code { font-family: var(--mono); font-size: 0.9em; }
   letter-spacing: 0.6px;
 }
 .stat-tile .tile-sub { font-size: 11px; color: var(--text-secondary); font-family: var(--mono); }
+
+/* Segmented window control (Activity over time). */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.seg-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.seg-btn:not(:last-child) { border-right: 1px solid var(--border); }
+.seg-btn:hover { color: var(--text-secondary); }
+.seg-btn.on { background: var(--accent-soft); color: var(--accent); }
+.activity-summary { margin: 2px 0 12px; }
+.activity-summary .big {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---------- offline CTA (shared by dashboard + merge studio) ---------- */
 .offline-cta {

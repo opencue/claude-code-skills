@@ -537,6 +537,31 @@ describe("materializeRuntime", () => {
     expect(link).toContain("resources/hooks/bash-quality-preflight.json");
   });
 
+  test("hooks: auto-review Stop hook + its .sh companion both land in the runtime", async () => {
+    const profile: ResolvedProfile = {
+      ...sampleProfile,
+      name: "test-auto-review",
+      inheritanceChain: ["test-auto-review"],
+      rules: [], commands: [],
+      hooks: ["auto-review.json"],
+    };
+    const out = await materializeRuntime({
+      profile, agent: "claude-code",
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id) => `/fake/source/${id}`,
+      mcpRegistry: {},
+      userClaudeMd: "",
+    });
+    const settings = JSON.parse(await readFile(join(out.runtimeDir, "settings.json"), "utf8"));
+    expect(settings.hooks.Stop).toBeArray();
+    expect(settings.hooks.Stop[0].hooks[0].id).toBe("cue:stop:auto-review");
+    expect(settings.hooks.Stop[0].hooks[0].command).toContain("auto-review.sh");
+    // The reviewer script companion must be symlinked too, else the hook fires
+    // `bash $CLAUDE_CONFIG_DIR/hooks/auto-review.sh` against a missing file.
+    const script = await readlink(join(out.runtimeDir, "hooks", "auto-review.sh"));
+    expect(script).toContain("resources/hooks/auto-review.sh");
+  });
+
   // Claude Code reads MCP servers from .claude.json (top-level `mcpServers`),
   // NOT from settings.json. The materializer must therefore merge profile MCPs
   // into .claude.json — and copy (not symlink) it so mutations don't leak back

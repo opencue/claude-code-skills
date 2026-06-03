@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "name": "example-ship-a-fix",
+  "title": "Ship a fix",
+  "description": "Starter workflow: investigate → set a measurable goal → review the diff → ship. Demonstrates the cue workflow schema (trigger + skill + command nodes).",
+  "nodes": [
+    { "id": "n1", "kind": "trigger", "ref": "manual", "label": "When asked to fix something", "position": { "x": 0, "y": 120 }, "config": { "trigger": "manual" } },
+    { "id": "n2", "kind": "skill", "ref": "meta/analyze", "label": "Analyze the area", "position": { "x": 280, "y": 60 }, "config": { "prompt": "Map the area before proposing changes." } },
+    { "id": "n3", "kind": "command", "ref": "goal", "label": "Set a goal with a check", "position": { "x": 560, "y": 60 }, "config": {} },
+    { "id": "n4", "kind": "skill", "ref": "review/code-review-deep", "label": "Review the diff", "position": { "x": 840, "y": 120 }, "config": {} },
+    { "id": "n5", "kind": "command", "ref": "ship", "label": "Ship it", "position": { "x": 1120, "y": 120 }, "config": {} }
+  ],
+  "edges": [
+    { "id": "e1", "source": "n1", "target": "n2" },
+    { "id": "e2", "source": "n2", "target": "n3" },
+    { "id": "e3", "source": "n3", "target": "n4" },
+    { "id": "e4", "source": "n4", "target": "n5" }
+  ],
+  "createdAt": "2026-06-03T00:00:00.000Z",
+  "updatedAt": "2026-06-03T00:00:00.000Z"
+}

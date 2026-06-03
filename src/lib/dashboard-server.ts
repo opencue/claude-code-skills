@@ -11,12 +11,16 @@
  * public interface would be a privacy footgun.
  */
 
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { readFile, stat as statAsync } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 
 import { configDir } from "./config-paths";
 import { computeStats, computeDailyActivity, sessionDurationSummary } from "./analytics";
+import { discoverInstalledPlugins } from "./plugin-discovery";
+import { listWorkflows, loadWorkflow, saveWorkflow } from "./workflow-store";
 import { listActiveSessions, supportsProcScan } from "./active-sessions";
 import { readGateStatus, readAllGateStatus } from "./gate-status";
 import { computeAffinityMap, suggestionsByProfile } from "./pair-suggestions";
@@ -32,7 +36,10 @@ import {
   type MergeMode,
 } from "./profile-merge";
 import { validateProfileName } from "./profile-generator";
-import { parseSkillFromDir } from "./skill-router";
+import { loadMcpCatalog, addMcpToProfile } from "./mcp-catalog";
+import { aggregateProfileClis, type ProfileCli } from "./skill-clis";
+import { collectPermissions } from "./permissions";
+import { parseSkillFromContent, parseSkillFromDir } from "./skill-router";
 import { resolveLocalSkill } from "./resolver-local";
 import { resolveProfileForCwd } from "./cwd-resolver";
 import { quickDiagnose } from "../commands/status";
@@ -183,6 +190,96 @@ function mergeProfilesDir(): string {
 }
 
 /**
+ * Serve a profile's logo image (`profiles/<name>/<iconImage>`) as raw bytes.
+ * Read-only and path-traversal-safe: the profile name is restricted to a
+ * single dir segment, the iconImage must be a bare filename, and the resolved
+ * path must stay inside the profiles dir. 404 when the profile has no logo.
+ */
+async function serveProfileIcon(rawName: string | null): Promise<Response> {
+  if (!rawName) return new Response("missing profile", { status: 400 });
+  // Composite selectors (a+b) → use the first part's logo.
+  const name = rawName.split("+")[0]!.trim();
+  if (!/^[A-Za-z0-9._-]+$/.test(name) || name.includes("..")) {
+    return new Response("bad profile", { status: 400 });
+  }
+  let iconImage: string | undefined;
+  try {
+    iconImage = (await loadProfile(name)).iconImage;
+  } catch {
+    return new Response("not found", { status: 404 });
+  }
+  if (!iconImage || iconImage.includes("/") || iconImage.includes("\\") || iconImage.includes("..")) {
+    return new Response("no icon", { status: 404 });
+  }
+  const dir = mergeProfilesDir();
+  const file = resolve(join(dir, name, iconImage));
+  if (!file.startsWith(resolve(dir))) return new Response("forbidden", { status: 403 });
+  if (!existsSync(file) || !statSync(file).isFile()) return new Response("not found", { status: 404 });
+  return new Response(readFileSync(file), {
+    headers: { "Content-Type": contentTypeFor(file), "Cache-Control": "max-age=3600" },
+  });
+}
+
+/** Directory holding generated plugin logos, keyed by `<plugin-name>.png`. */
+function pluginLogosDir(): string {
+  return process.env.CUE_PLUGIN_LOGOS_DIR ?? join(REPO_ROOT, "resources", "plugin-logos");
+}
+
+/** Directory holding playbook markdown docs, keyed by `<slug>.md`. */
+function playbooksDir(): string {
+  return process.env.CUE_PLAYBOOKS_DIR ?? join(REPO_ROOT, "resources", "playbooks");
+}
+
+/** Directory holding slash-command markdown docs, keyed by `<ref>.md`. */
+function commandsDir(): string {
+  return process.env.CUE_COMMANDS_DIR ?? join(REPO_ROOT, "resources", "commands");
+}
+
+/**
+ * Serve a plugin's logo image as raw bytes. Two sources, tried in order:
+ *   1. Reuse — a cue profile sharing the plugin's bare name that ships its own
+ *      logo (the `resend` / `vercel` / `stripe` plugins map straight onto
+ *      profiles/<name>/<iconImage>).
+ *   2. Generated — a PNG under the plugin-logos dir keyed by the plugin name.
+ * Path-traversal-safe exactly like serveProfileIcon. 404 when neither exists.
+ */
+async function servePluginIcon(rawId: string | null): Promise<Response> {
+  if (!rawId) return new Response("missing plugin", { status: 400 });
+  // Plugin ids are "name@marketplace" — the logo keys off the bare name.
+  const name = rawId.split("@")[0]!.trim();
+  if (!/^[A-Za-z0-9._-]+$/.test(name) || name.includes("..")) {
+    return new Response("bad plugin", { status: 400 });
+  }
+
+  // 1. Reuse a same-named profile's logo when it ships one.
+  try {
+    const iconImage = (await loadProfile(name)).iconImage;
+    if (iconImage && !iconImage.includes("/") && !iconImage.includes("\\") && !iconImage.includes("..")) {
+      const pdir = mergeProfilesDir();
+      const pfile = resolve(join(pdir, name, iconImage));
+      if (pfile.startsWith(resolve(pdir)) && existsSync(pfile) && statSync(pfile).isFile()) {
+        return new Response(readFileSync(pfile), {
+          headers: { "Content-Type": contentTypeFor(pfile), "Cache-Control": "max-age=3600" },
+        });
+      }
+    }
+  } catch {
+    // No same-named profile — fall through to generated art.
+  }
+
+  // 2. Generated logo under the plugin-logos dir.
+  const gdir = pluginLogosDir();
+  const gfile = resolve(join(gdir, name + ".png"));
+  if (!gfile.startsWith(resolve(gdir))) return new Response("forbidden", { status: 403 });
+  if (existsSync(gfile) && statSync(gfile).isFile()) {
+    return new Response(readFileSync(gfile), {
+      headers: { "Content-Type": "image/png", "Cache-Control": "max-age=3600" },
+    });
+  }
+  return new Response("not found", { status: 404 });
+}
+
+/**
  * Full profile inventory for the Merge Studio source list: every profile's
  * resolved skill/MCP/plugin counts plus its `bundles`/`conflicts` hints.
  * Resolution failures (offline npx, missing MCP) degrade to a per-row error
@@ -197,22 +294,552 @@ export async function handleProfilesFull(): Promise<ApiResult<unknown>> {
         return {
           name,
           icon: p.icon ?? null,
+          // Filename (relative to the profile dir) of a real logo, when set —
+          // served by GET /api/v1/profile-icon?profile=<name>. null = emoji only.
+          // iconImage is inheritable, so a base like core would otherwise leak
+          // its logo to every child; only report it when the file actually
+          // exists in THIS profile's own dir (also hides dangling refs).
+          iconImage:
+            p.iconImage && existsSync(join(mergeProfilesDir(), name, p.iconImage))
+              ? p.iconImage
+              : null,
           description: p.description,
           skills: p.skills.local.length,
           npx: p.skills.npx.length,
           mcps: p.mcps.length,
           plugins: p.plugins.length,
+          subagents: p.subagents?.length ?? 0,
           bundles: p.bundles ?? [],
           conflicts: p.conflicts ?? [],
           inheritsCore: p.inheritanceChain.includes("core"),
           error: null as string | null,
         };
       } catch (err) {
-        return { name, error: (err as Error).message };
+        // Degraded row: keep the full ProfileRow shape so consumers can rely
+        // on array fields (e.g. conflicts.some(...)) without guarding.
+        return {
+          name,
+          icon: null,
+          iconImage: null as string | null,
+          description: "",
+          skills: 0,
+          npx: 0,
+          mcps: 0,
+          plugins: 0,
+          subagents: 0,
+          bundles: [] as string[],
+          conflicts: [] as string[],
+          inheritsCore: false,
+          error: (err as Error).message,
+        };
       }
     }),
   );
   return { ok: true, data: rows };
+}
+
+// ---------------------------------------------------------------------------
+// Profile detail — the explorer/search/mcps data source for cue studio.
+//
+// Returns a profile's full skill catalogue grouped by namespace, each skill's
+// SKILL.md body + byte size + connected-MCP hints, plus the profile's MCP,
+// plugin, and command refs. Reuses the same loader + resolver + parser the CLI
+// uses so the studio reads real on-disk data, never a mock.
+//
+// Reading 50+ SKILL.md files per request is the heaviest read on the server,
+// so the result is cached briefly (keyed by profile selector).
+// ---------------------------------------------------------------------------
+
+interface StudioSkill {
+  id: string;
+  ns: string;
+  name: string;
+  desc: string;
+  sizeK: number;
+  body: string;
+  uses: string[];
+  missing: boolean;
+}
+
+/** One `##` heading of a playbook, rendered as a step chip in the studio. */
+interface PlaybookStep {
+  name: string;
+  detail: string;
+}
+
+/** A profile's playbook, shaped for the studio Workflows page. */
+interface PlaybookWorkflow {
+  id: string;
+  name: string;
+  title: string;
+  emoji: string;
+  trigger: string;
+  est: string;
+  desc: string;
+  steps: PlaybookStep[];
+}
+
+/** A delegatable subagent ref, split into its division + slug for grouping. */
+interface SubagentRef {
+  /** The raw ref, e.g. "design/design-ui-designer". */
+  id: string;
+  /** First path segment — the agency division (design, finance, sales…). */
+  division: string;
+  /** Trailing slug — the agent name. */
+  name: string;
+}
+
+/** A profile slash-command, resolved from its on-disk markdown source. */
+interface StudioCommand {
+  /** Display name with the leading slash, e.g. "/goal". */
+  name: string;
+  /** Bare ref / file stem used to resolve the source, e.g. "goal". */
+  ref: string;
+  /** One-line `description:` from frontmatter ("" when absent / unresolved). */
+  desc: string;
+  /** Optional `argument-hint:` from frontmatter. */
+  argHint: string | null;
+  /** Full markdown body, rendered in the studio editor preview. */
+  body: string;
+  /** KB size of the source file (0 when unresolved). */
+  sizeK: number;
+  /** True when no source .md resolved (built-in / plugin-provided command). */
+  missing: boolean;
+}
+
+interface ProfileDetail {
+  profile: string;
+  parts: string[];
+  counts: { skills: number; mcps: number; plugins: number; commands: number; subagents: number; clis: number };
+  skills: StudioSkill[];
+  mcps: { id: string; status: string }[];
+  plugins: { id: string; name: string; marketplace: string; status: string }[];
+  commands: StudioCommand[];
+  /** Real on-disk workflows: the playbooks this profile declares, parsed. */
+  playbooks: PlaybookWorkflow[];
+  /** Delegatable specialists this profile wires into `.claude/agents/`. */
+  subagents: SubagentRef[];
+  /** External CLI tools the profile's skills declare (frontmatter Bash refs). */
+  clis: ProfileCli[];
+}
+
+/** Pull a `uses:` (or `mcps:`) frontmatter list out of a SKILL.md, if present. */
+function parseUsesFromFrontmatter(content: string): string[] {
+  const lines = content.split("\n");
+  if (lines[0] !== "---") return [];
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === "---") break;
+    const m = lines[i]!.match(/^(?:uses|mcps):\s*\[([^\]]*)\]/);
+    if (m) {
+      return m[1]!
+        .split(",")
+        .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean);
+    }
+  }
+  return [];
+}
+
+/** Strip a single matched pair of wrapping quotes — never an unbalanced lone quote. */
+function stripWrappingQuotes(s: string): string {
+  return s.replace(/^(['"])([\s\S]*)\1$/, "$2");
+}
+
+/** Pull `description:` and `argument-hint:` out of a command markdown's frontmatter. */
+function parseCommandFrontmatter(content: string): { desc: string; argHint: string | null } {
+  // Normalize CRLF so an externally-authored (Windows) command file's "---\r"
+  // fence still matches the delimiter check below.
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  if (lines[0] !== "---") return { desc: "", argHint: null };
+  let desc = "";
+  let argHint: string | null = null;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === "---") break;
+    const d = lines[i]!.match(/^description:\s*(.+)$/);
+    if (d) desc = stripWrappingQuotes(d[1]!.trim());
+    const a = lines[i]!.match(/^argument-hint:\s*(.+)$/);
+    if (a) argHint = stripWrappingQuotes(a[1]!.trim());
+  }
+  return { desc, argHint };
+}
+
+/** Placeholder body for a command with no on-disk source (plugin / built-in). */
+function stubCommandBody(name: string): string {
+  return `---
+command: ${name}
+source: plugin or built-in
+---
+
+# ${name}
+
+This command has no markdown source in \`resources/commands/\` — it is contributed by an installed plugin or built in to the agent, so its body isn't stored locally. Invoke it by typing \`${name}\` in the prompt.`;
+}
+
+/** Map a playbook slug/title to a stable emoji for its workflow card. */
+function playbookEmoji(hint: string): string {
+  const s = hint.toLowerCase();
+  // Specific themes first — generic "ship/deploy" verbs appear in many titles.
+  if (/bug|triage|debug/.test(s)) return "🐛";
+  if (/sprint/.test(s)) return "🏃";
+  if (/improve|clean|refactor|health/.test(s)) return "🔧";
+  if (/skill/.test(s)) return "🧪";
+  if (/research|analyze|investigate/.test(s)) return "🔍";
+  if (/security|secops|cso/.test(s)) return "🛡";
+  if (/doc|write/.test(s)) return "📝";
+  if (/growth|market/.test(s)) return "📈";
+  if (/vite|web|frontend|design/.test(s)) return "🎨";
+  if (/medusa|shop|commerce/.test(s)) return "🛒";
+  if (/ship|deploy|release|land|canary/.test(s)) return "🚀";
+  return "📋";
+}
+
+/** Rough token estimate (~4 chars/token) → compact "~1.2K" label. */
+function estTokensLabel(chars: number): string {
+  const t = Math.max(1, Math.round(chars / 4));
+  if (t < 1000) return `~${t}`;
+  return `~${(t / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+}
+
+/** Collapse whitespace and cap a string with an ellipsis. */
+function collapse(s: string, cap = 160): string {
+  const t = s.replace(/\s+/g, " ").trim();
+  return t.length > cap ? t.slice(0, cap - 1).trimEnd() + "…" : t;
+}
+
+/** Strip leading markdown markers (bullets, numbers, bold) from a line. */
+function cleanMdLine(s: string): string {
+  return s.replace(/^[-*]\s+/, "").replace(/^\d+\.\s+/, "").replace(/\*\*/g, "").trim();
+}
+
+/**
+ * Parse a playbook markdown doc into a workflow-card model:
+ *  - `title` from the `# Playbook: …` H1 (falls back to the prettified slug),
+ *  - `desc` from the first "Use when …" paragraph (falls back to the first
+ *    non-heading paragraph),
+ *  - one `step` per `##` heading, numbered prefix stripped, with a one-line
+ *    `detail` pulled from that section's first body line.
+ */
+function parsePlaybook(slug: string, content: string): PlaybookWorkflow {
+  const lines = content.split("\n");
+
+  let title = slug.replace(/[-_]/g, " ");
+  const h1Idx = lines.findIndex((l) => /^#\s+/.test(l));
+  if (h1Idx >= 0) {
+    const m = lines[h1Idx]!.match(/^#\s+(?:Playbook:\s*)?(.+)$/);
+    if (m) title = m[1]!.trim();
+  }
+
+  let desc = "";
+  const gatherParagraph = (start: number): string => {
+    const para: string[] = [];
+    for (let i = start; i < lines.length && lines[i]!.trim() !== ""; i++) para.push(lines[i]!);
+    return collapse(para.join(" "));
+  };
+  const useIdx = lines.findIndex((l) => /use when/i.test(l));
+  if (useIdx >= 0) {
+    desc = gatherParagraph(useIdx);
+  } else {
+    for (let i = h1Idx + 1; i < lines.length; i++) {
+      const l = lines[i]!.trim();
+      if (!l || l.startsWith("#")) continue;
+      desc = gatherParagraph(i);
+      break;
+    }
+  }
+
+  const steps: PlaybookStep[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i]!.match(/^##\s+(.+)$/);
+    if (!m) continue;
+    const name = collapse(m[1]!.replace(/^\d+\.\s*/, ""), 60);
+    let detail = "";
+    for (let j = i + 1; j < lines.length; j++) {
+      if (/^##\s+/.test(lines[j]!)) break;
+      const c = cleanMdLine(lines[j]!);
+      if (c) { detail = collapse(c, 140); break; }
+    }
+    steps.push({ name, detail });
+  }
+
+  return {
+    id: slug,
+    name: slug,
+    title,
+    emoji: playbookEmoji(`${slug} ${title}`),
+    trigger: "playbook",
+    est: estTokensLabel(content.length),
+    desc: desc || `Playbook: ${title}`,
+    steps,
+  };
+}
+
+const profileDetailCache = new Map<string, { ts: number; data: ProfileDetail }>();
+const PROFILE_DETAIL_TTL_MS = 60_000;
+
+export async function handleProfileDetail(params: URLSearchParams): Promise<ApiResult<unknown>> {
+  // Default to the profile resolved for the server's cwd (same precedence as
+  // /status), so the studio opens on the active profile with no query param.
+  let name = resolveProfileQuery(params.get("profile"));
+  if (!name) {
+    const resolved = await resolveProfileForCwd({
+      cwd: process.cwd(),
+      homeDir: homedir(),
+      configDir: configDir(),
+    });
+    if (resolved.source !== "none") name = (resolved as { profile: string }).profile;
+  }
+  if (!name) return { ok: false, error: "no-profile" };
+
+  const cached = profileDetailCache.get(name);
+  if (cached && Date.now() - cached.ts < PROFILE_DETAIL_TTL_MS) {
+    return { ok: true, data: cached.data };
+  }
+
+  let profile;
+  try {
+    profile = await loadProfile(name);
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+
+  // Resolve + read each local skill. Failures degrade to a stub entry (kept in
+  // the list so tree counts stay honest) rather than failing the whole call.
+  const localSkills: StudioSkill[] = await Promise.all(
+    profile.skills.local
+      .map((s) => s.id)
+      .filter((id) => !id.includes("*"))
+      .map(async (id): Promise<StudioSkill> => {
+        const ns = id.includes("/") ? id.split("/")[0]! : "skills";
+        const slug = id.slice(id.lastIndexOf("/") + 1);
+        try {
+          const dir = await resolveLocalSkill(id);
+          const path = join(dir, "SKILL.md");
+          const content = await readFile(path, "utf8");
+          const sizeK = +((await statAsync(path)).size / 1024).toFixed(1);
+          const parsed = parseSkillFromContent(id, content, slug);
+          const desc = parsed.capability || parsed.rawDescription || "";
+          return { id, ns, name: parsed.name || slug, desc, sizeK, body: content, uses: parseUsesFromFrontmatter(content), missing: false };
+        } catch {
+          return { id, ns, name: slug, desc: "(SKILL.md could not be read)", sizeK: 0, body: `---\nname: ${slug}\n---\n\n# ${slug}\n\nThis skill could not be resolved on disk.`, uses: [], missing: true };
+        }
+      }),
+  );
+
+  // npx skills: referenced by repo + slug; bodies live in a remote package, so
+  // surface them as catalogue entries under the "npx" namespace with a stub body.
+  const npxSkills: StudioSkill[] = profile.skills.npx.flatMap((ref) =>
+    (ref.skills ?? []).map((slug): StudioSkill => {
+      const id = `${ref.repo}#${slug}`;
+      const body = `---\nname: ${slug}\nnamespace: npx\nrepo: ${ref.repo}\n---\n\n# ${slug}\n\nProvided on demand via \`npx ${ref.repo}\`. The body is fetched at activation time, so it is not stored locally.`;
+      return { id, ns: "npx", name: slug, desc: `npx skill from ${ref.repo}`, sizeK: 0, body, uses: [], missing: false };
+    }),
+  );
+
+  const skills = [...localSkills, ...npxSkills];
+
+  const plugins = profile.plugins.map((p) => {
+    const at = p.id.lastIndexOf("@");
+    const pname = at > 0 ? p.id.slice(0, at) : p.id;
+    const marketplace = at > 0 ? p.id.slice(at + 1) : "";
+    return { id: p.id, name: pname, marketplace, status: "loaded" };
+  });
+
+  // Playbooks the profile declares → real on-disk workflows for the studio's
+  // Workflows page. Read + parse each; unreadable / oddly-named ones are skipped
+  // so one bad file never fails the whole call.
+  const pbDir = playbooksDir();
+  const playbooks: PlaybookWorkflow[] = (
+    await Promise.all(
+      (profile.playbooks ?? []).map(async (slug): Promise<PlaybookWorkflow | null> => {
+        if (!/^[A-Za-z0-9._-]+$/.test(slug)) return null;
+        try {
+          const content = await readFile(join(pbDir, `${slug}.md`), "utf8");
+          return parsePlaybook(slug, content);
+        } catch {
+          return null;
+        }
+      }),
+    )
+  ).filter((p): p is PlaybookWorkflow => p !== null);
+
+  // Subagents — the delegatable specialists the profile wires into agents/.
+  // Refs are "<division>/<slug>"; split for grouped display in the studio.
+  const subagents: SubagentRef[] = (profile.subagents ?? []).map((ref) => {
+    const slash = ref.indexOf("/");
+    const division = slash > 0 ? ref.slice(0, slash) : "other";
+    const sname = ref.slice(ref.lastIndexOf("/") + 1);
+    return { id: ref, division, name: sname };
+  });
+
+  // CLIs the profile's skills shell out to — parsed from the skill bodies we
+  // already loaded above (no extra disk reads), enriched from cli-recipes.json.
+  const clis = aggregateProfileClis(skills);
+
+  // Commands — resolve each profile-declared slash command to its on-disk
+  // markdown (resources/commands/<ref>.md), reading the frontmatter description
+  // + argument-hint and the body for the studio's command preview. Refs come
+  // from the profile definition, but the stem is validated (no separators, no
+  // `..`) so a malformed ref can never read outside the commands dir. Built-in
+  // or plugin-provided commands with no source .md degrade to a stub entry
+  // (kept in the list so tree counts stay honest).
+  const cmdDir = commandsDir();
+  const commands: StudioCommand[] = await Promise.all(
+    profile.commands.map(async (raw): Promise<StudioCommand> => {
+      const ref = raw.replace(/^\//, "").replace(/\.md$/, "");
+      const name = `/${ref}`;
+      if (!/^[A-Za-z0-9._-]+$/.test(ref) || ref.includes("..")) {
+        return { name, ref, desc: "", argHint: null, body: stubCommandBody(name), sizeK: 0, missing: true };
+      }
+      try {
+        const path = join(cmdDir, `${ref}.md`);
+        // Belt-and-suspenders containment, mirroring serveProfileIcon: the ref
+        // regex already bars separators, but assert the resolved path stays
+        // inside the commands dir so a loosened guard can never read outside it.
+        if (!resolve(path).startsWith(resolve(cmdDir) + sep)) {
+          return { name, ref, desc: "", argHint: null, body: stubCommandBody(name), sizeK: 0, missing: true };
+        }
+        const content = await readFile(path, "utf8");
+        const sizeK = +((await statAsync(path)).size / 1024).toFixed(1);
+        const { desc, argHint } = parseCommandFrontmatter(content);
+        return { name, ref, desc, argHint, body: content, sizeK, missing: false };
+      } catch {
+        return { name, ref, desc: "", argHint: null, body: stubCommandBody(name), sizeK: 0, missing: true };
+      }
+    }),
+  );
+
+  const data: ProfileDetail = {
+    profile: name,
+    parts: name.split("+").map((s) => s.trim()).filter(Boolean),
+    counts: {
+      skills: skills.length,
+      mcps: profile.mcps.length,
+      plugins: profile.plugins.length,
+      commands: profile.commands.length,
+      subagents: subagents.length,
+      clis: clis.length,
+    },
+    skills,
+    mcps: profile.mcps.map((m) => ({ id: m.id, status: "connected" })),
+    plugins,
+    commands,
+    playbooks,
+    subagents,
+    clis,
+  };
+
+  profileDetailCache.set(name, { ts: Date.now(), data });
+  return { ok: true, data };
+}
+
+// ---------------------------------------------------------------------------
+// Hooks — the active profile's real Claude Code hooks, read from the settings
+// files that actually drive them: the cue-materialized runtime settings.json
+// (per profile) plus the user's global ~/.claude/settings.json. Flattened and
+// grouped by lifecycle event for the studio Hooks view. Read-only.
+// ---------------------------------------------------------------------------
+
+interface FlatHook {
+  event: string;
+  matcher: string;
+  command: string;
+  description: string;
+  id: string;
+  source: "profile" | "global";
+}
+
+interface SettingsHookEntry {
+  matcher?: string;
+  hooks?: { type?: string; command?: string; description?: string; id?: string }[];
+}
+
+/** Parse the `hooks` map out of one settings.json, tagging each with `source`. */
+function readHooksFile(path: string, source: FlatHook["source"]): FlatHook[] {
+  if (!existsSync(path)) return [];
+  let parsed: { hooks?: Record<string, SettingsHookEntry[]> };
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return [];
+  }
+  const hooks = parsed.hooks;
+  if (!hooks || typeof hooks !== "object") return [];
+  const out: FlatHook[] = [];
+  for (const event of Object.keys(hooks)) {
+    const groups = hooks[event];
+    if (!Array.isArray(groups)) continue;
+    for (const g of groups) {
+      const matcher = g.matcher && g.matcher.length > 0 ? g.matcher : "*";
+      for (const h of g.hooks ?? []) {
+        if (!h.command) continue;
+        out.push({
+          event,
+          matcher,
+          command: h.command,
+          description: h.description ?? "",
+          id: h.id ?? `${event}:${matcher}:${h.command}`,
+          source,
+        });
+      }
+    }
+  }
+  return out;
+}
+
+export async function handleHooks(params: URLSearchParams): Promise<ApiResult<unknown>> {
+  let name = resolveProfileQuery(params.get("profile"));
+  if (!name) {
+    const resolved = await resolveProfileForCwd({
+      cwd: process.cwd(),
+      homeDir: homedir(),
+      configDir: configDir(),
+    });
+    if (resolved.source !== "none") name = (resolved as { profile: string }).profile;
+  }
+
+  // The materialized runtime settings are what Claude Code actually loads for
+  // this profile; the global file is the user-wide baseline.
+  const globalPath = join(homedir(), ".claude", "settings.json");
+  const runtimePath = name
+    ? join(configDir(), "runtime", name, "claude", "settings.json")
+    : null;
+
+  const flat: FlatHook[] = [
+    ...readHooksFile(globalPath, "global"),
+    ...(runtimePath ? readHooksFile(runtimePath, "profile") : []),
+  ];
+
+  // Dedup by id (a profile hook overriding a global one keeps the profile copy,
+  // which appears later in the array).
+  const byId = new Map<string, FlatHook>();
+  for (const h of flat) byId.set(h.id, h);
+  const deduped = [...byId.values()];
+
+  // Group by event in a stable lifecycle order; unknown events sort last.
+  const EVENT_ORDER = [
+    "PreToolUse", "PostToolUse", "UserPromptSubmit", "SessionStart",
+    "SessionEnd", "Stop", "SubagentStop", "PreCompact", "Notification",
+  ];
+  const byEvent = new Map<string, FlatHook[]>();
+  for (const h of deduped) {
+    if (!byEvent.has(h.event)) byEvent.set(h.event, []);
+    byEvent.get(h.event)!.push(h);
+  }
+  const events = [...byEvent.keys()]
+    .sort((a, b) => {
+      const ia = EVENT_ORDER.indexOf(a), ib = EVENT_ORDER.indexOf(b);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.localeCompare(b);
+    })
+    .map((event) => ({ event, hooks: byEvent.get(event)! }));
+
+  return {
+    ok: true,
+    data: {
+      profile: name,
+      total: deduped.length,
+      events,
+    },
+  };
 }
 
 interface MergeRequest {
@@ -270,6 +897,69 @@ export async function handleMergeSave(body: MergeRequest | null): Promise<ApiRes
     if (err instanceof MergedProfileExists) {
       return { ok: false, error: err.message };
     }
+    return { ok: false, error: (err as Error).message };
+  }
+}
+
+/**
+ * Full MCP catalog — every server cue can wire into a profile, with inferred
+ * transport + install hint. Drives the studio's "Available in cue" section.
+ * Read-only; the client diffs this against the active profile's `mcps` to show
+ * only the not-yet-connected entries.
+ */
+let mcpCatalogCache: { ts: number; data: unknown[] } | null = null;
+const MCP_CATALOG_TTL_MS = 60_000;
+
+export async function handleMcpCatalog(): Promise<ApiResult<unknown>> {
+  // The usedBy map below scans every profile via loadProfile; cache the built
+  // catalog briefly so a hard refresh / multiple clients don't re-scan all
+  // ~77 profiles on every hit. Global data, so a single-slot TTL cache fits.
+  if (mcpCatalogCache && Date.now() - mcpCatalogCache.ts < MCP_CATALOG_TTL_MS) {
+    return { ok: true, data: mcpCatalogCache.data };
+  }
+  // Map each MCP id → the profiles that wire it (resolved, so bundle- and
+  // core-inherited mcps count), each with its icon — lets the studio show
+  // "used by <profile icons>" next to a catalog entry's add button.
+  const profilesDir = mergeProfilesDir();
+  const usedBy = new Map<
+    string,
+    { name: string; icon: string | null; iconImage: string | null }[]
+  >();
+  for (const name of await listProfiles()) {
+    try {
+      const p = await loadProfile(name);
+      const iconImage =
+        p.iconImage && existsSync(join(profilesDir, name, p.iconImage)) ? p.iconImage : null;
+      for (const m of p.mcps) {
+        const list = usedBy.get(m.id) ?? [];
+        list.push({ name, icon: p.icon ?? null, iconImage });
+        usedBy.set(m.id, list);
+      }
+    } catch {
+      /* skip a profile that won't resolve */
+    }
+  }
+  const data = loadMcpCatalog().map((e) => ({ ...e, usedBy: usedBy.get(e.id) ?? [] }));
+  mcpCatalogCache = { ts: Date.now(), data };
+  return { ok: true, data };
+}
+
+/**
+ * Add a catalog MCP to a single physical profile's profile.yaml. The client
+ * passes the chosen part-profile (composite runtime profiles have no file to
+ * write), validated here against path traversal + catalog membership.
+ */
+export async function handleMcpAdd(
+  body: { id?: unknown; profile?: unknown } | null,
+): Promise<ApiResult<unknown>> {
+  const id = typeof body?.id === "string" ? body.id : "";
+  const profile = typeof body?.profile === "string" ? body.profile : "";
+  if (!id) return { ok: false, error: "missing-id" };
+  if (!profile) return { ok: false, error: "missing-profile" };
+  try {
+    const result = await addMcpToProfile(id, profile);
+    return { ok: true, data: result };
+  } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
 }
@@ -410,16 +1100,464 @@ export async function handleTelemetryTimeline(params: URLSearchParams): Promise<
   };
 }
 
+/**
+ * Every Claude Code plugin installed on this machine (enabled or not), read
+ * from Claude Code's real store — a superset of the active profile's declared
+ * `plugins:`. Powers the studio Plugins page's auto-discovery view.
+ */
+export async function handleDiscoveredPlugins(): Promise<ApiResult<unknown>> {
+  return { ok: true, data: { plugins: discoverInstalledPlugins() } };
+}
+
+// ── version / update banner ────────────────────────────────────────────────
+// The studio's "update available" pill + maintainer broadcast. This is the one
+// outbound call the dashboard makes — a GET of cue-ai's public version doc on
+// the npm registry. No user data leaves the box; it's cached ~1h and fail-soft
+// (any error → no banner), mirroring the CLI's existing 24h update check.
+
+/** Maintainer-authored broadcast, baked into the published `package.json`. */
+interface NoticePayload { message?: string; command?: string }
+interface VersionInfo {
+  current: string;
+  latest: string | null;
+  updateAvailable: boolean;
+  notice: NoticePayload | null;
+}
+
+const NPM_LATEST_URL = "https://registry.npmjs.org/cue-ai/latest";
+const VERSION_TTL_MS = 60 * 60 * 1000; // 1h — matches the answer's "cached ~1h".
+let versionCache: { ts: number; data: VersionInfo } | null = null;
+
+/** Installed cue-ai version, read from this package's own package.json. */
+function localVersion(): string {
+  try {
+    const pkg = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8")) as { version?: string };
+    return pkg.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
+/** True when semver `a` is strictly newer than `b` (major.minor.patch only). */
+export function semverGt(a: string, b: string): boolean {
+  const pa = a.split(".").map((n) => parseInt(n, 10) || 0);
+  const pb = b.split(".").map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    const x = pa[i] ?? 0, y = pb[i] ?? 0;
+    if (x !== y) return x > y;
+  }
+  return false;
+}
+
+/**
+ * Pure shaping of the version banner from the local version + the registry's
+ * `latest` doc (its published package.json). Split out so it's unit-testable
+ * without a network round-trip. `doc` is null when the fetch failed.
+ */
+export function computeVersionInfo(
+  current: string,
+  doc: { version?: string; cue?: { notice?: NoticePayload } } | null,
+): VersionInfo {
+  const latest = doc?.version ?? null;
+  const n = doc?.cue?.notice;
+  const notice = n && (n.message || n.command) ? { message: n.message, command: n.command } : null;
+  return { current, latest, updateAvailable: !!latest && semverGt(latest, current), notice };
+}
+
+export async function handleVersion(): Promise<ApiResult<unknown>> {
+  const current = localVersion();
+  // Serve cached registry data but always refresh `current` from disk (cheap,
+  // and stays correct across an in-place update without a server restart).
+  if (versionCache && Date.now() - versionCache.ts < VERSION_TTL_MS) {
+    return { ok: true, data: computeVersionInfo(current, { version: versionCache.data.latest ?? undefined, cue: versionCache.data.notice ? { notice: versionCache.data.notice } : undefined }) };
+  }
+  let doc: { version?: string; cue?: { notice?: NoticePayload } } | null = null;
+  try {
+    const res = await fetch(NPM_LATEST_URL, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) doc = (await res.json()) as typeof doc;
+  } catch {
+    // Offline / timeout / blocked → fail-soft: no banner this cycle.
+  }
+  const data = computeVersionInfo(current, doc);
+  versionCache = { ts: Date.now(), data };
+  return { ok: true, data };
+}
+
+// ── marketplace ─────────────────────────────────────────────────────────────
+// One unified feed of everything addable to a profile: shared hosted-registry
+// skills/mcps plus this checkout's local library (profiles, mcp catalog, CLIs,
+// playbooks, plugins). Normalized into a single MarketItem shape the studio's
+// Market page renders as one searchable grid. Read-only; cached 60s like the
+// profile-detail cache since it scans the registry + every playbook + plugins.
+
+interface MarketItem {
+  id: string;
+  type: "profile" | "workflow" | "skill" | "cli" | "mcp" | "plugin";
+  name: string;
+  author: string;
+  handle: string;
+  stars: number;
+  installs: string;
+  when: string;
+  featured: boolean;
+  desc: string;
+  tags: string[];
+  source: "registry" | "local";
+  add: string;
+  addKind: "mcp" | "skill" | "profile" | "cli" | "workflow" | "plugin";
+}
+
+interface MarketRegistrySkill {
+  id?: string; name?: string; description?: string;
+  repo?: string; tags?: string[]; stars?: number; installs?: string; featured?: boolean;
+}
+interface MarketRegistryMcp {
+  id?: string; name?: string; description?: string;
+  repo?: string; tags?: string[]; stars?: number; installs?: string; featured?: boolean;
+}
+interface MarketRegistry {
+  skills?: MarketRegistrySkill[];
+  mcps?: MarketRegistryMcp[];
+}
+
+/** Path to the shared registry doc in this checkout (may not exist). */
+function registryIndexPath(): string {
+  return join(REPO_ROOT, "docs", "registry", "index.json");
+}
+
+const REGISTRY_URL = "https://opencue.github.io/cue/registry/index.json";
+
+/**
+ * Load the shared registry — local doc first, then a short-timeout curl fetch,
+ * mirroring `loadRegistry` in src/commands/marketplace.ts. Any failure is
+ * tolerated (returns null) so the local-library part of the feed still renders
+ * offline.
+ */
+function loadMarketRegistry(): MarketRegistry | null {
+  const path = registryIndexPath();
+  if (existsSync(path)) {
+    try { return JSON.parse(readFileSync(path, "utf8")) as MarketRegistry; } catch { /* fall through */ }
+  }
+  try {
+    const res = spawnSync("curl", ["-sfL", "--max-time", "5", REGISTRY_URL], { encoding: "utf8", timeout: 8000 });
+    if (res.status === 0 && res.stdout) return JSON.parse(res.stdout) as MarketRegistry;
+  } catch { /* offline / blocked */ }
+  return null;
+}
+
+/** "owner/name" → display author. "" when the repo field is absent. */
+function authorFromRepo(repo: string | undefined): string {
+  if (!repo) return "";
+  return repo.split("/")[0]!.trim();
+}
+
+/** Registry skills + mcps → MarketItem[] (source:"registry"). */
+function registryItems(reg: MarketRegistry | null): MarketItem[] {
+  if (!reg) return [];
+  const items: MarketItem[] = [];
+  for (const s of reg.skills ?? []) {
+    if (!s.id || !s.repo) continue;
+    const handle = authorFromRepo(s.repo);
+    items.push({
+      id: `skill:${s.id}`,
+      type: "skill",
+      name: s.name || s.id,
+      author: handle || "cue",
+      handle: handle || "cue",
+      stars: typeof s.stars === "number" ? s.stars : 0,
+      installs: s.installs ?? "",
+      when: "",
+      featured: s.featured === true,
+      desc: s.description ?? "",
+      tags: Array.isArray(s.tags) ? s.tags : [],
+      source: "registry",
+      add: `cue marketplace install-skill ${s.repo}`,
+      addKind: "skill",
+    });
+  }
+  for (const m of reg.mcps ?? []) {
+    if (!m.id) continue;
+    const handle = authorFromRepo(m.repo);
+    items.push({
+      id: `mcp:${m.id}`,
+      type: "mcp",
+      name: m.name || m.id,
+      author: handle || "cue",
+      handle: handle || "cue",
+      stars: typeof m.stars === "number" ? m.stars : 0,
+      installs: m.installs ?? "",
+      when: "",
+      featured: m.featured === true,
+      desc: m.description ?? "",
+      tags: Array.isArray(m.tags) ? m.tags : [],
+      source: "registry",
+      add: `cue marketplace install-mcp ${m.id}`,
+      addKind: "mcp",
+    });
+  }
+  return items;
+}
+
+/** Every parseable file in resources/playbooks → workflow MarketItem[]. */
+function playbookMarketItems(): MarketItem[] {
+  const dir = playbooksDir();
+  let files: string[];
+  try {
+    files = readdirSync(dir).filter((f) => f.endsWith(".md"));
+  } catch {
+    return [];
+  }
+  const items: MarketItem[] = [];
+  for (const file of files) {
+    const slug = file.replace(/\.md$/, "");
+    if (!/^[A-Za-z0-9._-]+$/.test(slug)) continue;
+    try {
+      const content = readFileSync(join(dir, file), "utf8");
+      const pb = parsePlaybook(slug, content);
+      items.push({
+        id: `workflow:${slug}`,
+        type: "workflow",
+        name: pb.title,
+        author: "cue",
+        handle: "cue",
+        stars: 0,
+        installs: "",
+        when: "",
+        featured: false,
+        desc: pb.desc,
+        tags: [],
+        source: "local",
+        add: "(playbook)",
+        addKind: "workflow",
+      });
+    } catch { /* skip unreadable */ }
+  }
+  return items;
+}
+
+/** Local profiles → profile MarketItem[]. */
+async function profileMarketItems(): Promise<MarketItem[]> {
+  const names = await listProfiles();
+  const items: MarketItem[] = [];
+  for (const name of names) {
+    let desc = "";
+    let tags: string[] = [];
+    try {
+      const p = await loadProfile(name);
+      desc = p.description ?? "";
+      tags = p.bundles ?? [];
+    } catch { /* keep a bare row */ }
+    items.push({
+      id: `profile:${name}`,
+      type: "profile",
+      name,
+      author: "cue",
+      handle: "cue",
+      stars: 0,
+      installs: "",
+      when: "",
+      featured: false,
+      desc,
+      tags,
+      source: "local",
+      add: `cue use ${name}`,
+      addKind: "profile",
+    });
+  }
+  return items;
+}
+
+/** Local MCP catalog → mcp MarketItem[], minus ids already in `registryMcpIds`. */
+function localMcpMarketItems(registryMcpIds: Set<string>): MarketItem[] {
+  return loadMcpCatalog()
+    .filter((e) => !registryMcpIds.has(e.id))
+    .map((e) => ({
+      id: `mcp:${e.id}`,
+      type: "mcp" as const,
+      name: e.id,
+      author: "cue",
+      handle: "cue",
+      stars: 0,
+      installs: "",
+      when: "",
+      featured: false,
+      desc: e.description ?? "",
+      tags: [],
+      source: "local" as const,
+      add: `cue marketplace install-mcp ${e.id}`,
+      addKind: "mcp" as const,
+    }));
+}
+
+/** resources/cli-recipes.json → cli MarketItem[]. */
+function cliMarketItems(): MarketItem[] {
+  let recipes: Record<string, unknown>;
+  try {
+    recipes = JSON.parse(readFileSync(join(REPO_ROOT, "resources", "cli-recipes.json"), "utf8")) as Record<string, unknown>;
+  } catch {
+    return [];
+  }
+  const items: MarketItem[] = [];
+  for (const [name, recipe] of Object.entries(recipes)) {
+    // Skip the schema-doc key and any non-object entries.
+    if (name.startsWith("$") || typeof recipe !== "object" || recipe === null) continue;
+    const r = recipe as { needs?: unknown; apt?: unknown; brew?: unknown };
+    const desc = typeof r.needs === "string" ? r.needs : "";
+    items.push({
+      id: `cli:${name}`,
+      type: "cli",
+      name,
+      author: "cue",
+      handle: "cue",
+      stars: 0,
+      installs: "",
+      when: "",
+      featured: false,
+      desc,
+      tags: [],
+      source: "local",
+      add: "(see recipe)",
+      addKind: "cli",
+    });
+  }
+  return items;
+}
+
+/** Installed Claude Code plugins → plugin MarketItem[]. */
+function pluginMarketItems(): MarketItem[] {
+  return discoverInstalledPlugins().map((p) => ({
+    id: `plugin:${p.id}`,
+    type: "plugin" as const,
+    name: p.name,
+    author: "cue",
+    handle: "cue",
+    stars: 0,
+    installs: "",
+    when: relativeAge(p.installedAt),
+    featured: false,
+    desc: p.description ?? "",
+    tags: [],
+    source: "local" as const,
+    add: `cue marketplace install-plugin ${p.id}`,
+    addKind: "plugin" as const,
+  }));
+}
+
+/** ISO timestamp → compact relative age ("2d","1w","now"); "" when absent. */
+function relativeAge(iso: string | null): string {
+  if (!iso) return "";
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const secs = Math.max(0, (Date.now() - then) / 1000);
+  if (secs < 60) return "now";
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks}w`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo`;
+  return `${Math.floor(days / 365)}y`;
+}
+
+interface MarketData { items: MarketItem[]; counts: Record<string, number> }
+let marketCache: { ts: number; data: MarketData } | null = null;
+const MARKET_TTL_MS = 60_000;
+
+/**
+ * Unified marketplace feed: shared-registry skills/mcps + the local library
+ * (profiles, mcp catalog, CLIs, playbooks, plugins), normalized into one
+ * MarketItem[] with per-type counts. Registry fetch failures degrade to the
+ * local-only feed. Cached 60s. featured = any registry item flagged featured,
+ * else the top 3 items by stars.
+ */
+export async function handleMarket(): Promise<ApiResult<unknown>> {
+  if (marketCache && Date.now() - marketCache.ts < MARKET_TTL_MS) {
+    return { ok: true, data: marketCache.data };
+  }
+
+  const reg = loadMarketRegistry();
+  const regItems = registryItems(reg);
+  const registryMcpIds = new Set(
+    regItems.filter((i) => i.type === "mcp").map((i) => i.id.slice("mcp:".length)),
+  );
+
+  const items: MarketItem[] = [
+    ...regItems,
+    ...(await profileMarketItems()),
+    ...localMcpMarketItems(registryMcpIds),
+    ...cliMarketItems(),
+    ...playbookMarketItems(),
+    ...pluginMarketItems(),
+  ];
+
+  // Featured: honor any registry-flagged item; otherwise spotlight the top 3
+  // by stars (only registry items carry stars, so this picks the most-starred
+  // registry entries when nothing is explicitly flagged).
+  const anyFlagged = items.some((i) => i.featured);
+  if (!anyFlagged) {
+    const top3 = [...items].sort((a, b) => b.stars - a.stars).slice(0, 3);
+    const top3Ids = new Set(top3.map((i) => i.id));
+    for (const i of items) i.featured = top3Ids.has(i.id) && i.stars > 0;
+  }
+
+  const counts: Record<string, number> = {
+    all: items.length,
+    profile: 0, workflow: 0, skill: 0, cli: 0, mcp: 0, plugin: 0,
+  };
+  for (const i of items) counts[i.type] = (counts[i.type] ?? 0) + 1;
+
+  const data: MarketData = { items, counts };
+  marketCache = { ts: Date.now(), data };
+  return { ok: true, data };
+}
+
+// ── Workflows: the n8n-style canvas's saved DAGs (resources/workflows/*.json) ──
+export async function handleWorkflows(): Promise<ApiResult<unknown>> {
+  return { ok: true, data: listWorkflows() };
+}
+
+export async function handleWorkflow(params: URLSearchParams): Promise<ApiResult<unknown>> {
+  const name = params.get("name");
+  if (!name) return { ok: false, error: "missing-name" };
+  try {
+    const wf = loadWorkflow(name);
+    return wf ? { ok: true, data: wf } : { ok: false, error: "not-found" };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+}
+
+export async function handleWorkflowSave(body: unknown): Promise<ApiResult<unknown>> {
+  try {
+    return { ok: true, data: saveWorkflow(body, new Date().toISOString()) };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+}
+
 const ROUTES: Record<string, (params: URLSearchParams) => Promise<ApiResult<unknown>>> = {
   "/api/v1/status":             () => handleStatus(),
+  "/api/v1/plugins/discovered": () => handleDiscoveredPlugins(),
+  "/api/v1/workflows":          () => handleWorkflows(),
+  "/api/v1/workflow":           (p) => handleWorkflow(p),
   "/api/v1/profiles":           () => handleProfiles(),
   "/api/v1/profiles/full":      () => handleProfilesFull(),
+  "/api/v1/profile-detail":     (p) => handleProfileDetail(p),
+  "/api/v1/hooks":              (p) => handleHooks(p),
   "/api/v1/skill-report":       (p) => handleSkillReport(p),
   "/api/v1/pairs":              (p) => handlePairs(p),
   "/api/v1/gates":              (p) => handleGates(p),
   "/api/v1/trigger-gaps":       (p) => handleTriggerGaps(p),
   "/api/v1/active-sessions":    () => handleActiveSessions(),
   "/api/v1/telemetry/timeline": (p) => handleTelemetryTimeline(p),
+  "/api/v1/mcps/catalog":       () => handleMcpCatalog(),
+  "/api/v1/market":             () => handleMarket(),
+  "/api/v1/version":            () => handleVersion(),
+  "/api/v1/permissions":        () => Promise.resolve({ ok: true, data: collectPermissions() }),
 };
 
 function contentTypeFor(path: string): string {
@@ -463,6 +1601,32 @@ export function createHandler(): (req: Request) => Promise<Response> {
       try { body = await req.json(); } catch { /* malformed */ }
       const result = await handleMergeSave(body as Parameters<typeof handleMergeSave>[0]);
       return Response.json(result, { status: result.ok ? 200 : 400 });
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/v1/mcps/add") {
+      let body: unknown = null;
+      try { body = await req.json(); } catch { /* malformed */ }
+      const result = await handleMcpAdd(body as Parameters<typeof handleMcpAdd>[0]);
+      return Response.json(result, { status: result.ok ? 200 : 400 });
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/v1/workflows/save") {
+      let body: unknown = null;
+      try { body = await req.json(); } catch { /* malformed */ }
+      const result = await handleWorkflowSave(body);
+      return Response.json(result, { status: result.ok ? 200 : 400 });
+    }
+
+    // Profile logo bytes (not JSON): GET /api/v1/profile-icon?profile=<name>.
+    // Serves profiles/<name>/<iconImage> for profiles that set one.
+    if (req.method === "GET" && url.pathname === "/api/v1/profile-icon") {
+      return serveProfileIcon(url.searchParams.get("profile"));
+    }
+
+    // Plugin logo bytes (not JSON): GET /api/v1/plugin-icon?plugin=<id>.
+    // Reuses a same-named profile's logo, else a generated PNG.
+    if (req.method === "GET" && url.pathname === "/api/v1/plugin-icon") {
+      return servePluginIcon(url.searchParams.get("plugin"));
     }
 
     if (url.pathname.startsWith("/api/v1/")) {

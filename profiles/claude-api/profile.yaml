@@ -1,6 +1,6 @@
 name: claude-api
 icon: "🧠"
-iconImage: "logo.png"
+iconImage: "logo.svg"
 description: "Build apps with Claude API — Anthropic SDK, prompt caching, tool use, batch API, streaming, model selection"
 inherits: core
 recommends:

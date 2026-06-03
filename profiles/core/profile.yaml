@@ -1,5 +1,6 @@
 name: core
-icon: "🐢"
+icon: "🧠"
+iconImage: "logo.png"
 description: Baseline shared by every cue profile — essentials only
 persona_includes:
   - integrity-protocol     # resources/personas/integrity-protocol.md — fans out via inheritance
@@ -49,6 +50,18 @@ persona: |
   review → test → ship → reflect**. Each stage feeds the next. Skip stages
   that don't apply, never skip review/test.
 
+  ## Independent review before finishing
+
+  After a substantive code change (you used Edit/Write or a mutating command
+  this turn), don't sign off on your own work. Spawn a fresh reviewer subagent
+  — the `Agent` tool (e.g. `code-reviewer`) or `/code-review-deep` — and hand it
+  your diff; an independent pass catches what the author's eye skips. Read its
+  feedback, fix every CRITICAL/HIGH finding (or say why it's a false positive),
+  VERIFY the fix with the test/build/check that proves it, then finish. One
+  review round suffices for most diffs — don't loop forever. (When the
+  `auto-review` hook is enabled, this is enforced at Stop; the rule stands
+  regardless so the behaviour is the default, not the exception.)
+
   ## Skill routing
 
   When the user's request matches one of these, invoke the named skill via
@@ -80,6 +93,7 @@ skills:
     - meta/smart-loader         # soft-loads non-profile skills from disk when topic matches (coolify, resend, cso, etc.)
     - meta/roi-estimator        # auto-attaches ROI column (dimension, %, confidence tier) to any improvement list
     - meta/next-steps           # closes substantive tasks with a short, ranked Next steps block + offers the top one
+    - meta/ralph-loop           # /ralph-loop — autonomous "work longer" loop (re-feed prompt until tests pass), guarded by stop-check + iteration cap
     # ── Plan / debug (the rest of the plan cluster soft-loads via autoplan + smart-loader) ──
     - plan/investigate          # /investigate — root-cause debugging
     - plan/autoplan             # /autoplan — chains office-hours → ceo → eng on demand
@@ -89,6 +103,7 @@ skills:
     - browser/lightpanda        # Lightpanda — fast headless browser for scraping, DOM dump, CDP. Pairs with lightpanda MCP.
     # ── Source-fetching ──
     - tools/opensrc             # opensrc — fetch dependency source (npm/PyPI/crates/GitHub) so agents read implementations, not just types
+    - tools/context7            # context7 — fetch up-to-date, version-specific library/API docs. Pairs with the context7 MCP (in core's mcps).
     # ── Trimmed 2026-06-01 (lean-core pass) — moved to disk, reachable via smart-loader ──
     # Cut as non-universal / 0-telemetry: meta/just, meta/kiro-powers, meta/mcp-finder,
     # plan/office-hours, plan/plan-ceo-review, plan/plan-eng-review, review/code-review
@@ -112,6 +127,7 @@ skills:
 mcps:
   - cue-tty-watch    # Claude's eyes inside X displays / tmux panes (screenshot, capture-pane, send-keys)
   - lightpanda       # Fast headless browser MCP — fetch/render/scrape URLs without Chromium. Pairs with browser/lightpanda skill.
+  - context7         # Up-to-date, version-specific library docs (Upstash @upstash/context7-mcp). No API key needed; set CONTEXT7_API_KEY for higher limits. Pairs with tools/context7 skill.
 plugins:
   - claude-mem@thedotmack
   # Disabled 2026-05-30: OMC's PreToolUse auto-mode classifier was intermittently
@@ -129,6 +145,8 @@ commands:
   - cue
   # Independent-verifier escalation for high-stakes liedetector claims.
   - verify
+  # Goal-driven execution: prove a measurable check, then keep going.
+  - goal
   # Safety rails — opt-in destructive-command + edit-scope guards.
   - careful
   - freeze
@@ -193,6 +211,15 @@ hooks:
   # substantive turn end with a Next steps block?). Only NUDGES (stderr, never
   # blocks) when ${HOME}/.config/cue/next-steps-nudge exists. Off by default.
   - next-steps-nudge.json
+  # Stop hook: independent reviewer-agent loop. After a code-producing turn,
+  # spawns a fresh reviewer (code-review-deep on Sonnet) over the working-tree
+  # diff and BLOCKS until CRITICAL/HIGH findings are addressed + verified — the
+  # enforced arm of the core persona's "Independent review before finishing"
+  # rule. Recursion-guarded, round-capped (2), fail-open. OFF by default; enable
+  # with `touch ~/.config/cue/auto-review-enabled`. Wired into every profile via
+  # core so the loop is one flag away in any of them. Suppress one turn with
+  # [skip-auto-review].
+  - auto-review.json
   # Stricter destructive-command guard, opt-in via /careful. No-op until
   # ~/.config/cue/careful-mode exists.
   - careful-mode.json

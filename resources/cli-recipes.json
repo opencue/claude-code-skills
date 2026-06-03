@@ -142,6 +142,8 @@
   "scc":              { "brew": "scc", "snap": "scc", "manual": "go install github.com/boyter/scc/v3@latest", "needs": "Sloc Cloc and Code — fast code line counter. Used by gstack throughput metrics and retro skills" },
   "playwright":       { "npm": "playwright", "needs": "Browser automation. After install run: npx playwright install chromium (downloads ~150MB headless Chromium to ~/.cache/ms-playwright/)" },
 
+  "ctx7":             { "npm": "ctx7", "needs": "Context7 CLI — fetch up-to-date, version-specific library docs into your prompt. Run `npx ctx7 setup` (OAuth + skill/MCP install) or use directly: `ctx7 library <name> <query>`, `ctx7 docs <libraryId> <query>`. No API key required; get one at context7.com/dashboard for higher limits" },
+
   "create-strapi":    { "npm": "create-strapi@latest", "needs": "Strapi v5 project scaffolder. Run via `npx create-strapi@latest my-app` (no global install needed); installs into a new project folder, not your PATH" },
   "strapi":           { "npm": "@strapi/strapi", "needs": "Strapi CLI is project-local — invoke as `npm run strapi <cmd>`, `yarn strapi <cmd>`, or `npx strapi <cmd>` inside a Strapi project. Interactive commands (admin:create-user) need yarn, not npm" }
 }

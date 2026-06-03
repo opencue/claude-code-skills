@@ -85,10 +85,7 @@ skills:
     - repo: affaan-m/everything-claude-code
       skills: [seo]
 mcps:
-  - x-api
-  - reddit
   - google-ads-mcp
-  - meta-ads
   - mapi-devdocs
   - Higgsfield
   - trendradar

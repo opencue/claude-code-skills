@@ -86,6 +86,9 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
     if (path.startsWith("/merge/save")) {
       throw new Error("Saving is disabled in the demo — run cue locally to write profiles.");
     }
+    if (path.startsWith("/sessions/")) {
+      throw new Error("Stopping sessions is disabled in the demo — run cue locally.");
+    }
     const demo = await loadDemoData();
     const env = demo[`POST ${path}`] as ApiEnvelope<T> | undefined;
     if (!env) throw new Error(`demo-data has no entry for POST ${path}`);
@@ -122,11 +125,14 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
 export interface ProfileRow {
   name: string;
   icon: string | null;
+  /** Logo filename (served at /api/v1/profile-icon?profile=<name>), or null. */
+  iconImage: string | null;
   description: string;
   skills: number;
   npx: number;
   mcps: number;
   plugins: number;
+  subagents: number;
   bundles: string[];
   conflicts: string[];
   inheritsCore: boolean;

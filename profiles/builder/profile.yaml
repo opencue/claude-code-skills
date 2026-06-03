@@ -1,5 +1,5 @@
 name: builder
-icon: "🐻"
+icon: "👷"
 description: "General software dev: backend APIs, React frontends (Next.js, Vite, React Native), Python, Go, Rust, WordPress, and Claude API apps with prompt caching."
 inherits: core
 bundles:

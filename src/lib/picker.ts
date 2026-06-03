@@ -601,6 +601,15 @@ export function formatCombinedPreview(baseline: TallyCounts, combined: TallyCoun
 export const OVERHEAD_WARN_TOKENS = 10_000;
 
 /**
+ * Column where a category header's count sits. The header rule fills out to here
+ * so every group's count lands in one stable column regardless of label width —
+ * a long name ("content & research") no longer collapses the rule to its 4-dash
+ * minimum while a short one ("commerce") gets a long one. Tuned to sit just past
+ * the 28-wide section dividers for a consistent right edge.
+ */
+export const CATEGORY_RULE_COL = 30;
+
+/**
  * Soft-warning line for a heavy combined stack — "⚠ heavy: ~32k always-on 🔴 —
  * slows the agent". Returns "" below the warn threshold so light combos stay
  * uncluttered. The `~` flags it as an upper-bound estimate. Pure.
@@ -904,11 +913,18 @@ export function renderCombineFrame(state: CombineFrameState): string {
     for (const r of win.items) {
       const cat = r.o.category;
       if (cat && cat !== lastCat) {
+        // Blank spacer between groups (never before the first / window top) so
+        // the categories read as distinct blocks, not one running wall.
+        if (lastCat !== undefined) lines.push(BAR);
         const n = catTotals.get(cat) ?? 0;
-        const label = styleText("blue", cat);
-        const ruleLen = Math.max(4, labelCol + 6 - displayWidth(cat) - String(n).length);
+        const countStr = String(n);
+        // Bold bright-blue label so the group header pops above the dim rows,
+        // with the rule filling to a fixed column (CATEGORY_RULE_COL) so every
+        // count lines up — a long name no longer collapses the rule to a stub.
+        const label = styleText("bold", styleText("blueBright", cat));
+        const ruleLen = Math.max(3, CATEGORY_RULE_COL - displayWidth(cat) - 2);
         const rule = styleText("gray", "─".repeat(ruleLen));
-        lines.push(`${BAR}  ${label} ${rule} ${styleText("dim", String(n))}`);
+        lines.push(`${BAR}  ${label} ${rule} ${styleText("dim", countStr)}`);
         lastCat = cat;
       }
       renderRow(r.o, r.idx);

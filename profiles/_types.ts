@@ -51,6 +51,14 @@ export interface Profile {
   // auto-merge skills/MCPs — purely a discovery hint.
   recommends?: string[];
   /**
+   * Companion profiles that start CHECKED in the picker's combine-multiselect
+   * whenever this profile is the primary, regardless of cwd detection. Stronger
+   * than `recommends` (which only tags a row): use it when a profile is only
+   * useful alongside a specific companion (e.g. designer-medusa-vite always
+   * wants the medusa-dev backend). Still opt-out — the user can uncheck.
+   */
+  autoSelect?: string[];
+  /**
    * Mutually-exclusive profile names. Used by the picker's combine-multiselect
    * to disable rows that would conflict with an already-checked option (e.g.
    * picking medusa-vite greys out medusa-next, since both are Medusa
@@ -150,6 +158,7 @@ export interface ResolvedProfile extends Omit<Profile, "skills" | "mcps" | "plug
   qualityGates: string[];
   evals: string[];
   recommends: string[];
+  autoSelect: string[];
   conflicts: string[];
   inheritanceChain: string[];
   personaRouting: PersonaRoutingEntry[];

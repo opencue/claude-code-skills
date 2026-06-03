@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { fetcher } from "../lib/fetcher";
 
 interface ProfilesData {
@@ -48,6 +48,15 @@ export function TokenCostChart() {
           <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
             <XAxis type="number" tick={{ fill: "var(--text-dim)", fontSize: 11 }} stroke="var(--border)" />
             <YAxis dataKey="name" type="category" width={180} tick={{ fill: "var(--text-secondary)", fontSize: 11 }} stroke="var(--border)" />
+            {/* 4k "zombie skills" rule-of-thumb threshold — was only in prose. */}
+            {max > 4000 && (
+              <ReferenceLine
+                x={4000}
+                stroke="var(--text-dim)"
+                strokeDasharray="3 3"
+                label={{ value: "4k", position: "top", fill: "var(--text-dim)", fontSize: 10 }}
+              />
+            )}
             <Tooltip
               cursor={{ fill: "var(--accent-soft)" }}
               contentStyle={{ background: "var(--bg-elev)", border: "1px solid var(--border)", borderRadius: 6, fontSize: 12 }}

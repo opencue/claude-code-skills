@@ -32,10 +32,15 @@ const EXAMPLES_DIR = join(REPO_ROOT, "profiles", "_examples");
 
 let scratchRoot: string;
 let priorEnv: string | undefined;
+// SOUL_PROFILES_DIR is a fallback the loader honors; one test below sets it.
+// Capture + restore it too so it never leaks into sibling test files (a dead
+// SOUL_PROFILES_DIR would make their loadProfile() calls fail).
+let priorSoulEnv: string | undefined;
 
 beforeEach(async () => {
   scratchRoot = await mkdtemp(join(tmpdir(), "cue-profile-loader-"));
   priorEnv = process.env.CUE_PROFILES_DIR;
+  priorSoulEnv = process.env.SOUL_PROFILES_DIR;
   process.env.CUE_PROFILES_DIR = scratchRoot;
 });
 
@@ -44,6 +49,11 @@ afterEach(() => {
     delete process.env.CUE_PROFILES_DIR;
   } else {
     process.env.CUE_PROFILES_DIR = priorEnv;
+  }
+  if (priorSoulEnv === undefined) {
+    delete process.env.SOUL_PROFILES_DIR;
+  } else {
+    process.env.SOUL_PROFILES_DIR = priorSoulEnv;
   }
 });
 

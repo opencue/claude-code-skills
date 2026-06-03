@@ -479,6 +479,7 @@ function foldChain(chain: Profile[]): ResolvedProfile {
       qualityGates: dedupePrimitiveArray(acc.qualityGates, child.qualityGates),
       evals: dedupePrimitiveArray(acc.evals, child.evals),
       recommends: dedupePrimitiveArray(acc.recommends, child.recommends),
+      autoSelect: dedupePrimitiveArray(acc.autoSelect, child.autoSelect),
       conflicts: dedupePrimitiveArray(acc.conflicts, child.conflicts),
       // bundles is a display hint, leaf-wins: a child that declares its own
       // list overrides the parent; a child that omits it inherits the parent's.
@@ -522,6 +523,7 @@ function normalizeToResolved(p: Profile, chain: string[]): ResolvedProfile {
     qualityGates: [...(p.qualityGates ?? [])],
     evals: [...(p.evals ?? [])],
     recommends: [...(p.recommends ?? [])],
+    autoSelect: [...(p.autoSelect ?? [])],
     conflicts: [...(p.conflicts ?? [])],
     bundles: p.bundles && p.bundles.length > 0 ? [...p.bundles] : undefined,
     personaRouting: [...(p.persona_routing ?? [])],
@@ -614,6 +616,7 @@ function foldComposite(selector: string, parts: ResolvedProfile[]): ResolvedProf
     qualityGates: [...head.qualityGates],
     evals: [...head.evals],
     recommends: [...head.recommends],
+    autoSelect: [...head.autoSelect],
     conflicts: [...head.conflicts],
     // persona_includes is additive across a composite too — policy snippets
     // (Integrity Protocol, voice rules) from every stacked profile survive.
@@ -650,6 +653,7 @@ function foldComposite(selector: string, parts: ResolvedProfile[]): ResolvedProf
       qualityGates: dedupePrimitiveArray(acc.qualityGates, next.qualityGates),
       evals: dedupePrimitiveArray(acc.evals, next.evals),
       recommends: dedupePrimitiveArray(acc.recommends, next.recommends),
+      autoSelect: dedupePrimitiveArray(acc.autoSelect, next.autoSelect),
       conflicts: dedupePrimitiveArray(acc.conflicts, next.conflicts),
       personaIncludes: dedupePrimitiveArray(acc.personaIncludes, next.personaIncludes),
       personaRouting: [...acc.personaRouting, ...next.personaRouting],
