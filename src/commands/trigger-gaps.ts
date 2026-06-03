@@ -89,10 +89,33 @@ function resolveActiveProfile(explicit: string | null): string | null {
  * each line is a message-shape object; we read defensively because the
  * shape can vary by Claude Code version.
  */
-export function collectUserPrompts(sinceDays: number, root = PROJECTS_ROOT): string[] {
+/**
+ * Bound the transcript scan so a large `~/.claude/projects/` (GBs of JSONL on
+ * an active machine) can't peg CPU / balloon memory / block the dashboard's
+ * single event loop. The detector is a recency heuristic, so reading the NEWEST
+ * transcripts under a byte + prompt budget keeps the signal while capping cost.
+ */
+export interface CollectOpts {
+  /** Max transcript bytes to read (newest-first). Default 32 MB. */
+  maxBytes?: number;
+  /** Max prompts to collect. Default 20,000. */
+  maxPrompts?: number;
+}
+
+export function collectUserPrompts(
+  sinceDays: number,
+  root = PROJECTS_ROOT,
+  opts: CollectOpts = {},
+): string[] {
+  const maxBytes = opts.maxBytes ?? 32 * 1024 * 1024;
+  const maxPrompts = opts.maxPrompts ?? 20_000;
   if (!existsSync(root)) return [];
   const cutoff = Date.now() - sinceDays * 24 * 60 * 60 * 1000;
-  const prompts: string[] = [];
+
+  // Gather in-window candidate files first, then read NEWEST-first under the
+  // budget — so when there's more history than the cap allows, we keep the most
+  // recent prompts (the ones that matter for "what should be firing lately").
+  const candidates: { fp: string; mt: number; size: number }[] = [];
   let dirs: string[] = [];
   try { dirs = readdirSync(root); } catch { return []; }
   for (const dir of dirs) {
@@ -104,35 +127,46 @@ export function collectUserPrompts(sinceDays: number, root = PROJECTS_ROOT): str
     try { files = readdirSync(dirPath).filter((f) => f.endsWith(".jsonl")); } catch { continue; }
     for (const f of files) {
       const fp = join(dirPath, f);
-      let mt = 0;
-      try { mt = statSync(fp).mtimeMs; } catch { continue; }
-      if (mt < cutoff) continue;
-      let raw = "";
-      try { raw = readFileSync(fp, "utf8"); } catch { continue; }
-      for (const line of raw.split("\n")) {
-        if (!line.trim()) continue;
-        try {
-          const msg = JSON.parse(line) as {
-            type?: string;
-            role?: string;
-            message?: { role?: string; content?: unknown };
-            content?: unknown;
-          };
-          // Claude Code shape: { type: "user", message: { role: "user", content: "..." } }
-          const role = msg.role ?? msg.message?.role ?? msg.type;
-          if (role !== "user") continue;
-          const content = msg.message?.content ?? msg.content;
-          if (typeof content === "string") {
-            prompts.push(content);
-          } else if (Array.isArray(content)) {
-            for (const part of content) {
-              if (part && typeof part === "object" && "text" in part && typeof part.text === "string") {
-                prompts.push(part.text);
-              }
+      try {
+        const st = statSync(fp);
+        if (st.mtimeMs < cutoff) continue;
+        candidates.push({ fp, mt: st.mtimeMs, size: st.size });
+      } catch { /* unreadable — skip */ }
+    }
+  }
+  candidates.sort((a, b) => b.mt - a.mt);
+
+  const prompts: string[] = [];
+  let bytesRead = 0;
+  for (const c of candidates) {
+    if (bytesRead >= maxBytes || prompts.length >= maxPrompts) break;
+    bytesRead += c.size;
+    let raw = "";
+    try { raw = readFileSync(c.fp, "utf8"); } catch { continue; }
+    for (const line of raw.split("\n")) {
+      if (prompts.length >= maxPrompts) break;
+      if (!line.trim()) continue;
+      try {
+        const msg = JSON.parse(line) as {
+          type?: string;
+          role?: string;
+          message?: { role?: string; content?: unknown };
+          content?: unknown;
+        };
+        // Claude Code shape: { type: "user", message: { role: "user", content: "..." } }
+        const role = msg.role ?? msg.message?.role ?? msg.type;
+        if (role !== "user") continue;
+        const content = msg.message?.content ?? msg.content;
+        if (typeof content === "string") {
+          prompts.push(content);
+        } else if (Array.isArray(content)) {
+          for (const part of content) {
+            if (part && typeof part === "object" && "text" in part && typeof part.text === "string") {
+              prompts.push(part.text);
             }
           }
-        } catch { /* skip malformed */ }
-      }
+        }
+      } catch { /* skip malformed */ }
     }
   }
   return prompts;

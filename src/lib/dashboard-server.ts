@@ -16,7 +16,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
 import { configDir } from "./config-paths";
-import { computeStats } from "./analytics";
+import { computeStats, computeDailyActivity, sessionDurationSummary } from "./analytics";
 import { listActiveSessions, supportsProcScan } from "./active-sessions";
 import { readGateStatus, readAllGateStatus } from "./gate-status";
 import { computeAffinityMap, suggestionsByProfile } from "./pair-suggestions";
@@ -157,6 +157,7 @@ export async function handleStatus(): Promise<ApiResult<unknown>> {
         : null,
       totalProfiles: (await listProfiles()).length,
       totalSessions: stats.reduce((a, s) => a + s.sessions, 0),
+      durations: sessionDurationSummary(),
       telemetryEnabled: telemetryEnabled(),
     },
   };
@@ -308,11 +309,23 @@ export async function handleGates(params: URLSearchParams): Promise<ApiResult<un
   return { ok: true, data: readGateStatus(name) };
 }
 
+// Trigger-gaps is the dashboard's most expensive endpoint (it reads recent
+// transcripts and runs skills × prompts matching). Cache the result briefly so
+// a page load + auto-refetches don't recompute it back-to-back and stall the
+// single-threaded server. Keyed by profile + window; 90s TTL.
+const triggerGapsCache = new Map<string, { ts: number; data: unknown }>();
+const TRIGGER_GAPS_TTL_MS = 90_000;
+
 export async function handleTriggerGaps(params: URLSearchParams): Promise<ApiResult<unknown>> {
   if (!telemetryEnabled()) return { ok: false, error: "telemetry-disabled" };
   const name = resolveProfileQuery(params.get("profile"));
   if (!name) return { ok: false, error: "no-profile" };
   const sinceDays = parseSinceDays(params.get("since"));
+  const cacheKey = `${name}:${sinceDays}`;
+  const cached = triggerGapsCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < TRIGGER_GAPS_TTL_MS) {
+    return { ok: true, data: cached.data };
+  }
   try {
     const profile = await loadProfile(name);
     const skills = [];
@@ -330,10 +343,9 @@ export async function handleTriggerGaps(params: URLSearchParams): Promise<ApiRes
     const hits = new Map<string, number>();
     for (const u of usage) hits.set(u.id, u.hits);
     const rows = computeTriggerGaps({ skills, userPrompts, hits });
-    return {
-      ok: true,
-      data: { profile: name, windowDays: sinceDays, promptsScanned: userPrompts.length, rows },
-    };
+    const data = { profile: name, windowDays: sinceDays, promptsScanned: userPrompts.length, rows };
+    triggerGapsCache.set(cacheKey, { ts: Date.now(), data });
+    return { ok: true, data };
   } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
@@ -383,12 +395,12 @@ export async function handleTelemetryTimeline(params: URLSearchParams): Promise<
   const sinceDays = parseSinceDays(params.get("since"));
   const cutoff = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
   const events = computeStats({ since: cutoff });
-  // Bucket sessions per profile per day. Computed from session counts since
-  // we don't have per-day rollups; close enough for a sparkline.
   return {
     ok: true,
     data: {
       windowDays: sinceDays,
+      // Gap-filled sessions-per-day for the activity area chart.
+      daily: computeDailyActivity(sinceDays),
       profiles: events.map((e) => ({
         profile: e.profile,
         sessions: e.sessions,
