@@ -250,9 +250,17 @@ export interface DailyActivity {
  * Dedupes a session that appears in both the `start` events and the Stop-hook
  * session log by `session_id`, mirroring computeStats' intent.
  */
-export function computeDailyActivity(sinceDays: number): DailyActivity[] {
+export function computeDailyActivity(sinceDays: number, now: number = Date.now()): DailyActivity[] {
   const days = Math.max(1, Math.floor(sinceDays));
-  const since = new Date(Date.now() - days * 86_400_000);
+  // Read from the START of the oldest day we actually render a bucket for. Reading
+  // a full `days` span back (now - days*day) reaches into the day BEFORE the oldest
+  // bucket: those events have no bucket, and worse, their session ids poison the
+  // dedup `seen` set, so a session that starts late on that prior day but whose
+  // Stop-hook log lands on the oldest shown day is dropped from the chart entirely.
+  // Anchoring `since` to the oldest bucket's UTC midnight keeps read and display
+  // windows identical.
+  const oldestDay = new Date(now - (days - 1) * 86_400_000).toISOString().slice(0, 10);
+  const since = new Date(`${oldestDay}T00:00:00.000Z`);
   const counts = new Map<string, number>();
   const seen = new Set<string>();
   const bump = (ts: string, id: string): void => {
@@ -269,7 +277,6 @@ export function computeDailyActivity(sinceDays: number): DailyActivity[] {
     bump(e.ts, e.session_id || `log|${e.ts}|${e.cwd}`);
   }
   const out: DailyActivity[] = [];
-  const now = Date.now();
   for (let i = days - 1; i >= 0; i--) {
     const key = new Date(now - i * 86_400_000).toISOString().slice(0, 10);
     out.push({ date: key, sessions: counts.get(key) ?? 0 });
