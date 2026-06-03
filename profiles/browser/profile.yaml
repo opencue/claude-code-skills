@@ -7,11 +7,17 @@ skills:
   local:
     - browser/lightpanda
     - browser/agent-browser   # vercel-labs/agent-browser — Rust browser CLI, ref-based automation, daemon-backed
+    - browser/playwright      # drives the Playwright MCP (Chromium/Firefox/WebKit): screenshot-verify UI, repro bugs
 
 mcps:
   # Lightpanda — fast, low-memory headless browser exposed over MCP (`lightpanda mcp`).
   # Default engine for headless navigation/scraping; tools appear as mcp__lightpanda__*.
   - lightpanda
+  # Playwright — Microsoft's official Playwright MCP (`npx @playwright/mcp@latest`).
+  # Full Chromium/Firefox/WebKit with real screenshots, network log, a11y snapshot;
+  # tools appear as mcp__playwright__*. Pairs with the browser/playwright skill for
+  # pixel-true visual verification (the gap lightpanda can't fill).
+  - playwright
 
 plugins:
   # microsoft/Webwright — SOTA browser agent framework (MIT, 757★)
