@@ -13,3 +13,9 @@ skills:
     # Ref-based snapshot → click/fill → screenshot. The only browser stack here;
     # use it for visual verification of frontends.
     - browser/agent-browser
+  npx:
+    # Addy Osmani's production-grade agent skills (addyosmani/agent-skills, 48K★).
+    # Cherry-picked the two highest-signal, framework-agnostic skills; they
+    # propagate to frontend/nextjs/vite/medusa storefronts via inheritance.
+    - repo: addyosmani/agent-skills
+      skills: [frontend-ui-engineering, performance-optimization]
