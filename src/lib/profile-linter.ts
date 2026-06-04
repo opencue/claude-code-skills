@@ -4,7 +4,7 @@
  * The rules below are intentionally numbered and centralized so a later
  * suppression pass can key off stable ids such as `# lint: ignore W1`.
  *
- * W1: profile declares more than 40 skills.
+ * W1: profile declares more than 120 skills.
  * W2: profile declares more than 5 MCP servers.
  * W3: inheritance chain depth is greater than 2.
  * W4: a skill slug appears in both `skills.local` and `skills.npx`.
@@ -72,7 +72,7 @@ export const PROFILE_LINT_RULES: Record<LintRuleId, RuleDoc> = {
   W1: {
     severity: "warning",
     title: "too many skills",
-    description: "Profile declares more than 40 skills; this can bloat prompt tokens.",
+    description: "Profile declares more than 120 skills; this can bloat prompt tokens.",
   },
   W2: {
     severity: "warning",
@@ -503,7 +503,7 @@ function checkStaticRules(
   result: ProfileLintResult,
 ): void {
   const skillCount = declaredSkillCount(profile);
-  if (skillCount > 40) {
+  if (skillCount > 120) {
     addIssue(
       result,
       "W1",

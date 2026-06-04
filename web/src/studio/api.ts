@@ -259,6 +259,21 @@ export interface PermissionsData {
   sources: PermSourceFile[];
 }
 
+/** A GitHub source repo for a profile's components, with a live star count. */
+export type RepoKind = "profile" | "skill" | "mcp" | "plugin" | "workflow" | "cli";
+export interface RepoEntry {
+  repo: string;
+  url: string;
+  desc: string;
+  kinds: RepoKind[];
+  /** Live stargazer count, or null when GitHub couldn't be reached. */
+  stars: number | null;
+}
+export interface ReposData {
+  profile: string;
+  repos: RepoEntry[];
+}
+
 // ---------------------------------------------------------------------------
 // Hooks
 // ---------------------------------------------------------------------------
@@ -387,6 +402,21 @@ export function usePermissions() {
   return useQuery({
     queryKey: ["permissions"],
     queryFn: () => fetcher<PermissionsData>("/permissions"),
+  });
+}
+
+/**
+ * GitHub source repos for a profile's components, with live star counts. The
+ * server caches stars 6h; the hook refetches hourly so counts auto-update
+ * without a reload.
+ */
+export function useRepos(profile?: string) {
+  const qs = profile ? `?profile=${encodeURIComponent(profile)}` : "";
+  return useQuery({
+    queryKey: ["repos", profile ?? "@active"],
+    queryFn: () => fetcher<ReposData>(`/repos${qs}`),
+    staleTime: 60 * 60 * 1000,
+    refetchInterval: 60 * 60 * 1000,
   });
 }
 

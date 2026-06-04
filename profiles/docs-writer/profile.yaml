@@ -21,7 +21,7 @@ skills:
     - gstack/document-generate
     - gstack/document-release
     - gstack/make-pdf
-    - content/playwright
+    - browser/agent-browser   # browser automation (vercel-labs/agent-browser CLI)
   npx:
     - repo: lucasli6833/slop-cop
       skills:

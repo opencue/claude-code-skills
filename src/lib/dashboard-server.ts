@@ -39,6 +39,7 @@ import { validateProfileName } from "./profile-generator";
 import { loadMcpCatalog, addMcpToProfile } from "./mcp-catalog";
 import { aggregateProfileClis, type ProfileCli } from "./skill-clis";
 import { collectPermissions } from "./permissions";
+import { reposForProfile, resolveRepoStars } from "./repos";
 import { parseSkillFromContent, parseSkillFromDir } from "./skill-router";
 import { resolveLocalSkill } from "./resolver-local";
 import { resolveProfileForCwd } from "./cwd-resolver";
@@ -1754,6 +1755,44 @@ export async function handleEnv(params: URLSearchParams): Promise<ApiResult<unkn
   return { ok: true, data: { folder: def.path, tag: def.tag, exists: true, vars: parseEnvText(raw, reveal) } };
 }
 
+/**
+ * GitHub source repos a profile's skills / MCPs / plugins originate from, with
+ * live star counts. Derives the profile's namespace / MCP / plugin sets from
+ * the resolved profile, filters the curated catalog to what it actually
+ * contains, then resolves each repo's stargazers (cached 6h, fail-soft).
+ */
+export async function handleRepos(params: URLSearchParams): Promise<ApiResult<unknown>> {
+  let name = resolveProfileQuery(params.get("profile"));
+  if (!name) {
+    const resolved = await resolveProfileForCwd({
+      cwd: process.cwd(),
+      homeDir: homedir(),
+      configDir: configDir(),
+    });
+    if (resolved.source !== "none") name = (resolved as { profile: string }).profile;
+  }
+  if (!name) return { ok: false, error: "no-profile" };
+
+  let profile;
+  try {
+    profile = await loadProfile(name);
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
+
+  const namespaces = new Set<string>();
+  for (const s of profile.skills.local) {
+    namespaces.add(s.id.includes("/") ? s.id.split("/")[0]! : "skills");
+  }
+  if (profile.skills.npx.length) namespaces.add("npx");
+  const mcpIds = profile.mcps.map((m) => m.id);
+  const pluginIds = profile.plugins.map((p) => p.id);
+
+  const matched = reposForProfile({ namespaces, mcpIds, pluginIds });
+  const repos = await resolveRepoStars(matched, Date.now());
+  return { ok: true, data: { profile: name, repos } };
+}
+
 const ROUTES: Record<string, (params: URLSearchParams) => Promise<ApiResult<unknown>>> = {
   "/api/v1/status":             () => handleStatus(),
   "/api/v1/env/folders":        () => handleEnvFolders(),
@@ -1776,6 +1815,7 @@ const ROUTES: Record<string, (params: URLSearchParams) => Promise<ApiResult<unkn
   "/api/v1/market":             () => handleMarket(),
   "/api/v1/version":            () => handleVersion(),
   "/api/v1/permissions":        () => Promise.resolve({ ok: true, data: collectPermissions() }),
+  "/api/v1/repos":              (p) => handleRepos(p),
 };
 
 function contentTypeFor(path: string): string {

@@ -47,7 +47,7 @@ skills:
     - github/gh-fix-ci
     - gstack/canary
     - gstack/health
-    - gstack/investigate
+    # gstack/investigate removed — duplicate of plan/investigate (inherited from core)
     - gstack/ship
     - gstack/review
     - gstack/retro
@@ -58,7 +58,7 @@ skills:
     - design/image-to-code
     - design/ui-ux-pro-max
     - design/minimalist-ui
-    - browser/playwright
+    - browser/agent-browser   # browser automation (vercel-labs/agent-browser CLI)
     # --- designer: premium UI + brand kit + redesign ---
     - design/taste-skill
     - design/taste-skill-v1
@@ -105,9 +105,9 @@ plugins:
   - frontend-design@claude-plugins-official
   - webwright@webwright                # microsoft/Webwright SOTA browser agent
 mcps:
+  - lightpanda   # fast low-memory headless browser — scrape/DOM dump (no pixels)
   - coolify
   - envoult
-  - playwright
   - Higgsfield
   - gbrain
   - hostinger-api
@@ -124,15 +124,33 @@ persona: |
   | Task                                                       | Lead surface     |
   |------------------------------------------------------------|------------------|
   | Medusa core modules, migrations, admin extensions, shop setup | medusa/*      |
-  | Vite + TanStack storefront, region/cart, payment redirect  | medusa/* + design/* + playwright |
+  | Vite + TanStack storefront, region/cart, payment redirect  | medusa/* + design/* + agent-browser |
   | API endpoints, webhooks, security review, CI               | review/*, stripe/*, gstack/* |
-  | Storefront UI implementation, visual polish, a11y          | design/* + browser/playwright |
+  | Storefront UI implementation, visual polish, a11y          | design/* + browser/agent-browser |
   | Premium visual design, brand kit, redesign                 | design/taste-* + design/brandkit |
   | Long-horizon browser automation, e2e flows                 | webwright plugin |
+  | Scrape / headless read, DOM or markdown dump (no pixels)    | lightpanda       |
   | Product photos, hero shots, marketplace cards, Soul ID     | higgsfield/*     |
   | Transactional + marketing email, React Email, deliverability | resend plugin  |
   | Containers, env vars, reverse proxy, zero-downtime deploy  | deployment/coolify + gstack/setup-deploy |
   | DNS, domain, VPS firewall, TLS                             | hostinger/*      |
+
+  ## Browser stack — which tool when
+
+  Three browser engines, distinct sweet spots — pick by the job:
+
+  - **lightpanda** (MCP / `lightpanda fetch <url> --dump markdown`) — the
+    lightest. Headless, renders DOM + JS but paints **no pixels**. Use for
+    scraping, DOM/markdown extraction, cheap bulk navigation. Can't screenshot.
+  - **agent-browser** (CLI) — the interactive default. `snapshot -i` → act on
+    `@ref` → `screenshot`. Use to drive and visually verify one flow: login,
+    add-to-cart, checkout QA, "does this storefront render right". Real pixels.
+  - **webwright** (plugin) — the heaviest. Hand off a long-horizon, multi-page
+    goal; it plans → acts → screenshot-self-verifies → logs to `final_runs/`.
+    Use for autonomous end-to-end missions, not a handful of commands.
+
+  Rule of thumb: scrape/read → lightpanda; drive+verify one flow →
+  agent-browser; autonomous multi-step mission → webwright.
 
   ## Defaults across the stack
 

@@ -40,7 +40,7 @@ skills:
     - github/gh-fix-ci
     - gstack/canary
     - gstack/health
-    - gstack/investigate
+    # gstack/investigate removed — duplicate of plan/investigate (inherited from core)
     - gstack/ship
     - gstack/review
     - gstack/retro
@@ -50,7 +50,7 @@ skills:
     - design/image-to-code
     - design/ui-ux-pro-max
     - design/minimalist-ui
-    - browser/playwright
+    - browser/agent-browser   # browser automation (vercel-labs/agent-browser CLI)
     - design/taste-skill
     - design/taste-skill-v1
     - design/gpt-tasteskill
@@ -117,7 +117,6 @@ mcps:
   - lightpanda
   - coolify
   - envoult
-  - playwright
   - Higgsfield
   - gbrain
   - hostinger-api
@@ -135,6 +134,29 @@ persona: |
   Vite + TanStack storefront, Stripe payments, Resend email, Higgsfield
   visuals, and Coolify + Hostinger deploy on Postgres. Route work by
   surface to the lead skill family, don't blur layers.
+
+  ## Browser stack — which tool when
+
+  Three browser engines, distinct sweet spots — pick by the job, don't
+  default to one:
+
+  - **lightpanda** (MCP / `lightpanda fetch <url> --dump markdown`) — the
+    lightest. Headless, renders DOM + JS but paints **no pixels**. Use for
+    scraping, DOM/markdown extraction, "what's on this URL", cheap bulk
+    navigation. Fastest, lowest memory. Can't screenshot.
+  - **agent-browser** (CLI) — the interactive default. `snapshot -i` →
+    act on `@ref` → `screenshot`. Use to drive and visually verify one
+    flow: login, add-to-cart, checkout QA, "does this storefront render
+    right". Real pixels, persistent daemon so steps chain cheaply.
+  - **webwright** (plugin) — the heaviest. Hand off a long-horizon,
+    multi-page goal; it plans → acts → screenshot-self-verifies → logs
+    artifacts to `final_runs/`. Use for autonomous end-to-end missions,
+    not a handful of commands.
+
+  Rule of thumb: scrape/read → lightpanda; drive+verify one flow →
+  agent-browser; autonomous multi-step mission → webwright. (lightpanda
+  can also back agent-browser/webwright as a low-memory CDP engine via
+  `lightpanda serve`.)
 
   ## Surface router
 

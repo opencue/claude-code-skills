@@ -171,7 +171,7 @@ describe("lintProfile", () => {
 
   test("reports W1, W2, W3, and W4 warnings", async () => {
     const localRefs: string[] = [];
-    for (let i = 0; i < 41; i++) {
+    for (let i = 0; i < 121; i++) {
       const ref = `bulk/skill-${i}`;
       localRefs.push(ref);
       await writeLocalSkill(ref);

@@ -21,7 +21,7 @@ persona: |
     classes; global styles need an explicit reason.
 skills:
   local:
-    # baseline design+playwright skills now provided by web-frontend-base
+    # baseline design + agent-browser skills now provided by web-frontend-base
     - gstack/canary
     # Removed for size: design/redesign-existing-projects,
     # design/imagegen-frontend-web, design/imagegen-frontend-mobile,
@@ -29,11 +29,4 @@ skills:
     # gstack/benchmark, gstack/design-consultation, gstack/design-review,
     # gstack/plan-design-review, gstack/scrape, gstack/skillify,
     # gstack/setup-browser-cookies
-  npx:
-    # Playwright skill (287 installs) — pairs with the playwright MCP for visual verification flows.
-    # Removed heygen-com/hyperframes@tailwind 2026-05-29: verified as a stub specific to HyperFrames
-    # runtime, not actual Tailwind CSS framework guidance. 48.9K install count was misleading.
-    - repo: oakoss/agent-skills
-      skills: [playwright]
-mcps:
-  - playwright
+mcps: []   # browser automation via the agent-browser CLI (no MCP needed)

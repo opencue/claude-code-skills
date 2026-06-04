@@ -29,8 +29,6 @@ After this, `claude` in any directory launches through cue with the `core+cavema
 
 Native Windows PowerShell can't run cue's bash installer or shims — on Windows, install cue **inside WSL2** and follow the **Linux** section below. The PowerShell block in §3 only covers RTK, which does run natively.
 
-> **Architecture note.** The RTK `latest/download` URLs below are **x86_64**. On Apple Silicon, `brew install rtk` fetches the native ARM build automatically. On ARM Linux (aarch64), check the [RTK releases page](https://github.com/rtk-ai/rtk/releases) for an `aarch64` asset instead of the x86_64 tarball.
-
 ---
 
 ## 1. Linux
@@ -42,7 +40,7 @@ command -v git >/dev/null || { echo "install git first"; exit 1; }
 export PATH="$HOME/.bun/bin:$HOME/.local/bin:$PATH"
 
 # 1b. Install the cue CLI (clone + symlink claude shim through cue)
-curl -fsSL https://raw.githubusercontent.com/opencue/cuecards/main/get.sh | bash -s -- --yes
+curl -fsSL https://raw.githubusercontent.com/opencue/claude-code-skills/main/get.sh | bash -s -- --yes
 
 # 1c. RTK — Rust Token Killer
 if ! command -v rtk >/dev/null; then
@@ -64,12 +62,11 @@ Then jump to **§4 — pin core + caveman** (shared across OSes).
 ```bash
 # 2a. Prereqs: git + bun via Homebrew
 command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install git bun
-brew install rtk || echo "rtk not on brew — grab a darwin build from https://github.com/rtk-ai/rtk/releases"
+brew install git bun rtk
 export PATH="$HOME/.local/bin:$PATH"
 
 # 2b. Install the cue CLI
-curl -fsSL https://raw.githubusercontent.com/opencue/cuecards/main/get.sh | bash -s -- --yes
+curl -fsSL https://raw.githubusercontent.com/opencue/claude-code-skills/main/get.sh | bash -s -- --yes
 
 # 2c. RTK hook (binary already installed via brew above)
 rtk init -g

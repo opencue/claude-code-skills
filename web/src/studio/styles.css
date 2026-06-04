@@ -990,6 +990,20 @@ body{background:var(--bg1);color:var(--fg);font-family:var(--ui);font-size:13px;
 .pm-modebtn.on.ask{background:#1f1a10;color:var(--amber)}
 .pm-modebtn.on.deny{background:#1f1014;color:var(--red)}
 
+/* ════════ REPOS ════════ */
+.pd-repos{display:flex;flex-direction:column;gap:10px}
+.pd-repos-note{font-size:12px;color:var(--fg3);margin-bottom:14px}
+.repo-row{display:flex;align-items:center;gap:15px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:14px 17px;text-decoration:none;transition:.12s}
+.repo-row:hover{border-color:var(--bd2)}
+.repo-gh{color:var(--fg);flex-shrink:0;display:flex}
+.repo-mid{flex:1;min-width:0}
+.repo-name{font-family:var(--mono);font-size:13.5px;color:var(--fg);font-weight:600;display:flex;align-items:center;gap:7px}
+.repo-ext{color:var(--violet);font-size:11px}
+.repo-desc{font-size:12px;color:var(--fg2);margin-top:4px}
+.repo-kinds{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.repo-kind{font-family:var(--mono);font-size:9.5px;border:1px solid;border-radius:5px;padding:1px 7px;text-transform:lowercase}
+.repo-stars{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--fg);flex-shrink:0;background:var(--bg1);border:1px solid var(--bd);border-radius:999px;padding:5px 12px}
+.repo-star-ic{color:var(--amber)}
 
 /* ── hook source viewer ─────────────────────────────────────────────────── */
 .hk-cmd-btn{width:100%;cursor:pointer;text-align:left;font:inherit;transition:border-color .12s,background .12s}

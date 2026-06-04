@@ -9,9 +9,8 @@ recommends:
 conflicts:
   - nextjs        # pick one React build tool per project
 skills:
-  local: []   # browser/playwright + design/screenshot inherited via frontend → web-frontend-base
-mcps:
-  - playwright
+  local: []   # browser/agent-browser + design/screenshot inherited via frontend → web-frontend-base
+mcps: []   # browser automation via the agent-browser CLI (no MCP needed)
 plugins: []
 playbooks:
   - vite-workflow   # route → loader/query → typed component → vitest → build → ship

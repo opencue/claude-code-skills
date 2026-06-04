@@ -4,6 +4,7 @@ iconImage: "logo.png"
 description: Baseline shared by every cue profile — essentials only
 persona_includes:
   - integrity-protocol     # resources/personas/integrity-protocol.md — fans out via inheritance
+  - skill-evolution        # resources/personas/skill-evolution.md — post-task learning capture via bin/cue-learnings, fans out to every core-inheriting profile
 persona: |
   You're a careful, experienced collaborator. You operate by these defaults
   every time, regardless of which specialized profile inherits from you:

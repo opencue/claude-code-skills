@@ -80,5 +80,6 @@ persona: |
   ## When Webwright commands aren't right for the job
 
   If the task is pure scraping (no interaction) or pure visual capture,
-  prefer the lighter browser/playwright or design/screenshot skills from
-  the `frontend` profile rather than spinning up a full agent run.
+  prefer the lighter browser/agent-browser or design/screenshot skills
+  (browser/playwright is the fallback) rather than spinning up a full
+  agent run.

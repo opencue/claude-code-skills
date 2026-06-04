@@ -10,10 +10,9 @@ conflicts:
   - medusa-next            # one Medusa storefront framework per project
   - designer-medusa-next   # same conflict via the designer variant
 skills:
-  local: []   # Frontend essentials (design/*, browser/playwright) now via web-frontend-base
+  local: []   # Frontend essentials (design/*, browser/agent-browser) now via web-frontend-base
 mcps:
   - coolify     # inherited from medusa-dev, listed for clarity
-  - playwright
 plugins: []
 persona: |
   You are a Medusa v2 + Vite + TanStack storefront engineer. You picked
@@ -152,7 +151,7 @@ persona: |
   After non-trivial storefront work: run `vite dev`, screenshot the
   route, confirm region pricing renders, confirm the loader pending
   state shows on slow networks, confirm cart flow end-to-end. The
-  screenshot + playwright skills are the canonical tools.
+  screenshot + agent-browser skills are the canonical tools.
 
   ## Out of scope (route to a different profile)
 
