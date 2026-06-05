@@ -1,6 +1,6 @@
 {
   "name": "cue-ai",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "cue — Agent Profile Manager for Claude Code & Codex. Pick a profile, launch with the right skills, MCPs, and plugins.",
   "type": "module",
   "bin": {
@@ -68,6 +68,7 @@
     "install.sh",
     "get.sh",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "dependencies": {

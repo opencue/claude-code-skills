@@ -69,10 +69,15 @@ function readSessionLog(since?: Date): SessionLogEntry[] {
  *   - `skill_invoked` (structured `Skill` tool_use): skill, session_id, tool_use_id
  *   - `skill_miss` (trigger matched but skill wasn't fired): session_id,
  *     prompt_redacted (first 80 chars, secret-masked), matched_skills
+ *   - `skill_gap` (self-learner — profile-self-improve.sh Stop hook): where the
+ *     active profile's skills fell short. `source:"hook"` carries cheap friction
+ *     `signals`; `source:"critic"` carries a critic-agent verdict (`skill`,
+ *     `gap_type`, `suggestion`, `confidence`). Consumed by `cue profile
+ *     self-improve`; inert to existing readers.
  */
 export interface SessionEvent {
   ts: string;
-  event: "start" | "end" | "skill_hit" | "skill_invoked" | "skill_miss";
+  event: "start" | "end" | "skill_hit" | "skill_invoked" | "skill_miss" | "skill_gap";
   profile?: string;
   agent?: "claude-code" | "codex";
   cwd?: string;
@@ -82,6 +87,13 @@ export interface SessionEvent {
   tool_use_id?: string;
   prompt_redacted?: string;
   matched_skills?: string[];
+  // skill_gap variant
+  source?: "hook" | "critic";
+  signals?: string[];
+  gap_type?: "missing-skill" | "weak-description" | "weak-body" | "profile-composition";
+  suggestion?: string;
+  confidence?: number;
+  first_prompt?: string;
 }
 
 /**

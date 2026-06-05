@@ -118,6 +118,10 @@ commands:
 
 hooks:
   - skill-frontmatter-guard.json
+  # cue self-learner (pilot) — captures where this profile's skills fall short
+  # and (with the live critic) judges the gap, feeding `cue profile self-improve`.
+  # OFF until `touch ~/.config/cue/.auto-improve-enabled`. See docs/self-learner.md.
+  - profile-self-improve.json
 
 mcps:
   - gbrain

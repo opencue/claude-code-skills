@@ -220,6 +220,44 @@ Full system + when each tag fires: **[`resources/skills/skills/meta/integrity-ta
 
 ---
 
+## what you'll see during a run — the reviewer.
+
+cuecards can ship an **independent review gate**. When the agent finishes a
+code-producing turn in a cuecard that enables it, cue spawns a *fresh, separate*
+reviewer agent over the working-tree diff **before the turn is allowed to finish**.
+It runs as a normal step of a Claude Code run — so expect to see a reviewer agent
+think for a while (a deep pass can run many minutes and tens of thousands of tokens).
+This is by design, and it earns its keep.
+
+A real catch from a live session: the reviewer flagged a **load-bearing unit bug** —
+a product's `weight` was treated as kilograms in one place but grams in two others
+(`weight >= 1000 ? kg : g`). Left in, the per-kg price renders as `€0.00` and a cart
+reads `20000 kg`. The gate held the merge until it was fixed.
+
+Two things so the behavior isn't surprising:
+
+- **A red "Stop hook error" is the gate working, not a failure.** Claude Code renders
+  any *blocking* hook that way. It means the reviewer found a CRITICAL/HIGH issue and is
+  holding the turn until you address it. It caps at 2 rounds, then releases. Suppress it
+  for one turn with `[skip-auto-review]` in your message; turn it off entirely with
+  `rm ~/.config/cue/auto-review-enabled`.
+- **You can watch the review live.** A long review otherwise shows only a spinner. Run
+  `cue-review-watch` in a second pane to see it move file-by-file with findings as they land:
+
+```
+16:42:03  📄 setup-plate-variants.ts
+16:42:03     → unit convention
+16:42:09     🔴 CRITICAL  weight kg/g ambiguity → per-kg price shows €0.00
+16:45:30  ✅ review complete  1 CRITICAL
+```
+
+Enable the gate with `touch ~/.config/cue/auto-review-enabled`. Full details:
+[`docs/review-visibility.md`](./docs/review-visibility.md).
+
+<br>
+
+---
+
 ## the catalog.
 
 > One repo. 69 pre-built expert agents. Pin one with `cue use <name>` and `claude` launches with that cuecard's skills, MCPs, hooks, and commands materialized.
