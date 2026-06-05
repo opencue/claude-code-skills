@@ -22,6 +22,13 @@ export const auth = betterAuth({
   // Public origin of the auth server. On Vercel this is the site URL; for the
   // local check it falls back to the dev server port.
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  // Extra origins allowed to make authenticated requests (CSRF allowlist).
+  // Same-origin (baseURL) is always trusted; this covers the Vite dev proxy
+  // origin in development. Comma-separated env var, e.g.
+  // "http://localhost:5173". Unset in production (same-origin on Vercel).
+  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS
+    ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim())
+    : undefined,
   // Signs session cookies + tokens. Required in every environment so a missing
   // secret fails loudly at boot instead of silently weakening sessions.
   secret: required("BETTER_AUTH_SECRET"),
