@@ -2,7 +2,7 @@
 title: "Claude Code Skills for python"
 description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-03
+updated: 2026-06-05
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,15 @@ tags: [claude-code, python, skills, mcp, ai-agents]
 
 ---
 
-<a id="kagura-ai-memory-cloud"></a>
-## 💎 [kagura-ai/memory-cloud](https://github.com/kagura-ai/memory-cloud)
+<a id="sattyamjjain-agent-airlock"></a>
+## 💎 [sattyamjjain/agent-airlock](https://github.com/sattyamjjain/agent-airlock)
 
-**★ 5** · exceptional (score 9) · Python · tags: adaptive-memory, ai-agents, docker, fastapi, hybrid-search
+**★ 6** · exceptional (score 9.6) · Python · tags: ai-agents, ai-security, crewai, firewall, langchain
 
-Adaptive AI Agent Memory — Self-hosted MCP server that gets smarter as you use it. Hybrid search, neural memory graph, AI reranking, and web UI. Built with FastAPI, Next.js, PostgreSQL, and Qdrant.
+Open-source security firewall for AI agents — validates tool calls, strips ghost arguments, enforces type safety, PII masking, RBAC, cost tracking & sandbox isolation. Works with LangChain, OpenAI Agents SDK, PydanticAI & CrewAI.
 
 ```bash
-cue skills add kagura-ai/memory-cloud --profile python
+cue skills add sattyamjjain/agent-airlock --profile python
 ```
 
 ---

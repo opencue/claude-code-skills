@@ -2,7 +2,7 @@
 title: "SuanFishXYY/suanfish-design-system — Claude Code skill discovered by cue"
 description: "🐟 Suanfish Design System — 33 specialized AI design agents across 7 tiers with REJECT mechanism. Multi-agent design language SKILL for Claude Code / Codex CLI "
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, frontend]
 ---
 

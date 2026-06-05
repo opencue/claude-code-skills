@@ -2,7 +2,7 @@
 title: "ganeshmalkar/MCP-Control-Lite — Claude Code skill discovered by cue"
 description: "🛠 Manage Model Context Protocol servers easily with MCP-Control-Lite. Discover, install, and configure servers for your AI applications with a simple interface"
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: ai, ai-tools, cli, configuration-management, developer-tools, gui, mcp, mcp-server, native-app, react, rust, server-management, tauri, typescript
 
 ## Best fit cue profiles

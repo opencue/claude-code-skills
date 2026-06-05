@@ -2,19 +2,19 @@
 title: "veyralabsgroup/venture-analyst — Claude Code skill discovered by cue"
 description: "Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments."
 layout: page
-updated: 2026-06-03
+updated: 2026-06-05
 tags: [claude-code, skill, research]
 ---
 
 # 💎 [veyralabsgroup/venture-analyst](https://github.com/veyralabsgroup/venture-analyst)
 
-**★ 0** · exceptional (score 10.9) · Python · ai-agent-skill, claude-code, competitor-analysis, idea-validation, lean-startup
+**★ 0** · exceptional (score 10.8) · Python · ai-agent-skill, claude-code, competitor-analysis, idea-validation, lean-startup
 
 > Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.9 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.8 based on:
 - ✅ Contains SKILL.md
 - ⭐ 0 stars
 - 🗓️ Last pushed: 2026-06-02

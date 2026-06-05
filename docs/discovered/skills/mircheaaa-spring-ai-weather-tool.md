@@ -2,7 +2,7 @@
 title: "Mircheaaa/spring-ai-weather-tool — Claude Code skill discovered by cue"
 description: "🌤️ Build a versatile weather tool with AI capabilities, integrating real-time data and user-friendly features for enhanced travel planning."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: ai-agents, ai-integration, ai-tools, chatbot, groq-api, korean-weather, kotlin, mcp, mcp-server, model-context-protocol, reactive-programming, spring-ai, spring-boot, sse-transport, weather-api, webflux
 
 ## Best fit cue profiles

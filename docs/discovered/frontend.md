@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for frontend"
-description: "5 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "4 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `frontend`
 
-> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
+> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -39,19 +39,6 @@ Search, fetch, and integrate Lottie animations into React, Vue, Flutter, and oth
 
 ```bash
 cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
-```
-
----
-
-<a id="cs32dasdasd-ionik-capacitor-flux-patterns"></a>
-## ✨ [cs32dasdasd/ionik-capacitor-flux-patterns](https://github.com/cs32dasdasd/ionik-capacitor-flux-patterns)
-
-**★ 0** · strong (score 7.5) · HTML · tags: agent, agents, ai, ai-coding, android
-
-Ionic Capacitor Pro 2026: AI-Powered Hybrid App Builder for React, Angular & Vue
-
-```bash
-cue skills add cs32dasdasd/ionik-capacitor-flux-patterns --profile frontend
 ```
 
 ---

@@ -2,7 +2,7 @@
 title: "CheekyCodexConjurer/prompttaint-ci — Claude Code skill discovered by cue"
 description: "CI guardrail that finds prompt-injection paths in agentic GitHub workflows before Claude, Codex, or Copilot read untrusted text."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, core]
 ---
 

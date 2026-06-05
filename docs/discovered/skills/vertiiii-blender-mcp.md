@@ -2,7 +2,7 @@
 title: "Vertiiii/blender-mcp — Claude Code skill discovered by cue"
 description: "🛠️ Connect Blender to Claude AI for seamless 3D modeling and scene manipulation using the Model Context Protocol for enhanced creative workflows."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.6 based on:
 - ⭐ 5 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: blender, blender-addon, blender-mcp, blender-python, blender3d, gemini-api, google-generativeai, mcp, mcp-server, model-context-protocol, python, uv, visionos
 
 ## Best fit cue profiles

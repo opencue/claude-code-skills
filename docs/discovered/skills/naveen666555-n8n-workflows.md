@@ -2,7 +2,7 @@
 title: "Naveen666555/n8n-workflows — Claude Code skill discovered by cue"
 description: "⚡ Explore 2,053 n8n workflows with a fast, user-friendly documentation system for instant search and analysis capabilities."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10.2 based on:
 - ⭐ 13 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: agents, ai-agents, automation-templates, chatgpt-integration, docker, ia, integration, mcp, mcp-server, n8n-template, n8n-workflow, no-code, no-code-ai, productivity, typescript, workflow, workflow-automation, workflow-management
 
 ## Best fit cue profiles

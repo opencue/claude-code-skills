@@ -2,7 +2,7 @@
 title: "Muhaastok/DBJavaGenix — Claude Code skill discovered by cue"
 description: "🛠️ Generate Java code from databases easily with DBJavaGenix, supporting multiple databases and full-layered code architecture for efficient development."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: easycode, easycoder, mcp, mcp-server, mysql, npm, sqllite, vibe-coding, vibe-coding-assistant
 
 ## Best fit cue profiles

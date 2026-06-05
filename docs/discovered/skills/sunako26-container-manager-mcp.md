@@ -2,7 +2,7 @@
 title: "Sunako26/container-manager-mcp — Claude Code skill discovered by cue"
 description: "🔧 Manage and optimize your container environments efficiently with Container Manager MCP, designed for streamlined deployment and monitoring."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-05
 - 🏷️ Tags: agentic-ai, ai, compose, container, docker, dockers-compose, dockerswarm, mcp-server, podman, podman-compose, python, swarm
 
 ## Best fit cue profiles

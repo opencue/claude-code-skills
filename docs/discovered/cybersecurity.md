@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for cybersecurity"
-description: "4 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "5 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-05
 tags: [claude-code, cybersecurity, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `cybersecurity`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
+> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -18,7 +18,7 @@ tags: [claude-code, cybersecurity, skills, mcp, ai-agents]
 <a id="nsasoft-nsauditor-ai-agent-skill"></a>
 ## 💎 [nsasoft/nsauditor-ai-agent-skill](https://github.com/nsasoft/nsauditor-ai-agent-skill)
 
-**★ 3** · exceptional (score 15.2) · tags: ai-agent, ai-agent-skill, claude, claude-code, copilot
+**★ 3** · exceptional (score 15.1) · tags: ai-agent, ai-agent-skill, claude, claude-code, copilot
 
 AI Agent Skill for NSAuditor AI — gives any AI coding agent built-in knowledge of NSAuditor's MCP tools, schemas, plugins, and security audit workflows. Works with Claude Code, Cursor, Windsurf, and any MCP-aware agent.
 
@@ -48,7 +48,7 @@ cue skills add Zandereins/hydra --profile cybersecurity
 <a id="elementalsouls-claude-osint"></a>
 ## 💎 [elementalsouls/Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT)
 
-**★ 1618** · exceptional (score 10.9) · Python · tags: agentskills, claude, skills
+**★ 1625** · exceptional (score 11.5) · Python · tags: agentskills, claude, skills
 
 Two paired Claude skills · 90+ recon modules · 48 secret-regex patterns · 80+ dorks · 9 read-only credential validators · 27 attack-path templates · 5,500+ lines of structured tradecraft. Drop-in SKILL.md files that turn Claude into a god-mode external recon operator for authorized red-team and bug-bounty engagements.
 
@@ -67,6 +67,19 @@ Automate security research workflows with structured tool-driven assessments for
 
 ```bash
 cue skills add davzpogi01/claude-security-research-skill --profile cybersecurity
+```
+
+---
+
+<a id="hybridindie-comfyui-mcp"></a>
+## 💎 [hybridindie/comfyui_mcp](https://github.com/hybridindie/comfyui_mcp)
+
+**★ 2** · exceptional (score 8) · Python · tags: ai-tools, claude, comfyui, image-generation, mcp
+
+Secure MCP server for ComfyUI — workflow inspection, path sanitization, rate limiting, and audit logging. Generate images from Claude and other AI assistants with built-in security controls.
+
+```bash
+cue skills add hybridindie/comfyui_mcp --profile cybersecurity
 ```
 
 ---
