@@ -208,6 +208,11 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
   if (exAny(cwd, ["vite.config.ts", "vite.config.js"])) add("frontend", 0.6, "vite.config.*");
   if (exAny(cwd, ["tailwind.config.js", "tailwind.config.ts"])) add("frontend", 0.4, "tailwind.config.*");
 
+  // ── Vercel (deploy target) — an explicit vercel.json / .vercel signals intent
+  // to use Vercel, so it edges out the bare framework profile (nextjs/frontend).
+  if (exAny(cwd, ["vercel.json", ".vercel/project.json"])) add("vercel", 0.95, "vercel.json");
+  else if (ex(cwd, ".vercel")) add("vercel", 0.9, ".vercel/");
+
   // ── Docs ──
   if (exAny(cwd, ["astro.config.mjs", "docusaurus.config.js", "mkdocs.yml"])) {
     add("docs-writer", 0.7, "astro / docusaurus / mkdocs config");
@@ -243,6 +248,10 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
       add("frontend", 0.8, "package.json has react");
     } else {
       add("backend", 0.6, "package.json (no framework)");
+    }
+    // Vercel CLI / SDK in deps corroborates an existing vercel.json signal.
+    if (hasPrefix(allDeps, "@vercel/") || allDeps.has("vercel")) {
+      add("vercel", 0.6, "package.json @vercel/* or vercel");
     }
   }
 

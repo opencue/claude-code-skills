@@ -70,6 +70,7 @@ function printHelp(): void {
     ],
     "Launch & Shell": [
       ["launch", "Resolve + materialize + exec claude/codex"],
+      ["summon", "Bind a profile into the live session (soft-load + pin), no restart"],
       ["shell", "Install/uninstall shims (~/.local/bin)"],
       ["update", "Self-update: git pull + bun install"],
       ["upgrade", "Pull new skills from the registry"],
