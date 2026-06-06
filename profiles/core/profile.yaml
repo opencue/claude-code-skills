@@ -100,6 +100,8 @@ skills:
     - plan/autoplan             # /autoplan — chains office-hours → ceo → eng on demand
     # ── Review ──
     - review/code-review-deep   # /code-review-deep — two-pass diff review (sole baseline reviewer)
+    # ── Security ──
+    - security/trivy-scan       # /trivy-scan — pre-merge supply-chain gate (Trivy: dependency CVEs + secrets + IaC misconfig). Hard-blocks HIGH/CRITICAL. Invoked by code-review-deep Pass 0 + ship Step 9.0.
     # ── Browser ──
     - browser/lightpanda        # Lightpanda — fast headless browser for scraping, DOM dump, CDP. Pairs with lightpanda MCP.
     # ── Source-fetching ──

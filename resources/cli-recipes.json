@@ -21,6 +21,7 @@
   "subfinder":    { "brew": "subfinder", "pacman": "subfinder", "manual": "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" },
   "httpx":        { "brew": "httpx", "pacman": "httpx", "manual": "go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest" },
   "nuclei":       { "brew": "nuclei", "pacman": "nuclei", "manual": "go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest" },
+  "trivy":        { "brew": "trivy", "pacman": "trivy", "script": "curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/v0.71.0/contrib/install.sh | sh -s -- -b $HOME/.local/bin", "needs": "Aqua Security scanner: dependency CVEs + committed secrets + IaC/Dockerfile misconfig. Pre-merge gate behind the security/trivy-scan skill. Not in default apt/dnf — those need the Aqua repo; the script installer is the cross-distro fallback. https://trivy.dev/latest/getting-started/installation/" },
 
   "yara":         { "apt": "yara", "brew": "yara", "pacman": "yara", "dnf": "yara" },
   "suricata":     { "apt": "suricata", "brew": "suricata", "pacman": "suricata", "dnf": "suricata" },
