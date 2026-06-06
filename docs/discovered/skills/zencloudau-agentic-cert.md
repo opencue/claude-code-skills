@@ -2,7 +2,7 @@
 title: "ZenCloudAU/agentic-cert — Claude Code skill discovered by cue"
 description: "Agentic AI certification study hub for Claude, GitHub, architecture foundations, practice questions, and cross-certification learning paths."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, skill, core]
 ---
 

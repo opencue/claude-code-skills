@@ -2,7 +2,7 @@
 title: "Claude Code Skills for frontend"
 description: "4 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
@@ -18,7 +18,7 @@ tags: [claude-code, frontend, skills, mcp, ai-agents]
 <a id="suanfishxyy-suanfish-design-system"></a>
 ## 💎 [SuanFishXYY/suanfish-design-system](https://github.com/SuanFishXYY/suanfish-design-system)
 
-**★ 6** · exceptional (score 10.8) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
+**★ 6** · exceptional (score 10.7) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
 
 🐟 Suanfish Design System — 33 specialized AI design agents across 7 tiers with REJECT mechanism. Multi-agent design language SKILL for Claude Code / Codex CLI / Copilot CLI. v2.5 adds AI-native Path G (streaming · tool-calls · reasoning · citations · artifacts).
 
@@ -43,15 +43,15 @@ cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
 
 ---
 
-<a id="ansariwaqqas-storybook-mcp-server"></a>
-## ✨ [ansariwaqqas/storybook-mcp-server](https://github.com/ansariwaqqas/storybook-mcp-server)
+<a id="cs32dasdasd-ionik-capacitor-flux-patterns"></a>
+## ✨ [cs32dasdasd/ionik-capacitor-flux-patterns](https://github.com/cs32dasdasd/ionik-capacitor-flux-patterns)
 
-**★ 0** · strong (score 7.5) · C++ · tags: anthropic, claude, claude-desktop, component-library, component-testing
+**★ 0** · strong (score 7.5) · HTML · tags: agent, agents, ai, ai-coding, android
 
-🎨 Enhance Storybook with this TypeScript MCP server for seamless AI interaction, allowing easy access to components, stories, and screenshots.
+Ionic Capacitor Pro 2026: AI-Powered Hybrid App Builder for React, Angular & Vue
 
 ```bash
-cue skills add ansariwaqqas/storybook-mcp-server --profile frontend
+cue skills add cs32dasdasd/ionik-capacitor-flux-patterns --profile frontend
 ```
 
 ---
@@ -59,7 +59,7 @@ cue skills add ansariwaqqas/storybook-mcp-server --profile frontend
 <a id="aiatelie-ai-atelie"></a>
 ## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
 
-**★ 6** · strong (score 5.9) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+**★ 6** · strong (score 5.8) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
 
 Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
 

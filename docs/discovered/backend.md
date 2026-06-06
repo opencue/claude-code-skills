@@ -1,252 +1,159 @@
 ---
 title: "Claude Code Skills for backend"
-description: "20 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "13 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 20 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
+> 13 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="xquik-dev-x-twitter-scraper"></a>
-## 💎 [Xquik-dev/x-twitter-scraper](https://github.com/Xquik-dev/x-twitter-scraper)
+<a id="jjang-ai-vmlx"></a>
+## 💎 [jjang-ai/vmlx](https://github.com/jjang-ai/vmlx)
 
-**★ 108** · exceptional (score 17.4) · JavaScript · tags: advanced-search, agent-skill, ai-agent, data-extraction, follower-export
+**★ 620** · exceptional (score 13.8) · Python · tags: anthropic-api, kvcache-compression, kvcache-optimization, kvcache-reuse, llm
 
-Twitter scraper API skill for tweet search, advanced Twitter search, profile tweets, follower export, media download, monitors, webhooks, MCP, and posting automation: send tweets and replies.
+vMLX - JANGTQ Uber Compressed MLX Models - L2 Disk Cache (survives restart) + L1 Paged (super fast ttft) + Hybrid SSM Scheduler  + Cont Batching + etc!
 
 ```bash
-cue skills add Xquik-dev/x-twitter-scraper --profile backend
+cue skills add jjang-ai/vmlx --profile backend
 ```
 
 ---
 
-<a id="cyanheads-clinicaltrialsgov-mcp-server"></a>
-## 💎 [cyanheads/clinicaltrialsgov-mcp-server](https://github.com/cyanheads/clinicaltrialsgov-mcp-server)
+<a id="innocuous-stiffness915-vibe-agent"></a>
+## 💎 [innocuous-stiffness915/Vibe-Agent](https://github.com/innocuous-stiffness915/Vibe-Agent)
 
-**★ 78** · exceptional (score 16.3) · TypeScript · tags: ai-agent, bioinformatics, clinical-trials, clinicaltrials-gov, cyanheads
+**★ 4** · exceptional (score 9.8) · HTML · tags: agent, agentic-ai, all-in-one, bedrock, claude-code
 
-MCP server for the ClinicalTrials.gov v2 API. Search trials, retrieve study details and results, and match patients to eligible trials.
+🎨 Create dynamic canvases and explore multimodal AI generation with Vibe-Agent, featuring easy-to-use tools and customizable options.
 
 ```bash
-cue skills add cyanheads/clinicaltrialsgov-mcp-server --profile backend
+cue skills add innocuous-stiffness915/Vibe-Agent --profile backend
 ```
 
 ---
 
-<a id="n8n-io-n8n"></a>
-## 💎 [n8n-io/n8n](https://github.com/n8n-io/n8n)
+<a id="mugoherick12-boop-skillz"></a>
+## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
 
-**★ 191173** · exceptional (score 15) · TypeScript · tags: ai, apis, automation, cli, data-flow
+**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
 
-Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.
+🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
 
 ```bash
-cue skills add n8n-io/n8n --profile backend
+cue skills add mugoherick12-boop/skillz --profile backend
 ```
 
 ---
 
-<a id="datawithusman-business-data-automator"></a>
-## 💎 [datawithusman/business-data-automator](https://github.com/datawithusman/business-data-automator)
+<a id="whiteknightonhorse-apibase"></a>
+## 💎 [whiteknightonhorse/APIbase](https://github.com/whiteknightonhorse/APIbase)
 
-**★ 0** · exceptional (score 13) · tags: automation, business-intelligence, claude-code, claude-code-skill, consulting
+**★ 6** · exceptional (score 8.1) · TypeScript · tags: ai-agents, ai-tools, api-gateway, api-hub, awesome-mcp-servers
 
-Claude Code skill - Convert messy business spreadsheets into clean databases, dashboards, and automations. Built for freelancers and consultants working with non-tech clients.
-
-✅ SKILL.md
+Universal MCP gateway for AI agents — 618 tools, 191 providers. Bloomberg FIGI, SEC XBRL, npm, PyPI, climate, US Census, Congress, FEMA, SAM.gov, EPA, USNO, exercises, email verification. Pay per call with x402 USDC on Base + MPP Tempo.
 
 ```bash
-cue skills add datawithusman/business-data-automator --profile backend
+cue skills add whiteknightonhorse/APIbase --profile backend
 ```
 
 ---
 
-<a id="benseverndev-oss-goldenmatch"></a>
-## 💎 [benseverndev-oss/goldenmatch](https://github.com/benseverndev-oss/goldenmatch)
+<a id="mattaspira-google-docs-mcp-server"></a>
+## ✨ [mattaspira/google-docs-mcp-server](https://github.com/mattaspira/google-docs-mcp-server)
 
-**★ 79** · exceptional (score 11.6) · Python · tags: active-learning, agent, airflow, auto-config, data-engineering
+**★ 1** · strong (score 7.8) · TypeScript · tags: ai, ai-tools, anthropic, claude-ai, claude-desktop
 
-Zero-config entity resolution that scales from a CSV to 100M+ rows on a Ray cluster (verified: 100M deduped in 213s, 0.30 GB driver). Fuzzy + exact + probabilistic dedupe, identity graph, PPRL, LLM boost. Python + full TypeScript port; SQL-native in PostgreSQL & DuckDB; MCP/REST servers, dbt + Airflow recipes.
+🔗 Connect LLMs to Google Docs with this unofficial MCP server for smarter workflows and enhanced document management.
 
 ```bash
-cue skills add benseverndev-oss/goldenmatch --profile backend
+cue skills add mattaspira/google-docs-mcp-server --profile backend
 ```
 
 ---
 
-<a id="vertiiii-blender-mcp"></a>
-## 💎 [Vertiiii/blender-mcp](https://github.com/Vertiiii/blender-mcp)
+<a id="imaginationfinagler591-mcp-hello-world"></a>
+## ✨ [Imaginationfinagler591/mcp-hello-world](https://github.com/Imaginationfinagler591/mcp-hello-world)
 
-**★ 5** · exceptional (score 10.6) · Python · tags: blender, blender-addon, blender-mcp, blender-python, blender3d
+**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agent, ai-integration, client-server, fastapi, fat-jar
 
-🛠️ Connect Blender to Claude AI for seamless 3D modeling and scene manipulation using the Model Context Protocol for enhanced creative workflows.
+
 
 ```bash
-cue skills add Vertiiii/blender-mcp --profile backend
+cue skills add Imaginationfinagler591/mcp-hello-world --profile backend
 ```
 
 ---
 
-<a id="naveen666555-n8n-workflows"></a>
-## 💎 [Naveen666555/n8n-workflows](https://github.com/Naveen666555/n8n-workflows)
+<a id="f1nthelad-google-contacts-mcp-server"></a>
+## ✨ [f1nthelad/google-contacts-mcp-server](https://github.com/f1nthelad/google-contacts-mcp-server)
 
-**★ 13** · exceptional (score 10.2) · HTML · tags: agents, ai-agents, automation-templates, chatgpt-integration, docker
+**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, aws-cdk, aws-lambda, calendar, claude-ai
 
-⚡ Explore 2,053 n8n workflows with a fast, user-friendly documentation system for instant search and analysis capabilities.
+📇 Access Google Contacts securely with a serverless MCP server on AWS Lambda, using per-user OAuth for real-time, privacy-focused data retrieval.
 
 ```bash
-cue skills add Naveen666555/n8n-workflows --profile backend
+cue skills add f1nthelad/google-contacts-mcp-server --profile backend
 ```
 
 ---
 
-<a id="proompteng-bilig"></a>
-## 💎 [proompteng/bilig](https://github.com/proompteng/bilig)
+<a id="powlite32-google-docs-mcp-server"></a>
+## ✨ [powlite32/google-docs-mcp-server](https://github.com/powlite32/google-docs-mcp-server)
 
-**★ 30** · exceptional (score 10) · TypeScript · tags: agent-tools, ai-agents, excel, excel-formulas, formula-engine
+**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, ai-tools, claude-ai, google, google-drive-api-v3
 
-Bilig WorkPaper: headless spreadsheet formula engine and MCP server for Node agents: edit cells, recalculate, read values, persist JSON.
+📄 Connect LLMs with Google Docs through this unofficial MCP server for smarter workflows and efficient document management.
 
 ```bash
-cue skills add proompteng/bilig --profile backend
+cue skills add powlite32/google-docs-mcp-server --profile backend
 ```
 
 ---
 
-<a id="ayaanjan76-awesome-mcp-servers"></a>
-## 💎 [ayaanjan76/awesome-mcp-servers](https://github.com/ayaanjan76/awesome-mcp-servers)
+<a id="manojkumarjanapati-expense-tracker-mcp-server"></a>
+## ✨ [manojkumarjanapati/expense-tracker-mcp-server](https://github.com/manojkumarjanapati/expense-tracker-mcp-server)
 
-**★ 2** · exceptional (score 10) · tags: ai, ai-agent, awesome, awesome-mcp, collection
+**★ 0** · strong (score 7.5) · Java · tags: claude-desktop, fastmcp, jsonrpc2, mcp-inspector, mcp-server
 
-🚀 Explore a curated collection of top Model Context Protocol (MCP) servers for seamless connectivity and enhanced experiences in your projects.
+💰 Track your expenses efficiently with this Python-based MCP server, enabling AI assistants to manage and summarize your finances through natural conversation.
 
 ```bash
-cue skills add ayaanjan76/awesome-mcp-servers --profile backend
+cue skills add manojkumarjanapati/expense-tracker-mcp-server --profile backend
 ```
 
 ---
 
-<a id="unitedideas-nothumansearch"></a>
-## ✨ [unitedideas/nothumansearch](https://github.com/unitedideas/nothumansearch)
+<a id="insipidityincus22-golf-testing"></a>
+## ✨ [insipidityincus22/golf-testing](https://github.com/insipidityincus22/golf-testing)
 
-**★ 5** · strong (score 7.9) · Go · tags: agent-discovery, agentic-ai, ai-agents, ai-plugin, ai-tools
+**★ 0** · strong (score 7.5) · Python · tags: autocannon, cicd, descriptive-statistics, hypothesis-testing, inferential-statistics
 
-Search engine for AI agents — ranks sites by agentic readiness (llms.txt, OpenAPI, MCP, ai-plugin). MCP server, REST API, full-text search. 8,000+ indexed sites.
+🧪 Test MCP servers with AI agents and LLM judges to ensure seamless natural language interactions and effective performance evaluation.
 
 ```bash
-cue skills add unitedideas/nothumansearch --profile backend
+cue skills add insipidityincus22/golf-testing --profile backend
 ```
 
 ---
 
-<a id="zcebupelka-graphql-mcp-bridge"></a>
-## ✨ [zcebupelka/graphql-mcp-bridge](https://github.com/zcebupelka/graphql-mcp-bridge)
+<a id="harshitshukla2003-sse-server"></a>
+## ✨ [Harshitshukla2003/SSE-Server](https://github.com/Harshitshukla2003/SSE-Server)
 
-**★ 1** · strong (score 7.8) · TypeScript · tags: ai-tools, api-integration, api-translator, bridge, developer-tools
+**★ 2** · strong (score 7) · JavaScript · tags: advanced-analytics-integration, agents, anthropic, data-science, deep-research
 
-🌉 Connect GraphQL APIs seamlessly with the Model Context Protocol for enhanced data management and integration.
-
-```bash
-cue skills add zcebupelka/graphql-mcp-bridge --profile backend
-```
-
----
-
-<a id="sunako26-container-manager-mcp"></a>
-## ✨ [Sunako26/container-manager-mcp](https://github.com/Sunako26/container-manager-mcp)
-
-**★ 1** · strong (score 7.8) · Python · tags: agentic-ai, ai, compose, container, docker
-
-🔧 Manage and optimize your container environments efficiently with Container Manager MCP, designed for streamlined deployment and monitoring.
+📊 Monitor real-time HTTP requests with this Server-Sent Events (SSE) tool, featuring a dashboard for instant updates and easy testing integration.
 
 ```bash
-cue skills add Sunako26/container-manager-mcp --profile backend
-```
-
----
-
-<a id="luis13-source-jira-simple-mcp"></a>
-## ✨ [Luis13-source/jira-simple-mcp](https://github.com/Luis13-source/jira-simple-mcp)
-
-**★ 0** · strong (score 7.5) · JavaScript · tags: ai-assistant, ai-tools, atlassian, atlassian-confluence, atlassian-jira
-
-🚀 Access and manage Jira issues effortlessly with this simple MCP server, enabling AI assistants to enhance your project workflows.
-
-```bash
-cue skills add Luis13-source/jira-simple-mcp --profile backend
-```
-
----
-
-<a id="mircheaaa-spring-ai-weather-tool"></a>
-## ✨ [Mircheaaa/spring-ai-weather-tool](https://github.com/Mircheaaa/spring-ai-weather-tool)
-
-**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agents, ai-integration, ai-tools, chatbot, groq-api
-
-🌤️ Build a versatile weather tool with AI capabilities, integrating real-time data and user-friendly features for enhanced travel planning.
-
-```bash
-cue skills add Mircheaaa/spring-ai-weather-tool --profile backend
-```
-
----
-
-<a id="muhaastok-dbjavagenix"></a>
-## ✨ [Muhaastok/DBJavaGenix](https://github.com/Muhaastok/DBJavaGenix)
-
-**★ 0** · strong (score 7.5) · Python · tags: easycode, easycoder, mcp, mcp-server, mysql
-
-🛠️ Generate Java code from databases easily with DBJavaGenix, supporting multiple databases and full-layered code architecture for efficient development.
-
-```bash
-cue skills add Muhaastok/DBJavaGenix --profile backend
-```
-
----
-
-<a id="eslaim-ai-diagram-prototype-generator-mcp-server-"></a>
-## ✨ [eslaim/AI-Diagram-Prototype-Generator-MCP-Server-](https://github.com/eslaim/AI-Diagram-Prototype-Generator-MCP-Server-)
-
-**★ 0** · strong (score 7.5) · Python · tags: ai-diagram-generator, api-integration, artificial-intelligence, code-generation, design-prototyping
-
-🤖 Generate AI-driven diagrams and prototypes in draw.io and HTML formats, tailored to your requirements with advanced language model integration.
-
-```bash
-cue skills add eslaim/AI-Diagram-Prototype-Generator-MCP-Server- --profile backend
-```
-
----
-
-<a id="orderchlorococcalesdresswhites76-bb-bash"></a>
-## ✨ [Orderchlorococcalesdresswhites76/bb-bash](https://github.com/Orderchlorococcalesdresswhites76/bb-bash)
-
-**★ 0** · strong (score 6) · Shell · tags: automation, bash, bash-scripting, bbs, bitbucket
-
-Control Bitbucket Cloud via terminal or AI agents with this zero-config, single-file bash script for seamless PR management and automated workflow integration.
-
-```bash
-cue skills add Orderchlorococcalesdresswhites76/bb-bash --profile backend
-```
-
----
-
-<a id="andrewkomkov-gantry"></a>
-## ✨ [andrewkomkov/gantry](https://github.com/andrewkomkov/gantry)
-
-**★ 0** · strong (score 6) · Swift · tags: ai-agents, containers, developer-tools, docker, macos
-
-Native macOS app for managing and monitoring Docker — local and over SSH. Agent-ready: built-in MCP server and App Intents. Free and open source.
-
-```bash
-cue skills add andrewkomkov/gantry --profile backend
+cue skills add Harshitshukla2003/SSE-Server --profile backend
 ```
 
 ---

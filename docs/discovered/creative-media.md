@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for creative-media"
-description: "5 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `creative-media`
 
-> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
+> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -30,28 +30,15 @@ cue skills add TinaDu-AI/claude-wechat-bridge-with-files --profile creative-medi
 
 ---
 
-<a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
-## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
+<a id="danielgwilson-image-skill-cli"></a>
+## 💎 [danielgwilson/image-skill-cli](https://github.com/danielgwilson/image-skill-cli)
 
-**★ 2** · exceptional (score 8.5) · tags: ai, automation, claude-code, claude-skill, content-analysis
+**★ 1** · exceptional (score 8.8) · JavaScript · tags: 3d-generation, agent-skill, agent-skills, ai-agents, audio-generation
 
-Extract and summarize social media content from platforms like Instagram, TikTok, X, and YouTube using Claude Code.
-
-```bash
-cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile creative-media
-```
-
----
-
-<a id="eslaim-ai-diagram-prototype-generator-mcp-server-"></a>
-## ✨ [eslaim/AI-Diagram-Prototype-Generator-MCP-Server-](https://github.com/eslaim/AI-Diagram-Prototype-Generator-MCP-Server-)
-
-**★ 0** · strong (score 7.5) · Python · tags: ai-diagram-generator, api-integration, artificial-intelligence, code-generation, design-prototyping
-
-🤖 Generate AI-driven diagrams and prototypes in draw.io and HTML formats, tailored to your requirements with advanced language model integration.
+Zero-setup creative media for agents — generate & edit images, generate video & audio, create 3D, with no API key, no OAuth, durable hosted URLs, recoverable jobs, and cost receipts.
 
 ```bash
-cue skills add eslaim/AI-Diagram-Prototype-Generator-MCP-Server- --profile creative-media
+cue skills add danielgwilson/image-skill-cli --profile creative-media
 ```
 
 ---
@@ -59,7 +46,7 @@ cue skills add eslaim/AI-Diagram-Prototype-Generator-MCP-Server- --profile creat
 <a id="aiatelie-ai-atelie"></a>
 ## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
 
-**★ 6** · strong (score 5.9) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+**★ 6** · strong (score 5.8) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
 
 Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
 

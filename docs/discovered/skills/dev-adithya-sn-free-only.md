@@ -2,7 +2,7 @@
 title: "dev-adithya-sn/free-only — Claude Code skill discovered by cue"
 description: "its a claude skill that only gives a free path to solve you're problem"
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, skill, core]
 ---
 

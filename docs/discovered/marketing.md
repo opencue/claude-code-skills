@@ -2,7 +2,7 @@
 title: "Claude Code Skills for marketing"
 description: "1 community Claude Code skills curated by cue for the marketing profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-03
+updated: 2026-06-06
 tags: [claude-code, marketing, skills, mcp, ai-agents]
 ---
 
@@ -15,17 +15,15 @@ tags: [claude-code, marketing, skills, mcp, ai-agents]
 
 ---
 
-<a id="shauryalowkeygotaura-brand-launchpad"></a>
-## 💎 [shauryalowkeygotaura/brand-launchpad](https://github.com/shauryalowkeygotaura/brand-launchpad)
+<a id="eagleisbatman-eagle-skills"></a>
+## ✨ [eagleisbatman/eagle-skills](https://github.com/eagleisbatman/eagle-skills)
 
-**★ 1** · exceptional (score 12.3) · HTML · tags: agent-skills, ai, ai-tools, anthropic, brand-strategy
+**★ 3** · strong (score 7.7) · Shell · tags: claude-code, claude-code-skill, design-critique, firebase-analytics, funnel-analysis
 
-One Claude Code skill that turns a single project into a complete brand launch — 12 files (positioning, hero line, 30-day calendar, content system) in one run. Built on Caleb Ralston, Harry Dry, Oren John & Brier Cochran frameworks.
-
-✅ SKILL.md
+Claude Code skills for expert-level UX audits, data-validated product diagnostics, ad creative review, AI slop detection, and clean document generation. 65+ UX laws, three-layer triangulation, anti-slop for code/text/design.
 
 ```bash
-cue skills add shauryalowkeygotaura/brand-launchpad --profile marketing
+cue skills add eagleisbatman/eagle-skills --profile marketing
 ```
 
 ---

@@ -1,29 +1,42 @@
 ---
 title: "Claude Code Skills for python"
-description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-06
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `python`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="sattyamjjain-agent-airlock"></a>
-## 💎 [sattyamjjain/agent-airlock](https://github.com/sattyamjjain/agent-airlock)
+<a id="yuc16-patentradar"></a>
+## 💎 [yuc16/PatentRadar](https://github.com/yuc16/PatentRadar)
 
-**★ 6** · exceptional (score 9.6) · Python · tags: ai-agents, ai-security, crewai, firewall, langchain
+**★ 29** · exceptional (score 10.7) · Python · tags: agentic-ai, claim-chart, claude-code, claude-code-skill, codex
 
-Open-source security firewall for AI agents — validates tool calls, strips ghost arguments, enforces type safety, PII masking, RBAC, cost tracking & sandbox isolation. Works with LangChain, OpenAI Agents SDK, PydanticAI & CrewAI.
+自动化专利侵权竞品分析系统 —— 输入专利公开号，1 小时产出律师可复核的 claim chart 报告（逐特征对比 + 证据URL + 下一步建议）；同时打包成 skill，可被任意 agent 调用。
 
 ```bash
-cue skills add sattyamjjain/agent-airlock --profile python
+cue skills add yuc16/PatentRadar --profile python
+```
+
+---
+
+<a id="mugoherick12-boop-skillz"></a>
+## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
+
+**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
+
+🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
+
+```bash
+cue skills add mugoherick12-boop/skillz --profile python
 ```
 
 ---

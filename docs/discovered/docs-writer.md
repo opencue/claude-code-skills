@@ -2,7 +2,7 @@
 title: "Claude Code Skills for docs-writer"
 description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-06
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
@@ -15,32 +15,28 @@ tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 
 ---
 
-<a id="yanqiyang62-wiki-vis"></a>
-## 💎 [yanqiyang62/wiki-vis](https://github.com/yanqiyang62/wiki-vis)
+<a id="eiaao-kuangjia-chaijie"></a>
+## 💎 [eiaao/kuangjia-chaijie](https://github.com/eiaao/kuangjia-chaijie)
 
-**★ 1** · exceptional (score 13.3) · HTML · tags: claude-code, claude-code-skill, documentation, documentation-generator, markdown
+**★ 0** · exceptional (score 10.5) · HTML · tags: agentic-workflow, ai-agent, anthropic, claude-code, claude-skill
 
-Turn a codebase into a single, self-contained, good-looking wiki.html — a standard project-wiki solution and Claude Code skill (sidebar nav, collapsible sections, Mermaid diagrams, light/dark themes).
-
-✅ SKILL.md
+框架/代码库主题深度拆解工作流（Claude Code skill）：自顶向下+自底向上双路扫描，关键节点人在回路确认范围，干净上下文子代理交叉验证，每阶段硬退出标准。让你在写技术文章/做分享前，先完整、不漏地理解一个跨模块主题。
 
 ```bash
-cue skills add yanqiyang62/wiki-vis --profile docs-writer
+cue skills add eiaao/kuangjia-chaijie --profile docs-writer
 ```
 
 ---
 
-<a id="wxggzz-project-to-study"></a>
-## 💎 [wxggzz/project-to-study](https://github.com/wxggzz/project-to-study)
+<a id="amri854-obsidian-mcp-server"></a>
+## ✨ [Amri854/obsidian-mcp-server](https://github.com/Amri854/obsidian-mcp-server)
 
-**★ 0** · exceptional (score 13) · tags: ai-agents, anthropic, claude, claude-code, claude-skill
+**★ 0** · strong (score 6.5) · TypeScript · tags: claude, claude-desktop, cursor, knowledge-base, llm
 
-A Claude Code skill that turns any codebase into a structured Markdown study-docs package (operation, deployment, learning, architecture, API/data, troubleshooting) with an evidence trail.
-
-✅ SKILL.md
+🗂️ Boost your Obsidian experience with a powerful Model Context Protocol server for vault access, knowledge graph analysis, and seamless integrations.
 
 ```bash
-cue skills add wxggzz/project-to-study --profile docs-writer
+cue skills add Amri854/obsidian-mcp-server --profile docs-writer
 ```
 
 ---
