@@ -1153,9 +1153,11 @@ async function buildUserClaudeMd(profile: ResolvedProfile, agent: "claude-code" 
     content += "\n<!-- cue:first-time-suggest -->\n" +
       "## ⚡ First-Time Setup\n\n" +
       "No `.cue-profile` is pinned to this directory. Before answering the user's first message, " +
-      "quickly scan this repo (package.json, Cargo.toml, Dockerfile, etc.) and suggest the best " +
-      "profile from `cue list`. Present your suggestion in 3-4 lines with reasoning, then offer " +
-      "to pin it with `echo <name> > .cue-profile`. After suggesting, proceed with the user's request.\n\n" +
+      "summon the right profile into THIS session — no restart. Invoke the `meta/profile-summon` " +
+      "skill, or run `cue summon` (auto-detects from the repo). It soft-loads the profile's persona " +
+      "and skill playbooks inline, pins `.cue-profile`, and prints `claude --continue` for the MCP / " +
+      "/slash-command tail (which needs a warm re-exec). Propose the detected profile in 3-4 lines, " +
+      "apply on the user's OK, then proceed with their request.\n\n" +
       "Available profiles:\n```\n" +
       (await getProfileListForStamp()) +
       "```\n\n";

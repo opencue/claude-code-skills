@@ -61,6 +61,10 @@ export const COMMANDS = {
     summary: "Write skills + MCPs for any agent (cursor, cline, gemini, copilot, etc.)",
     load: () => import("./materialize"),
   },
+  summon: {
+    summary: "Bind a profile into the LIVE session (soft-load + pin), no cold restart",
+    load: () => import("./summon"),
+  },
   quick: {
     summary: "One-shot bare launch — no profile, no skills, fastest cold start",
     load: () => import("./quick"),
