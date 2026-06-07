@@ -53,6 +53,29 @@ describe("materializeRuntime", () => {
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  test("surfaces allowlisted profile.env (CLAUDE_CODE_SUBAGENT_MODEL) into settings.env", async () => {
+    const out = await materializeRuntime({
+      profile: {
+        ...sampleProfile,
+        env: {
+          CLAUDE_CODE_SUBAGENT_MODEL: "claude-sonnet-4-6",
+          // secret reference — must NOT leak into settings.json
+          AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}",
+        },
+      },
+      agent: "claude-code",
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id) => `/fake/skills/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem", args: [] } },
+      userClaudeMd: "# user CLAUDE.md\n",
+    });
+
+    const settings = JSON.parse(await readFile(join(out.runtimeDir, "settings.json"), "utf8"));
+    expect(settings.env).toEqual({ CLAUDE_CODE_SUBAGENT_MODEL: "claude-sonnet-4-6" });
+    // unresolved "${...}" placeholder and non-allowlisted keys stay out
+    expect(settings.env.AWS_SECRET_ACCESS_KEY).toBeUndefined();
+  });
+
   test("second call with same profile is a no-op (rebuilt=false)", async () => {
     const args = {
       profile: sampleProfile,

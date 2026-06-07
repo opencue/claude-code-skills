@@ -1057,6 +1057,41 @@ async function buildClaudeSettings(
   if (Object.keys(mergedHooks).length > 0) {
     settings.hooks = mergedHooks;
   }
+
+  // Surface an allowlisted subset of profile.env into settings.json `env` so
+  // Claude Code's cost/runtime knobs actually reach the session. profile.env is
+  // otherwise consumed only for MCP-placeholder substitution (mcp-materializer)
+  // and never reaches the agent process. We allowlist deliberately: profile.env
+  // also holds secret references like "${AWS_SECRET_ACCESS_KEY}" that must NOT
+  // be written into settings.json. Gated to claude-code (these keys are
+  // Claude-Code-specific; codex uses its own config). Set in `core` so it fans
+  // out to every inheriting profile — e.g. CLAUDE_CODE_SUBAGENT_MODEL pins
+  // subagents to Sonnet, ~50-60% cheaper than Opus on file-read/grep/review.
+  if (agent === "claude-code") {
+    // Allowlist of Claude-Code cost/runtime knobs that may flow from profile.env
+    // into settings.json. To surface a new one, append its key here.
+    const CLAUDE_RUNTIME_ENV_KEYS = [
+      "CLAUDE_CODE_SUBAGENT_MODEL", // run Task/Agent subagents on a cheaper model
+    ];
+    // Preserve any account-level env from credentialsSource (spread in via
+    // baseSettings above); profile-declared keys overlay it (profile is more
+    // specific). Skip unset values and unresolved placeholders — the `${`
+    // check is deliberately conservative: any "${...}"-shaped value is treated
+    // as an unresolved secret reference and dropped, never written out.
+    const runtimeEnv: Record<string, string> = {
+      ...((settings.env as Record<string, string> | undefined) ?? {}),
+    };
+    for (const key of CLAUDE_RUNTIME_ENV_KEYS) {
+      const val = profile.env?.[key];
+      if (typeof val === "string" && val.length > 0 && !val.includes("${")) {
+        runtimeEnv[key] = val;
+      }
+    }
+    if (Object.keys(runtimeEnv).length > 0) {
+      settings.env = runtimeEnv;
+    }
+  }
+
   return JSON.stringify(settings, null, 2);
 }
 
