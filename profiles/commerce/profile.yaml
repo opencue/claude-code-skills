@@ -74,7 +74,6 @@ skills:
     - higgsfield/higgsfield-marketplace-cards
     - higgsfield/higgsfield-soul-id
     - medusa/higgsfield-to-medusa-products
-    - secrets/envoult
     - gstack/setup-deploy
     - private/myvps
     - hostinger/dns

@@ -85,7 +85,6 @@ skills:
     - higgsfield/higgsfield-soul-id
     - medusa/higgsfield-to-medusa-products
     # --- coolify deploy + secrets + myvps ---
-    - secrets/envoult
     - gstack/setup-deploy
     - private/myvps
     # --- hostinger DNS/domains/VPS/hosting ---

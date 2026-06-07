@@ -128,7 +128,6 @@ skills:
     # github-actions-docs dropped from core 2026-06-01 — CI-docs is not universal
     # baseline. Add it back per-profile (ops, the deploy-touching ones) if needed.
 mcps:
-  - cue-tty-watch    # Claude's eyes inside X displays / tmux panes (screenshot, capture-pane, send-keys)
   - lightpanda       # Fast headless browser MCP — fetch/render/scrape URLs without Chromium. Pairs with browser/lightpanda skill.
   - context7         # Up-to-date, version-specific library docs (Upstash @upstash/context7-mcp). No API key needed; set CONTEXT7_API_KEY for higher limits. Pairs with tools/context7 skill.
 plugins:
