@@ -64,15 +64,19 @@ export async function runGlobalOnboarding(): Promise<boolean> {
     message: "Default profile — loads when no .cue-profile is pinned to a directory:",
     options: [
       {
+        value: "core",
+        label: "core only",
+        hint: "recommended - smallest default context",
+      },
+      {
         value: "core+skill-writer",
         label: "core + skill-writer",
-        hint: "recommended — minimal base plus skill management",
+        hint: "optional - add skill management when needed",
       },
-      { value: "core", label: "core only", hint: "smallest — just the base" },
       { value: "__custom", label: "Custom…", hint: "type a +-separated composite" },
       { value: "__skip", label: "Skip for now", hint: "falls back to plain `core`" },
     ],
-    initialValue: "core+skill-writer",
+    initialValue: "core",
   });
   if (p.isCancel(defaultPick)) return false;
 
@@ -80,7 +84,7 @@ export async function runGlobalOnboarding(): Promise<boolean> {
   if (defaultPick === "__custom") {
     const custom = await p.text({
       message: "Composite (e.g., core+skill-writer+backend):",
-      placeholder: "core+skill-writer",
+      placeholder: "core",
       validate: (v) => {
         const parts = (v ?? "").split("+").map((s) => s.trim()).filter((s) => s.length > 0);
         if (parts.length === 0) return "Must contain at least one profile name";
