@@ -2,7 +2,7 @@
 title: "f1nthelad/google-contacts-mcp-server — Claude Code skill discovered by cue"
 description: "📇 Access Google Contacts securely with a serverless MCP server on AWS Lambda, using per-user OAuth for real-time, privacy-focused data retrieval."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: ai-integration, aws-cdk, aws-lambda, calendar, claude-ai, claude-connector, contacts-api, dynamodb, google, llm-tools, mcp, mcp-connector, mcp-server, model-context-protocol, model-context-protocol-servers, oauth2, serverless, typescript
 
 ## Best fit cue profiles

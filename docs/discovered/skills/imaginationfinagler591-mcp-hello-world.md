@@ -2,7 +2,7 @@
 title: "Imaginationfinagler591/mcp-hello-world — Claude Code skill discovered by cue"
 description: "Claude Code skill from Imaginationfinagler591/mcp-hello-world"
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: ai-agent, ai-integration, client-server, fastapi, fat-jar, gradle, hello-world, kotlin, mcp, mcp-client, mcp-server, model-context-protocol, sdk-example, stdio
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "MostafaMahmoud-33/misc-mcp — Claude Code skill discovered by cue"
 description: "🛠️ Build your own tools with this open-source project. Contribute features and manage requests to enhance functionality with ease."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: ai, hong-kong, hongkong, mcp, mcp-server
 
 ## Best fit cue profiles

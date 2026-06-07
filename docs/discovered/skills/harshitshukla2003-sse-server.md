@@ -2,7 +2,7 @@
 title: "Harshitshukla2003/SSE-Server — Claude Code skill discovered by cue"
 description: "📊 Monitor real-time HTTP requests with this Server-Sent Events (SSE) tool, featuring a dashboard for instant updates and easy testing integration."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7 based on:
 - ⭐ 2 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: advanced-analytics-integration, agents, anthropic, data-science, deep-research, deep-research-api, eventsource, feature-flags, gemini, grok, ios, launchdarkly, launchdarkly-sdk, mcp-server, server-sent-events, sse-client, sseclient, swift
 
 ## Best fit cue profiles

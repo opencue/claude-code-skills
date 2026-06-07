@@ -1,30 +1,17 @@
 ---
 title: "Claude Code Skills for docs-writer"
-description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `docs-writer`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="eiaao-kuangjia-chaijie"></a>
-## 💎 [eiaao/kuangjia-chaijie](https://github.com/eiaao/kuangjia-chaijie)
-
-**★ 0** · exceptional (score 10.5) · HTML · tags: agentic-workflow, ai-agent, anthropic, claude-code, claude-skill
-
-框架/代码库主题深度拆解工作流（Claude Code skill）：自顶向下+自底向上双路扫描，关键节点人在回路确认范围，干净上下文子代理交叉验证，每阶段硬退出标准。让你在写技术文章/做分享前，先完整、不漏地理解一个跨模块主题。
-
-```bash
-cue skills add eiaao/kuangjia-chaijie --profile docs-writer
-```
 
 ---
 

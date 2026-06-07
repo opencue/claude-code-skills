@@ -2,7 +2,7 @@
 title: "Claude Code Skills for research"
 description: "2 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
@@ -15,17 +15,15 @@ tags: [claude-code, research, skills, mcp, ai-agents]
 
 ---
 
-<a id="ruichenrui-citation-verification"></a>
-## 💎 [ruichenrui/citation-verification](https://github.com/ruichenrui/citation-verification)
+<a id="0xe1337-thesis-figure-skill"></a>
+## 💎 [0xE1337/thesis-figure-skill](https://github.com/0xE1337/thesis-figure-skill)
 
-**★ 0** · exceptional (score 11) · tags: academic, ai-skill, citation, claude-skill, hallucination
+**★ 88** · exceptional (score 10.7) · TeX · tags: academic-paper, ai-tools, claude-skill, diagram, figure-generation
 
-A Skill that forces AI assistants to verify every academic citation before using it.
-
-✅ SKILL.md
+🎓 Claude Skill: Paste your paper text, auto-generate publication-ready LaTeX/TikZ diagrams. 粘贴论文文案，自动生成学术级配图。
 
 ```bash
-cue skills add ruichenrui/citation-verification --profile research
+cue skills add 0xE1337/thesis-figure-skill --profile research
 ```
 
 ---

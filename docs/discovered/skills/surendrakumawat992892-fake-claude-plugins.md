@@ -2,7 +2,7 @@
 title: "Surendrakumawat992892/fake-claude-plugins — Claude Code skill discovered by cue"
 description: "🛠️ Build robust HTTP MCP servers with the Claude Marketplace Plugin Collection and Golang SDK, featuring automation and best practices for efficient developmen"
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 6.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: claude, claudecode, go, marketplace, mcp, mcp-server, sdk, subagents
 
 ## Best fit cue profiles

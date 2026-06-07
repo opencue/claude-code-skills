@@ -2,19 +2,19 @@
 title: "dev-adithya-sn/free-only — Claude Code skill discovered by cue"
 description: "its a claude skill that only gives a free path to solve you're problem"
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [dev-adithya-sn/free-only](https://github.com/dev-adithya-sn/free-only)
 
-**★ 3** · exceptional (score 9.6)
+**★ 3** · exceptional (score 9.5)
 
 > its a claude skill that only gives a free path to solve you're problem
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.6 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.5 based on:
 - ✅ Contains SKILL.md
 - ⭐ 3 stars
 - 🗓️ Last pushed: 2026-06-03

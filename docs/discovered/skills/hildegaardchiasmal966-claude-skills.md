@@ -2,7 +2,7 @@
 title: "Hildegaardchiasmal966/claude-skills — Claude Code skill discovered by cue"
 description: "🎙️ Enhance Claude's capabilities with specialized agent skills for efficient workflows and deep domain expertise."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.7 based on:
 - ⭐ 3 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: agentic-ai, ai, anthropic-ai, anthropic-skills, chemoinformatics, claude, claude-code, claude-desktop, claude-skills, claudeskills, computational-biology, documentation, drug-discovery, genomics, github, mcp-server, metabolomics, scientific-visualization
 
 ## Best fit cue profiles

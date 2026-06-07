@@ -1,17 +1,32 @@
 ---
 title: "Claude Code Skills for cybersecurity"
-description: "4 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "8 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, cybersecurity, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `cybersecurity`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
+> 8 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
+
+---
+
+<a id="nsasoft-nsauditor-ai-agent-skill"></a>
+## 💎 [nsasoft/nsauditor-ai-agent-skill](https://github.com/nsasoft/nsauditor-ai-agent-skill)
+
+**★ 3** · exceptional (score 15.1) · tags: ai-agent, ai-agent-skill, claude, claude-code, copilot
+
+AI Agent Skill for NSAuditor AI — gives any AI coding agent built-in knowledge of NSAuditor's MCP tools, schemas, plugins, and security audit workflows. Works with Claude Code, Cursor, Windsurf, and any MCP-aware agent.
+
+✅ SKILL.md
+
+```bash
+cue skills add nsasoft/nsauditor-ai-agent-skill --profile cybersecurity
+```
 
 ---
 
@@ -30,10 +45,25 @@ cue skills add Zandereins/hydra --profile cybersecurity
 
 ---
 
+<a id="leontynestirredup43-slowmist-security-cc"></a>
+## 💎 [Leontynestirredup43/slowmist-security-cc](https://github.com/Leontynestirredup43/slowmist-security-cc)
+
+**★ 0** · exceptional (score 13) · tags: agent-security, aml, audit, blockchain, claude-code
+
+Audit Claude Code agents with this security framework to detect vulnerabilities, social engineering, and supply chain threats in adversarial environments.
+
+✅ SKILL.md
+
+```bash
+cue skills add Leontynestirredup43/slowmist-security-cc --profile cybersecurity
+```
+
+---
+
 <a id="elementalsouls-claude-osint"></a>
 ## 💎 [elementalsouls/Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT)
 
-**★ 1629** · exceptional (score 11.5) · Python · tags: agentskills, claude, skills
+**★ 1633** · exceptional (score 11.4) · Python · tags: agentskills, claude, skills
 
 Two paired Claude skills · 90+ recon modules · 48 secret-regex patterns · 80+ dorks · 9 read-only credential validators · 27 attack-path templates · 5,500+ lines of structured tradecraft. Drop-in SKILL.md files that turn Claude into a god-mode external recon operator for authorized red-team and bug-bounty engagements.
 
@@ -65,6 +95,32 @@ Secure MCP server for ComfyUI — workflow inspection, path sanitization, rate l
 
 ```bash
 cue skills add hybridindie/comfyui_mcp --profile cybersecurity
+```
+
+---
+
+<a id="saagpatel-mcpaudit"></a>
+## ✨ [saagpatel/MCPAudit](https://github.com/saagpatel/MCPAudit)
+
+**★ 0** · strong (score 6) · Python · tags: ai-safety, audit, cli, developer-tools, mcp
+
+Audit all locally configured MCP servers for permission risks, prompt injection threats, and schema drift
+
+```bash
+cue skills add saagpatel/MCPAudit --profile cybersecurity
+```
+
+---
+
+<a id="gabrielcoghi-rgb-spectre-graph"></a>
+## ✨ [gabrielcoghi-rgb/spectre-graph](https://github.com/gabrielcoghi-rgb/spectre-graph)
+
+**★ 0** · strong (score 5.5) · HTML · tags: ai-agents, ai-plugin, automation, mcp, mcp-server
+
+Spectre AI 2026: Next-Gen OSINT Engine & Autonomous Graph Disambiguation Toolkit
+
+```bash
+cue skills add gabrielcoghi-rgb/spectre-graph --profile cybersecurity
 ```
 
 ---

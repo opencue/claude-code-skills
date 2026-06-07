@@ -1,30 +1,17 @@
 ---
 title: "Claude Code Skills for fleet-control"
-description: "3 community Claude Code skills curated by cue for the fleet-control profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the fleet-control profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, fleet-control, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `fleet-control`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **fleet-control** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **fleet-control** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="aliksir-neko-gundan"></a>
-## 💎 [aliksir/neko-gundan](https://github.com/aliksir/neko-gundan)
-
-**★ 1** · exceptional (score 12.3) · Shell · tags: ai-agent, claude-code, claude-code-skill, multi-agent, orchestration
-
-Multi-agent orchestration framework for Claude Code with hierarchical team structure, quality gates, and bidirectional feedback protocols
-
-```bash
-cue skills add aliksir/neko-gundan --profile fleet-control
-```
 
 ---
 

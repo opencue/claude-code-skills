@@ -2,7 +2,7 @@
 title: "tommy0200/code-screenshot-mcp — Claude Code skill discovered by cue"
 description: "🎨 Generate stunning syntax-highlighted code screenshots with this MCP server, designed for seamless integration with Claude and professional themes."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: ai-powered, ai-tools, automation, claude, claude-code, cli, cli-tool, developer-tools, gemini-ai, mcp, mcp-server, model-context-protocol, nodejs, puppeteer, sharex, typescript, ux-analysis, windows
 
 ## Best fit cue profiles

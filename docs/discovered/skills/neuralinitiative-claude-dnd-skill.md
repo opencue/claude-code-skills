@@ -2,21 +2,21 @@
 title: "neuralinitiative/claude-dnd-skill — Claude Code skill discovered by cue"
 description: "Unofficial D&D 5e Dungeon Master for Claude Code — persistent campaigns, full 5e mechanics, and an optional cinematic display companion for your TV"
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [neuralinitiative/claude-dnd-skill](https://github.com/neuralinitiative/claude-dnd-skill)
 
-**★ 64** · exceptional (score 14.1) · Python · claude-code, claude-skill, dnd, dnd-5e, dungeon-master
+**★ 65** · exceptional (score 14.1) · Python · claude-code, claude-skill, dnd, dnd-5e, dungeon-master
 
 > Unofficial D&D 5e Dungeon Master for Claude Code — persistent campaigns, full 5e mechanics, and an optional cinematic display companion for your TV
 
 ## Why cue indexed it
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 14.1 based on:
-- ⭐ 64 stars
-- 🗓️ Last pushed: 2026-06-06
+- ⭐ 65 stars
+- 🗓️ Last pushed: 2026-06-07
 - 🏷️ Tags: claude-code, claude-skill, dnd, dnd-5e, dungeon-master, tabletop-gaming, tabletop-rpg
 
 ## Best fit cue profiles

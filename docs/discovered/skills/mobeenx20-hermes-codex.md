@@ -2,19 +2,19 @@
 title: "mobeenx20/hermes-codex — Claude Code skill discovered by cue"
 description: "Scoped project rules for Hermes Agent: .hermes/rules/ with YAML path-scoping, equivalent to Claude Code's .claude/rules/ but for Hermes Agent."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
 # 🔹 [mobeenx20/hermes-codex](https://github.com/mobeenx20/hermes-codex)
 
-**★ 1** · potential (score 4.3) · Python · cluade-code, hermes-agent, hermes-codex, hermes-core, hermes-plugin
+**★ 1** · potential (score 4.2) · Python · cluade-code, hermes-agent, hermes-codex, hermes-core, hermes-plugin
 
 > Scoped project rules for Hermes Agent: .hermes/rules/ with YAML path-scoping, equivalent to Claude Code's .claude/rules/ but for Hermes Agent.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.3 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.2 based on:
 - ⭐ 1 stars
 - 🗓️ Last pushed: 2026-06-04
 - 🏷️ Tags: cluade-code, hermes-agent, hermes-codex, hermes-core, hermes-plugin, hermes-skill, skill-md
