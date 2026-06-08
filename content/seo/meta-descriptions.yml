@@ -3,9 +3,8 @@
 
 pages:
   home: >
-    cuecards pins an AI agent profile to each project directory. Claude Code,
-    Codex, and 8 more agents load only that project's skills, MCPs, and
-    plugins. MIT, zero telemetry. npm install -g cue-ai
+    cuecards pins an AI agent profile to each directory. Claude Code, Codex
+    & 8 more agents load only that project's skills + MCPs. npm i -g cue-ai
 
   getting_started: >
     Install cue-ai and pin your first profile in under 5 minutes. Works with
@@ -17,19 +16,16 @@ pages:
     Windows. npm install -g cue-ai or one-line curl installer.
 
   concepts_profiles: >
-    A cue profile is a YAML file declaring which skills, MCPs, and plugins
-    to load for a project type. Profiles inherit from core and compose
-    with + for hybrid setups.
+    A cue profile declares which skills, MCPs, and plugins to load for a
+    project type. Profiles inherit from core; compose with + for hybrid setups.
 
   concepts_skills: >
-    cue skills are Markdown files that give AI agents task-specific
-    knowledge. cue ships 110+ skills; add your own or install community
-    packs. Scoped per profile so irrelevant skills never load.
+    cue skills are Markdown files that give AI agents task-specific knowledge.
+    Ships 110+ skills. Scoped per profile — irrelevant skills never load.
 
   concepts_mcp: >
-    cue materialises only the MCP servers declared in the active profile —
-    no global MCP sprawl. Each project's claude session sees exactly the
-    servers it needs.
+    cue loads only the MCP servers in the active profile — no global sprawl.
+    Each project's claude sees exactly the servers it needs.
 
   guide_claude_code: >
     Use cuecards with Claude Code to scope skills, MCPs, and plugins
@@ -43,20 +39,18 @@ pages:
 
   compare_switcher: >
     cuecards vs claude-code-switcher: cue adds skill + plugin isolation and
-    profile inheritance. The switcher handles auth/MCP config switching only.
-    Detailed side-by-side comparison.
+    inheritance. The switcher handles MCP/auth config only. Side-by-side
+    comparison.
 
   compare_dotfiles: >
-    Why cuecards beats dotfiles for managing Claude Code: per-directory
-    isolation, inheritance, and a single-command install vs manual symlinks
-    and global config edits.
+    Why cuecards beats dotfiles for Claude Code config: per-directory
+    isolation, inheritance, and one-command install vs manual symlinks.
 
   use_case_agency: >
-    Agencies using Claude Code can give each client project its own cue
-    profile — right skills, MCPs, and persona loaded automatically. No
-    cross-project contamination.
+    Agencies can give each client project its own cue profile — right skills,
+    MCPs, and persona loaded automatically. No cross-project contamination.
 
   faq: >
-    Answers to the most common questions about cuecards: what it is, how
-    to install it, what .cue.profile does, how it reduces token costs, and
-    how it compares to alternatives.
+    Common questions about cuecards: what it is, how to install it, what
+    .cue.profile does, how it reduces token costs, and how it compares to
+    alternatives.
