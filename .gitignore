@@ -37,3 +37,7 @@ awesome-clis/
 vendor/
 .gstack/
 vibecode-pro-max-kit/
+
+# user-local skill clone (nested .git) — was force-added as a stray gitlink with no
+# .gitmodules URL, which broke CI submodule checkout on every job (PR #49). Keep ignored.
+.agents/skills/hirelens-showcase/
