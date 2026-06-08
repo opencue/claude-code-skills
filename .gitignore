@@ -38,6 +38,9 @@ vendor/
 .gstack/
 vibecode-pro-max-kit/
 
-# user-local skill clone (nested .git) — was force-added as a stray gitlink with no
-# .gitmodules URL, which broke CI submodule checkout on every job (PR #49). Keep ignored.
+# user-local skill clones (nested .git) — force-added as stray gitlinks with no
+# .gitmodules URL, which broke CI submodule checkout on every job (PR #49/#51).
+# jdfit + job-hunter also live canonically under resources/skills/skills/career/.
 .agents/skills/hirelens-showcase/
+.agents/skills/jdfit/
+.agents/skills/job-hunter/
