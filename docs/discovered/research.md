@@ -1,59 +1,42 @@
 ---
 title: "Claude Code Skills for research"
-description: "3 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `research`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **research** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **research** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="cyanheads-clinicaltrialsgov-mcp-server"></a>
-## 💎 [cyanheads/clinicaltrialsgov-mcp-server](https://github.com/cyanheads/clinicaltrialsgov-mcp-server)
+<a id="0xe1337-thesis-figure-skill"></a>
+## 💎 [0xE1337/thesis-figure-skill](https://github.com/0xE1337/thesis-figure-skill)
 
-**★ 78** · exceptional (score 16.3) · TypeScript · tags: ai-agent, bioinformatics, clinical-trials, clinicaltrials-gov, cyanheads
+**★ 88** · exceptional (score 10.7) · TeX · tags: academic-paper, ai-tools, claude-skill, diagram, figure-generation
 
-MCP server for the ClinicalTrials.gov v2 API. Search trials, retrieve study details and results, and match patients to eligible trials.
+🎓 Claude Skill: Paste your paper text, auto-generate publication-ready LaTeX/TikZ diagrams. 粘贴论文文案，自动生成学术级配图。
 
 ```bash
-cue skills add cyanheads/clinicaltrialsgov-mcp-server --profile research
+cue skills add 0xE1337/thesis-figure-skill --profile research
 ```
 
 ---
 
-<a id="xuenerissa-png-nerissa-competitive-research"></a>
-## 💎 [xuenerissa-png/nerissa-competitive-research](https://github.com/xuenerissa-png/nerissa-competitive-research)
+<a id="aemro-motors-popper-scope"></a>
+## ✨ [aemro-motors/popper-scope](https://github.com/aemro-motors/popper-scope)
 
-**★ 0** · exceptional (score 12) · tags: ai-skills, anti-hallucination, claude-code, claude-skill, competitive-research
+**★ 0** · strong (score 7.5) · HTML · tags: claude-code, claude-code-plugin, claude-code-plugins, claude-code-plugins-marketplace, claude-code-skill
 
-Disciplined competitor research SOP. A Claude Skill that refuses lazy AI shortcuts — every funding number needs 2 sources, every customer overlap needs verification, every recommendation needs 6-dimension scoring.
-
-✅ SKILL.md
+Popper Probe Repo: Automated Vulnerability Scanner 2026 - Smart GitHub Code Analysis
 
 ```bash
-cue skills add xuenerissa-png/nerissa-competitive-research --profile research
-```
-
----
-
-<a id="veyralabsgroup-venture-analyst"></a>
-## 💎 [veyralabsgroup/venture-analyst](https://github.com/veyralabsgroup/venture-analyst)
-
-**★ 0** · exceptional (score 10.8) · Python · tags: ai-agent-skill, claude-code, competitor-analysis, idea-validation, lean-startup
-
-Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments.
-
-✅ SKILL.md
-
-```bash
-cue skills add veyralabsgroup/venture-analyst --profile research
+cue skills add aemro-motors/popper-scope --profile research
 ```
 
 ---

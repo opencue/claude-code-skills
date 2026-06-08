@@ -128,6 +128,8 @@ skills:
     - plan/autoplan             # /autoplan — chains office-hours → ceo → eng on demand
     # ── Review ──
     - review/code-review-deep   # /code-review-deep — two-pass diff review (sole baseline reviewer)
+    # ── Security ──
+    - security/trivy-scan       # /trivy-scan — pre-merge supply-chain gate (Trivy: dependency CVEs + secrets + IaC misconfig). Hard-blocks HIGH/CRITICAL. Invoked by code-review-deep Pass 0 + ship Step 9.0.
     # ── Browser ──
     - browser/lightpanda        # Lightpanda — fast headless browser for scraping, DOM dump, CDP. Pairs with lightpanda MCP.
     # ── Source-fetching ──
@@ -154,7 +156,6 @@ skills:
     # github-actions-docs dropped from core 2026-06-01 — CI-docs is not universal
     # baseline. Add it back per-profile (ops, the deploy-touching ones) if needed.
 mcps:
-  - cue-tty-watch    # Claude's eyes inside X displays / tmux panes (screenshot, capture-pane, send-keys)
   - lightpanda       # Fast headless browser MCP — fetch/render/scrape URLs without Chromium. Pairs with browser/lightpanda skill.
   - context7         # Up-to-date, version-specific library docs (Upstash @upstash/context7-mcp). No API key needed; set CONTEXT7_API_KEY for higher limits. Pairs with tools/context7 skill.
 plugins:

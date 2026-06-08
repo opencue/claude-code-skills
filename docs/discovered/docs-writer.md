@@ -1,46 +1,29 @@
 ---
 title: "Claude Code Skills for docs-writer"
-description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-04
+updated: 2026-06-07
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `docs-writer`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="yanqiyang62-wiki-vis"></a>
-## 💎 [yanqiyang62/wiki-vis](https://github.com/yanqiyang62/wiki-vis)
+<a id="amri854-obsidian-mcp-server"></a>
+## ✨ [Amri854/obsidian-mcp-server](https://github.com/Amri854/obsidian-mcp-server)
 
-**★ 1** · exceptional (score 13.3) · HTML · tags: claude-code, claude-code-skill, documentation, documentation-generator, markdown
+**★ 0** · strong (score 6.5) · TypeScript · tags: claude, claude-desktop, cursor, knowledge-base, llm
 
-Turn a codebase into a single, self-contained, good-looking wiki.html — a standard project-wiki solution and Claude Code skill (sidebar nav, collapsible sections, Mermaid diagrams, light/dark themes).
-
-✅ SKILL.md
+🗂️ Boost your Obsidian experience with a powerful Model Context Protocol server for vault access, knowledge graph analysis, and seamless integrations.
 
 ```bash
-cue skills add yanqiyang62/wiki-vis --profile docs-writer
-```
-
----
-
-<a id="wxggzz-project-to-study"></a>
-## 💎 [wxggzz/project-to-study](https://github.com/wxggzz/project-to-study)
-
-**★ 0** · exceptional (score 13) · tags: ai-agents, anthropic, claude, claude-code, claude-skill
-
-A Claude Code skill that turns any codebase into a structured Markdown study-docs package (operation, deployment, learning, architecture, API/data, troubleshooting) with an evidence trail.
-
-✅ SKILL.md
-
-```bash
-cue skills add wxggzz/project-to-study --profile docs-writer
+cue skills add Amri854/obsidian-mcp-server --profile docs-writer
 ```
 
 ---

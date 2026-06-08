@@ -2,7 +2,7 @@
 title: "purrsZ/claude-netmon — Claude Code skill discovered by cue"
 description: "A tiny macOS HUD that measures the REAL latency of your proxy path to the Claude API (floating desktop widget or menu-bar item). Stops your proxy from lying abo"
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 

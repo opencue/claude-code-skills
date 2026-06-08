@@ -17,7 +17,6 @@ skills:
     - github/github
     - github/gh-fix-ci
     - review/security-review
-    - secrets/envoult
     - gstack/setup-deploy
     - private/myvps
     - hostinger/dns
@@ -98,7 +97,7 @@ persona: |
   | DNS, domains, VPS firewall, shared hosting, TLS       | hostinger/*           |
   | Self-hosted VPS schema and server ops                 | private/myvps         |
   | Repo automation, Actions, CI failures                 | github/*              |
-  | Secrets and env injection                             | secrets/envoult       |
+  | Secrets and env injection                             | Coolify env + envoult MCP |
   | One-shot deploy bootstrap                             | gstack/setup-deploy   |
   | Diff and dependency security audit                    | review/security-review|
   | Drive, Docs, Sheets, Slides, Calendar                 | google-workspace/*    |

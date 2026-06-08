@@ -1,31 +1,33 @@
 ---
 title: "Discovered Claude Code Skills"
-description: "100 community Claude Code skills curated by cue across 11 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
+description: "100 community Claude Code skills curated by cue across 13 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, skills, mcp, ai-agents, marketplace]
 ---
 
 # 🎯 Discovered Claude Code Skills
 
-> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **11 profiles**.
-> Last updated: 2026-06-05 · refreshed nightly via GitHub Code Search.
+> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **13 profiles**.
+> Last updated: 2026-06-07 · refreshed nightly via GitHub Code Search.
 
 ## Browse by profile
 
 | Profile | Skills | Sample |
 |---|---|---|
-| [**core**](./core.md) | 61 | `antigravity-workspace-template`, `hermes-agent`, `finance-assistant` |
-| [**backend**](./backend.md) | 20 | `x-twitter-scraper`, `clinicaltrialsgov-mcp-server`, `n8n` |
-| [**cybersecurity**](./cybersecurity.md) | 5 | `nsauditor-ai-agent-skill`, `hydra`, `Claude-OSINT` |
-| [**creative-media**](./creative-media.md) | 5 | `claude-wechat-bridge-with-files`, `social-media-scraper-skill`, `AI-Diagram-Prototype-Generator-MCP-Server-` |
-| [**frontend**](./frontend.md) | 4 | `suanfish-design-system`, `lottie-marketplace`, `storybook-mcp-server` |
-| [**research**](./research.md) | 3 | `clinicaltrialsgov-mcp-server`, `nerissa-competitive-research`, `venture-analyst` |
+| [**core**](./core.md) | 63 | `context-mode`, `antigravity-workspace-template`, `majia-guanyuan` |
+| [**backend**](./backend.md) | 13 | `Vibe-Agent`, `skillz`, `google-docs-mcp-server` |
+| [**cybersecurity**](./cybersecurity.md) | 8 | `nsauditor-ai-agent-skill`, `hydra`, `slowmist-security-cc` |
+| [**frontend**](./frontend.md) | 5 | `suanfish-design-system`, `lottie-marketplace`, `ionik-capacitor-flux-patterns` |
+| [**creative-media**](./creative-media.md) | 3 | `claude-wechat-bridge-with-files`, `ai-atelie`, `redesigned-pancake` |
+| [**marketing**](./marketing.md) | 2 | `brand-launchpad`, `sticky-switcher-funnel-playbook` |
+| [**research**](./research.md) | 2 | `thesis-figure-skill`, `popper-scope` |
 | [**niche**](./niche.md) | 2 | `grant-thinking-skill`, `grant-thinking-cn-biology` |
-| [**fleet-control**](./fleet-control.md) | 2 | `superx-agentic-orchestrator`, `rolepod` |
-| [**python**](./python.md) | 1 | `agent-airlock` |
-| [**video**](./video.md) | 1 | `social-media-scraper-skill` |
-| [**threejs**](./threejs.md) | 1 | `oh-my-web` |
+| [**fleet-control**](./fleet-control.md) | 2 | `superx-agentic-orchestrator`, `multi-agent-revenue-orchestrator` |
+| [**video**](./video.md) | 1 | `video-highlight-skill` |
+| [**python**](./python.md) | 1 | `skillz` |
+| [**nextjs**](./nextjs.md) | 1 | `personal-knowledge-nexus` |
+| [**docs-writer**](./docs-writer.md) | 1 | `obsidian-mcp-server` |
 
 ## How scoring works
 

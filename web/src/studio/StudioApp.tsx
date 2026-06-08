@@ -22,11 +22,12 @@ import { PermissionsView } from "./views/Permissions";
 import { EnvView } from "./views/Env";
 import { SettingsView } from "./views/Settings";
 import { ProfilesView } from "./views/Profiles";
+import { ApiView } from "./views/Api";
 import { OfflineBanner } from "./views/OfflineBanner";
 
 export type View =
   | "explorer" | "dashboard" | "profiles" | "search" | "merge"
-  | "workflows" | "mcps" | "plugins" | "market" | "hooks" | "permissions" | "env" | "settings";
+  | "workflows" | "mcps" | "plugins" | "market" | "hooks" | "permissions" | "env" | "api" | "settings";
 
 export interface OpenTarget { kind: "skill" | "mcp" | "plugin" | "command"; key: string; ts: number; highlightCli?: string }
 
@@ -45,6 +46,7 @@ const RAIL_ICONS: Record<string, string> = {
   panel: "M4 4h16v16H4z M9 4v16",
   gear: "M12 9a3 3 0 100 6 3 3 0 000-6zM19 12a7 7 0 00-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 00-1.7-1L14.4 2H9.6L9.2 4.6a7 7 0 00-1.7 1l-2.4-1-2 3.4L5.1 11a7 7 0 000 2l-2 1.6 2 3.4 2.4-1a7 7 0 001.7 1l.4 2.6h4.8l.4-2.6a7 7 0 001.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z",
   key: "M7 18a3 3 0 100-6 3 3 0 000 6z M9.2 13.8 19 4 M16 5l2 2 M18.5 5.5l1.5 1.5",
+  api: "M8 8l-4 4 4 4M16 8l4 4-4 4M13 6l-2 12",
 };
 
 function Ico({ name }: { name: string }) {
@@ -256,6 +258,7 @@ export function StudioApp() {
       case "hooks": return <>automation · <b>hooks</b></>;
       case "permissions": return <>security · <b>permissions</b></>;
       case "env": return <>secrets · <b>environment</b></>;
+      case "api": return <>account · <b>API tokens</b></>;
       case "search": return <>search · <b>workspace</b></>;
       case "settings": return <>preferences · <b>settings</b></>;
       default: return <>workspace · <b>overview</b></>;
@@ -313,11 +316,16 @@ export function StudioApp() {
           <div className={"rail-btn" + (view === "hooks" ? " on" : "")} data-label="Hooks" onClick={() => setView("hooks")}><Ico name="hook" /><span className="rail-label">Hooks</span></div>
           <div className={"rail-btn" + (view === "permissions" ? " on" : "")} data-label="Permissions" onClick={() => setView("permissions")}><Ico name="lock" /><span className="rail-label">Permissions</span></div>
           <div className={"rail-btn" + (view === "env" ? " on" : "")} data-label="Environment" onClick={() => setView("env")}><Ico name="key" /><span className="rail-label">Environment</span></div>
+          <div className={"rail-btn" + (view === "api" ? " on" : "")} data-label="API tokens" onClick={() => setView("api")}><Ico name="api" /><span className="rail-label">API tokens</span></div>
           <div className={"rail-btn" + (view === "settings" ? " on" : "")} data-label="Settings" onClick={() => setView("settings")}><Ico name="gear" /><span className="rail-label">Settings</span></div>
         </div>
 
         <div className="view">
-          {offline ? (
+          {view === "api" ? (
+            // Auth/token management is independent of the local dashboard
+            // server, so it stays available even when that server is offline.
+            <ApiView />
+          ) : offline ? (
             <OfflineBanner message={(status.error as Error).message} />
           ) : (
             <>

@@ -2,19 +2,19 @@
 title: "CheekyCodexConjurer/prompttaint-ci — Claude Code skill discovered by cue"
 description: "CI guardrail that finds prompt-injection paths in agentic GitHub workflows before Claude, Codex, or Copilot read untrusted text."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
 # 🔹 [CheekyCodexConjurer/prompttaint-ci](https://github.com/CheekyCodexConjurer/prompttaint-ci)
 
-**★ 1** · potential (score 4.2) · TypeScript
+**★ 1** · potential (score 4.1) · TypeScript
 
 > CI guardrail that finds prompt-injection paths in agentic GitHub workflows before Claude, Codex, or Copilot read untrusted text.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.2 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 4.1 based on:
 - ⭐ 1 stars
 - 🗓️ Last pushed: 2026-06-01
 - 🏷️ Tags: (none)

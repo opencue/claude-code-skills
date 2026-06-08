@@ -2,7 +2,7 @@
 title: "Claude Code Skills for video"
 description: "1 community Claude Code skills curated by cue for the video profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, video, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,17 @@ tags: [claude-code, video, skills, mcp, ai-agents]
 
 ---
 
-<a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
-## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
+<a id="inhai-wiki-video-highlight-skill"></a>
+## 💎 [inhai-wiki/video-highlight-skill](https://github.com/inhai-wiki/video-highlight-skill)
 
-**★ 2** · exceptional (score 8.5) · tags: ai, automation, claude-code, claude-skill, content-analysis
+**★ 2** · exceptional (score 14) · Python · tags: agent-skill, awesome, claude, claude-skill, codex
 
-Extract and summarize social media content from platforms like Instagram, TikTok, X, and YouTube using Claude Code.
+AI video highlight skill for agents: analyze videos, cut clips with FFmpeg, export subtitles, and generate a shareable recap page.
+
+✅ SKILL.md
 
 ```bash
-cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile video
+cue skills add inhai-wiki/video-highlight-skill --profile video
 ```
 
 ---

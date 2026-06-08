@@ -2,7 +2,7 @@
 title: "nvk/agentnoise — Claude Code skill discovered by cue"
 description: "Chat with local coding agents through White Noise. agentnoise is a native desktop helper for using a phone running White Noise as the control surface for local "
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5.4 based on:
 - ⭐ 17 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-06
 - 🏷️ Tags: agent, brew, chat, im, mls, nostr, whitenoise
 
 ## Best fit cue profiles

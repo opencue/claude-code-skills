@@ -2,7 +2,7 @@
 title: "Claude Code Skills for python"
 description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-07
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,15 @@ tags: [claude-code, python, skills, mcp, ai-agents]
 
 ---
 
-<a id="sattyamjjain-agent-airlock"></a>
-## 💎 [sattyamjjain/agent-airlock](https://github.com/sattyamjjain/agent-airlock)
+<a id="mugoherick12-boop-skillz"></a>
+## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
 
-**★ 6** · exceptional (score 9.6) · Python · tags: ai-agents, ai-security, crewai, firewall, langchain
+**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
 
-Open-source security firewall for AI agents — validates tool calls, strips ghost arguments, enforces type safety, PII masking, RBAC, cost tracking & sandbox isolation. Works with LangChain, OpenAI Agents SDK, PydanticAI & CrewAI.
+🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
 
 ```bash
-cue skills add sattyamjjain/agent-airlock --profile python
+cue skills add mugoherick12-boop/skillz --profile python
 ```
 
 ---

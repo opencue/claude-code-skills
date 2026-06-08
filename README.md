@@ -467,6 +467,26 @@ cuecards is the only one that treats agent expertise as a composable system.
 
 ---
 
+## api.
+
+cuecards.cc has free public accounts and per-user API tokens. Register in the
+**API tokens** view, mint a token (shown once), and call the API with a Bearer
+header:
+
+```bash
+curl https://cuecards.cc/api/v1/me \
+  -H "Authorization: Bearer <your-token>"
+# -> { "ok": true, "data": { "id": "...", "email": "...", "name": "..." } }
+```
+
+Auth is [BetterAuth](https://better-auth.com) (email + password) on Vercel
+serverless functions backed by Neon Postgres. Setup, env vars, the migration,
+local dev, and deploy steps live in [`web/AUTH.md`](./web/AUTH.md).
+
+<br>
+
+---
+
 ## deep dives.
 
 The bits that didn't fit on the landing page:
