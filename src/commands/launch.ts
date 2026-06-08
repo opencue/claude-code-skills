@@ -29,8 +29,9 @@ import {
 import { loadProfile, listProfiles, listFeaturedProfiles, parseProfileSelector } from "../lib/profile-loader";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 import { DIVIDER_PREFIX, runPicker, type PickerOption, type ProfileTally } from "../lib/picker";
-import { materializeRuntime, type McpServerConfig } from "../lib/runtime-materializer";
-import { resolveLocalSkill, listAllSkillIds } from "../lib/resolver-local";
+import { materializeRuntime } from "../lib/runtime-materializer";
+import { resolveLocalSkill } from "../lib/resolver-local";
+import { expandSkillWildcards, loadMcpRegistry, resolveClaudeCredentialsSource as resolveSharedClaudeCredentialsSource } from "../lib/runtime-install";
 import { detectKittyTerminal, kittyPlaceholderLabel, transmitKittyImage } from "../lib/kitty-image";
 import { computeStats } from "../lib/analytics";
 import { detectProfileV2, type DetectionResultV2 } from "../lib/auto-detect";
@@ -281,16 +282,7 @@ function announceTmuxProfile(
  * Used by both the launch hot path and the picker `details` callback so the
  * shown summary matches what materializeRuntime will actually link.
  */
-async function expandWildcards(profile: ResolvedProfile): Promise<void> {
-  if (!profile.skills.local.some((s) => s.id === "*/*")) return;
-  const allIds = await listAllSkillIds();
-  const wildcard = profile.skills.local.find((s) => s.id === "*/*")!;
-  const existing = new Set(profile.skills.local.filter((s) => s.id !== "*/*").map((s) => s.id));
-  profile.skills.local = [
-    ...profile.skills.local.filter((s) => s.id !== "*/*"),
-    ...allIds.filter((id) => !existing.has(id)).map((id) => ({ ...wildcard, id })),
-  ];
-}
+const expandWildcards = expandSkillWildcards;
 
 /**
  * Compact human-readable summary of what a profile would load. Each returned
@@ -1061,52 +1053,6 @@ async function listProfileOptions(pinnedProfile?: string): Promise<PickerOption[
   return buildPickerSections(defaultOpt, sorted, recent, 3, Date.now(), suggested, featured);
 }
 
-async function loadMcpRegistry(agent: "claude-code" | "codex"): Promise<Record<string, McpServerConfig>> {
-  const root = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(
-    new URL(import.meta.url).pathname,
-    "..",
-    "..",
-    "..",
-  );
-  // Files to merge, in priority order. The master `claude.sanitized.json` wins
-  // on key collisions; `claude_runtime.sanitized.json` is the live snapshot
-  // captured from the user's actual `~/.claude.json` (covers servers
-  // registered at runtime but not yet promoted to the master registry).
-  // Without this merge, profiles like `marketing` that reference
-  // `reddit`/`google-ads-mcp`/`meta-ads`/`Higgsfield` (runtime-only entries)
-  // would silently drop those MCPs at materialize time.
-  const files = agent === "claude-code"
-    ? ["claude_runtime.sanitized.json", "claude.sanitized.json"]
-    : ["codex.sanitized.json"];
-
-  const merged: Record<string, McpServerConfig> = {};
-  for (const file of files) {
-    const path = join(root, "resources", "mcps", "configs", file);
-    try {
-      const text = await readFile(path, "utf8");
-      const raw = JSON.parse(text) as { servers?: Record<string, McpServerConfig> };
-      for (const [k, v] of Object.entries(raw.servers ?? {})) {
-        // First file wins (claude_runtime first, then claude master).
-        // We want master to win, so only set if not already present.
-        if (!(k in merged)) merged[k] = v;
-      }
-    } catch { /* file missing — skip */ }
-  }
-  // Second pass: let the master registry override the runtime snapshot
-  // (master is the curated source of truth; runtime is just a fallback).
-  const masterPath = join(root, "resources", "mcps", "configs",
-    agent === "claude-code" ? "claude.sanitized.json" : "codex.sanitized.json");
-  try {
-    const text = await readFile(masterPath, "utf8");
-    const raw = JSON.parse(text) as { servers?: Record<string, McpServerConfig> };
-    for (const [k, v] of Object.entries(raw.servers ?? {})) {
-      merged[k] = v;
-    }
-  } catch (err) { debug("launch:master-config", err); /* keep runtime fallbacks */ }
-
-  return merged;
-}
-
 async function readSharedClaudeMd(profile?: { name: string; inheritanceChain?: string[] }): Promise<string> {
   const root = process.env.CUE_REPO_ROOT ?? process.env.SOUL_REPO_ROOT ?? resolve(
     new URL(import.meta.url).pathname, "..", "..", "..",
@@ -1240,56 +1186,7 @@ async function findRealBinary(name: string): Promise<string | null> {
  * accountUuid and copies the freshest one back to source.
  */
 async function resolveClaudeCredentialsSource(): Promise<string> {
-  const picked = await pickClaudeCredentialsSource();
-  // Heal source from freshest sibling runtime (if any). Silent best-effort.
-  try {
-    const { syncFreshestToSource } = await import("../lib/credentials-sync");
-    const runtimeRoot = join(configDir(), "runtime");
-    const result = await syncFreshestToSource(picked, runtimeRoot);
-    if (result.synced) {
-      // Tiny breadcrumb so users can see when the heal kicked in. Stays on
-      // stderr so it doesn't pollute pipelines or `claude --print` output.
-      process.stderr.write(
-        `▸ cue: refreshed source credentials from a sibling runtime (rotated refresh-token healed)\n`,
-      );
-    }
-  } catch (err) { debug("launch:runtime-heal", err); /* best-effort — never blocks launch */ }
-  return picked;
-}
-
-async function pickClaudeCredentialsSource(): Promise<string> {
-  if (process.env.CLAUDE_CONFIG_DIR) return process.env.CLAUDE_CONFIG_DIR;
-
-  const homeClaude = join(homedir(), ".claude");
-  if (existsSync(join(homeClaude, ".credentials.json"))) return homeClaude;
-
-  try {
-    const { spawnSync } = await import("node:child_process");
-    const { statSync } = await import("node:fs");
-    const res = spawnSync("authmux", ["parallel", "--list", "--json"], {
-      encoding: "utf8", timeout: 3000, stdio: ["ignore", "pipe", "pipe"],
-    });
-    if (res.status === 0 && res.stdout) {
-      const parsed = JSON.parse(res.stdout) as { data?: { profiles?: Array<{ name: string; configDir: string }> } };
-      const profiles = parsed?.data?.profiles ?? [];
-      const withMtime = profiles
-        .map((p) => {
-          const credsPath = join(p.configDir, ".credentials.json");
-          let mtime = 0;
-          try { mtime = statSync(credsPath).mtimeMs; } catch { /* missing */ }
-          return { ...p, mtime };
-        })
-        .filter((p) => p.mtime > 0)
-        .sort((a, b) => b.mtime - a.mtime);
-      const pick = withMtime[0];
-      if (pick) {
-        process.stderr.write(`▸ cue: inheriting auth from authmux profile "${pick.name}"\n`);
-        return pick.configDir;
-      }
-    }
-  } catch { /* authmux not installed or query failed — fall through */ }
-
-  return homeClaude;
+  return resolveSharedClaudeCredentialsSource({ healFromRuntime: true });
 }
 
 // ---------------------------------------------------------------------------

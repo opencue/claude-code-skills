@@ -357,10 +357,14 @@ cue cost --compare            # every profile ranked vs the `full` baseline
 
 # System dependencies
 cue cli install --all --yes   # install every missing CLI
+cue install <profile>         # dry-run: prepare Claude/Codex runtimes
+cue install <profile> --with-clis --yes
+cue install repo owner/repo --profile <profile> --yes
 
 # Quality + discovery
 cue lint-skill <path> [--fix]            # validate SKILL.md against R001-R008
 cue marketplace discover --cli-aware     # find skill repos on GitHub
+cue install doctor --all-profiles        # audit prepared runtimes
 cue failures --propose [profile]         # Claude drafts profile improvements
 
 # Audit

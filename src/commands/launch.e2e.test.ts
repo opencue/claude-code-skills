@@ -38,12 +38,17 @@ function cue(args: string[], opts: { cwd?: string; env?: Record<string, string> 
 
 describe.skipIf(!BUN_SPAWNABLE)("cue launch e2e", () => {
   let tmpDir: string;
+  let oldXdgConfigHome: string | undefined;
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(join(tmpdir(), "cue-e2e-launch-"));
+    oldXdgConfigHome = process.env.XDG_CONFIG_HOME;
+    process.env.XDG_CONFIG_HOME = join(tmpDir, "xdg");
   });
 
   afterEach(async () => {
+    if (oldXdgConfigHome === undefined) delete process.env.XDG_CONFIG_HOME;
+    else process.env.XDG_CONFIG_HOME = oldXdgConfigHome;
     await rm(tmpDir, { recursive: true, force: true });
   });
 

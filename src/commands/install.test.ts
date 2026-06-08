@@ -49,7 +49,7 @@ describe("cue install", () => {
         dryRun: boolean;
         profiles: string[];
         agents: string[];
-        actions: Array<{ profile: string; agent: string; runtimeDir: string; status: string }>;
+        actions: Array<{ profile: string; agent: string; targetDir: string; status: string }>;
       };
       expect(out.dryRun).toBe(true);
       expect(out.profiles).toEqual(["core"]);
@@ -58,7 +58,7 @@ describe("cue install", () => {
         ["core", "claude-code", "planned"],
         ["core", "codex", "planned"],
       ]);
-      expect(out.actions[0]!.runtimeDir).toContain(join(root, "cue", "runtime", "core"));
+      expect(out.actions[0]!.targetDir).toContain(join(root, "cue", "runtime", "core"));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -105,6 +105,69 @@ describe("cue install", () => {
       expect(out.cliResults[0]!.profile).toBe("core");
       expect(out.cliResults[0]!.code).toBe(0);
       expect(out.cliResults[0]!.plan?.plans || out.cliResults[0]!.plan?.text).toBeTruthy();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("external agents require explicit scope and stay dry-run by default", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cue-install-test-"));
+    const target = join(root, "target");
+    process.env.XDG_CONFIG_HOME = root;
+    try {
+      const { stdout, value } = await capture(() => installRun(["core", "--agents", "cursor", "--dir", target, "--json"]));
+      expect(value).toBe(0);
+      const out = JSON.parse(stdout) as {
+        dryRun: boolean;
+        agents: string[];
+        actions: Array<{ agent: string; targetDir: string; status: string }>;
+      };
+      expect(out.dryRun).toBe(true);
+      expect(out.agents).toEqual(["cursor"]);
+      expect(out.actions[0]).toMatchObject({ agent: "cursor", targetDir: target, status: "planned" });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("doctor JSON reports profile runtime checks", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cue-install-test-"));
+    process.env.XDG_CONFIG_HOME = root;
+    try {
+      const { stdout } = await capture(() => installRun(["doctor", "core", "--json"]));
+      const out = JSON.parse(stdout) as { reports: Array<{ profile: string; agent: string; missingMcps: string[] }> };
+      expect(out.reports.length).toBeGreaterThan(0);
+      expect(out.reports[0]!.profile).toBe("core");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("repo installer dry-run describes clone without network", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cue-install-test-"));
+    process.env.XDG_CONFIG_HOME = root;
+    try {
+      const { stdout, value } = await capture(() => installRun(["repo", "garrytan/gstack", "--profile", "maker", "--json"]));
+      expect(value).toBe(0);
+      const out = JSON.parse(stdout) as { dryRun: boolean; repo: string; profile: string; discoveredSkills: string[] };
+      expect(out.dryRun).toBe(true);
+      expect(out.repo).toBe("garrytan/gstack");
+      expect(out.profile).toBe("maker");
+      expect(out.discoveredSkills).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("repo installer accepts flags before the repo argument", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cue-install-test-"));
+    process.env.XDG_CONFIG_HOME = root;
+    try {
+      const { stdout, value } = await capture(() => installRun(["repo", "--profile", "maker", "garrytan/gstack", "--json"]));
+      expect(value).toBe(0);
+      const out = JSON.parse(stdout) as { repo: string; profile: string };
+      expect(out.repo).toBe("garrytan/gstack");
+      expect(out.profile).toBe("maker");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

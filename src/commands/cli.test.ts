@@ -95,11 +95,27 @@ describe("cue cli install", () => {
 
   test("install <known-tool> dry-run produces apt or pip plan", async () => {
     const { stdout } = await capture(() => cliRun(["install", "nmap", "--json"]));
-    const out = JSON.parse(stdout) as { plans: Array<{ cli: string; mode: string; command?: string }> };
+    const out = JSON.parse(stdout) as { plans: Array<{ cli: string; mode: string; command?: string; argv?: string[] }> };
     expect(out.plans).toHaveLength(1);
     expect(out.plans[0]!.cli).toBe("nmap");
     // On Linux with apt available, mode should be apt; otherwise some other available manager.
     expect(["apt", "brew", "dnf", "pacman", "winget", "manual"]).toContain(out.plans[0]!.mode);
+    if (out.plans[0]!.command) expect(out.plans[0]!.argv?.length).toBeGreaterThan(0);
+  });
+
+  test("script recipes are manual unless explicitly allowed", async () => {
+    const blocked = JSON.parse((await capture(() => cliRun(["install", "metasploit", "--json"]))).stdout) as {
+      plans: Array<{ mode: string; command?: string; argv?: string[]; hint?: string }>;
+    };
+    expect(blocked.plans[0]!.mode).toBe("manual");
+    expect(blocked.plans[0]!.command).toBeUndefined();
+    expect(blocked.plans[0]!.hint).toContain("--allow-scripts");
+
+    const allowed = JSON.parse((await capture(() => cliRun(["install", "metasploit", "--allow-scripts", "--json"]))).stdout) as {
+      plans: Array<{ mode: string; command?: string; argv?: string[] }>;
+    };
+    expect(allowed.plans[0]!.mode).toBe("script");
+    expect(allowed.plans[0]!.argv?.[0]).toBe("bash");
   });
 
   test("install <unknown-tool> dry-run reports no recipe", async () => {
