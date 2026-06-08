@@ -2,7 +2,7 @@
 title: "TinaDu-AI/claude-wechat-bridge-with-files — Claude Code skill discovered by cue"
 description: "Claude Code ↔ WeChat bridge with image/file/voice/video patch — files arrive at ~/.wechat-claude/media/ and inject as [图片:path] / [文件:path]"
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, skill, creative-media]
 ---
 

@@ -2,7 +2,7 @@
 title: "Luis13-source/jira-simple-mcp — Claude Code skill discovered by cue"
 description: "🚀 Access and manage Jira issues effortlessly with this simple MCP server, enabling AI assistants to enhance your project workflows."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-08
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-05
+- 🗓️ Last pushed: 2026-06-08
 - 🏷️ Tags: ai-assistant, ai-tools, atlassian, atlassian-confluence, atlassian-jira, jira, jira-api, jira-integration, jira-mcp, mcp, mcp-server, productivity, spring-ai, spring-ai-mcp, task-management
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for video"
 description: "1 community Claude Code skills curated by cue for the video profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, video, skills, mcp, ai-agents]
 ---
 
@@ -15,17 +15,17 @@ tags: [claude-code, video, skills, mcp, ai-agents]
 
 ---
 
-<a id="inhai-wiki-video-highlight-skill"></a>
-## 💎 [inhai-wiki/video-highlight-skill](https://github.com/inhai-wiki/video-highlight-skill)
+<a id="osidemedia-higgsfield-ai-prompt-skill"></a>
+## 💎 [OSideMedia/higgsfield-ai-prompt-skill](https://github.com/OSideMedia/higgsfield-ai-prompt-skill)
 
-**★ 2** · exceptional (score 14) · Python · tags: agent-skill, awesome, claude, claude-skill, codex
+**★ 114** · exceptional (score 20.4) · Python · tags: ai-cinema, ai-filmmaking, ai-video, cinema-studio, cinematic-cameras
 
-AI video highlight skill for agents: analyze videos, cut clips with FFmpeg, export subtitles, and generate a shareable recap page.
+Claude AI skill for cinematic Higgsfield AI prompts — 20 sub-skills covering Cinema Studio 2.5/3.0/3.5, MCSLA formula, Soul ID character consistency, Seedance 2.0 prompt modes, Kling 3.0 Motion Control, Elements system, DISCIPLINE framework, production benchmarks, and 17 templates across 3 categories.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add inhai-wiki/video-highlight-skill --profile video
+cue skills add OSideMedia/higgsfield-ai-prompt-skill --profile video
 ```
 
 ---

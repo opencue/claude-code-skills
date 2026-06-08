@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for creative-media"
-description: "3 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "5 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `creative-media`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
+> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -30,10 +30,36 @@ cue skills add TinaDu-AI/claude-wechat-bridge-with-files --profile creative-medi
 
 ---
 
+<a id="laith0003-ux-skill"></a>
+## 💎 [Laith0003/ux-skill](https://github.com/Laith0003/ux-skill)
+
+**★ 33** · exceptional (score 8.8) · Python · tags: ai-coding, ai-design, anti-ai-slop, brand-guidelines, claude-code
+
+Design intelligence engine for AI coding tools (Claude Code, Cursor, Windsurf). Deterministic anti-AI-slop linter with 152 rules, 160 brand specs, a 7-axis synthesizer, an MCP server (18 tools), 25 commands, 17 IDEs. Offline, never calls an LLM. MIT.
+
+```bash
+cue skills add Laith0003/ux-skill --profile creative-media
+```
+
+---
+
+<a id="coreline-ai-skills-html-showcase"></a>
+## ✨ [coreline-ai/skills-html-showcase](https://github.com/coreline-ai/skills-html-showcase)
+
+**★ 1** · strong (score 7.8) · HTML · tags: accessibility, adaptive-html, agent-skill, claude, claude-skill
+
+입력 자료를 13개 모드로 라우팅해 전문가급 한국어 HTML을 만드는 단일 통합 스킬 adaptive-html-final 쇼케이스 — 3-테마·비주얼 프로파일·무 JS·정적 품질 게이트 | Showcase of adaptive-html-final: a single skill that routes inputs into 13 modes to generate expert-grade Korean HTML — 3 themes, visual profiles, zero-JS, static quality gate
+
+```bash
+cue skills add coreline-ai/skills-html-showcase --profile creative-media
+```
+
+---
+
 <a id="aiatelie-ai-atelie"></a>
 ## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
 
-**★ 6** · strong (score 5.8) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+**★ 6** · strong (score 5.7) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
 
 Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
 

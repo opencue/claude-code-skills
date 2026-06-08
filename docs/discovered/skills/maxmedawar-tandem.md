@@ -1,22 +1,22 @@
 ---
 title: "Maxmedawar/tandem — Claude Code skill discovered by cue"
-description: "Tandem is an MCP bridge that lets a chatbot (Claude.ai or ChatGPT) spin up and drive real, interactive Claude Code sessions on your own machine. Runs 2 sessions"
+description: "Tandem is an MCP bridge that lets a chatbot (Claude.ai or ChatGPT) spin up and drive, interactive Claude Code sessions on your own machine. Runs 2 sessions in a"
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, skill, core]
 ---
 
-# ✨ [Maxmedawar/tandem](https://github.com/Maxmedawar/tandem)
+# 💎 [Maxmedawar/tandem](https://github.com/Maxmedawar/tandem)
 
-**★ 1** · strong (score 7.3) · TypeScript · agent, agents, ai-agents, claude, claude-ai
+**★ 7** · exceptional (score 10) · TypeScript · agent, agents, ai-agents, claude, claude-ai
 
-> Tandem is an MCP bridge that lets a chatbot (Claude.ai or ChatGPT) spin up and drive real, interactive Claude Code sessions on your own machine. Runs 2 sessions in a lead/worker loop that works autonomously. Also makes claude code respond to the initial Chatbot through the browser so they can talk.
+> Tandem is an MCP bridge that lets a chatbot (Claude.ai or ChatGPT) spin up and drive, interactive Claude Code sessions on your own machine. Runs 2 sessions in a lead/worker loop that works autonomously. Also makes claude code respond to the initial Chatbot through the browser so it can respond back.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.3 based on:
-- ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-07
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10 based on:
+- ⭐ 7 stars
+- 🗓️ Last pushed: 2026-06-08
 - 🏷️ Tags: agent, agents, ai-agents, claude, claude-ai, claude-code, claude-code-skill, claude-skills, mcp, orchestration, skills
 
 ## Best fit cue profiles

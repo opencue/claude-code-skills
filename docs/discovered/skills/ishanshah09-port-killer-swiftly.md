@@ -2,7 +2,7 @@
 title: "Ishanshah09/port-killer-swiftly — Claude Code skill discovered by cue"
 description: "Kill Ports Fast 2026 - Best Free kkp CLI Tool for Process Management"
 layout: page
-updated: 2026-06-04
+updated: 2026-06-08
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-04
+- 🗓️ Last pushed: 2026-06-08
 - 🏷️ Tags: analysis, claude, claude-code-skills, claude-plugin, claude-skill, claude-skills, demoscene, emacs, hotfix, ios, kotlin-multiplatform, patch, runtime, serilog, uz-video, zy-player-resource
 
 ## Best fit cue profiles

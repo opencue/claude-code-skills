@@ -1,159 +1,94 @@
 ---
 title: "Claude Code Skills for backend"
-description: "13 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "8 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 13 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
+> 8 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="innocuous-stiffness915-vibe-agent"></a>
-## 💎 [innocuous-stiffness915/Vibe-Agent](https://github.com/innocuous-stiffness915/Vibe-Agent)
+<a id="ayaanjan76-awesome-mcp-servers"></a>
+## 💎 [ayaanjan76/awesome-mcp-servers](https://github.com/ayaanjan76/awesome-mcp-servers)
 
-**★ 4** · exceptional (score 9.8) · HTML · tags: agent, agentic-ai, all-in-one, bedrock, claude-code
+**★ 2** · exceptional (score 10) · tags: ai, ai-agent, awesome, awesome-mcp, collection
 
-🎨 Create dynamic canvases and explore multimodal AI generation with Vibe-Agent, featuring easy-to-use tools and customizable options.
+🚀 Explore a curated collection of top Model Context Protocol (MCP) servers for seamless connectivity and enhanced experiences in your projects.
 
 ```bash
-cue skills add innocuous-stiffness915/Vibe-Agent --profile backend
+cue skills add ayaanjan76/awesome-mcp-servers --profile backend
 ```
 
 ---
 
-<a id="mugoherick12-boop-skillz"></a>
-## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
+<a id="getgantry-gantry"></a>
+## 💎 [getgantry/gantry](https://github.com/getgantry/gantry)
 
-**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
+**★ 16** · exceptional (score 8.4) · Swift · tags: ai-agents, containers, developer-tools, docker, macos
 
-🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
+Native macOS app for managing and monitoring Docker — local and over SSH. Agent-ready: built-in MCP server and App Intents. Free and open source.
 
 ```bash
-cue skills add mugoherick12-boop/skillz --profile backend
+cue skills add getgantry/gantry --profile backend
 ```
 
 ---
 
-<a id="mattaspira-google-docs-mcp-server"></a>
-## ✨ [mattaspira/google-docs-mcp-server](https://github.com/mattaspira/google-docs-mcp-server)
+<a id="zcebupelka-graphql-mcp-bridge"></a>
+## ✨ [zcebupelka/graphql-mcp-bridge](https://github.com/zcebupelka/graphql-mcp-bridge)
 
-**★ 1** · strong (score 7.8) · TypeScript · tags: ai, ai-tools, anthropic, claude-ai, claude-desktop
+**★ 1** · strong (score 7.8) · TypeScript · tags: ai-tools, api-integration, api-translator, bridge, developer-tools
 
-🔗 Connect LLMs to Google Docs with this unofficial MCP server for smarter workflows and enhanced document management.
+🌉 Connect GraphQL APIs seamlessly with the Model Context Protocol for enhanced data management and integration.
 
 ```bash
-cue skills add mattaspira/google-docs-mcp-server --profile backend
+cue skills add zcebupelka/graphql-mcp-bridge --profile backend
 ```
 
 ---
 
-<a id="princeyohann-stoic-mcp"></a>
-## ✨ [princeyohann/stoic-mcp](https://github.com/princeyohann/stoic-mcp)
+<a id="luis13-source-jira-simple-mcp"></a>
+## ✨ [Luis13-source/jira-simple-mcp](https://github.com/Luis13-source/jira-simple-mcp)
 
-**★ 0** · strong (score 7.5) · JavaScript · tags: ai-tools, anthropic, claude-mcp, deepseek-api, developer-experience
+**★ 0** · strong (score 7.5) · JavaScript · tags: ai-assistant, ai-tools, atlassian, atlassian-confluence, atlassian-jira
 
-🧘♂️ Deliver Stoic quotes with AI-driven insights via the DeepSeek API, enhancing developer well-being through practical wisdom and live training support.
+🚀 Access and manage Jira issues effortlessly with this simple MCP server, enabling AI assistants to enhance your project workflows.
 
 ```bash
-cue skills add princeyohann/stoic-mcp --profile backend
+cue skills add Luis13-source/jira-simple-mcp --profile backend
 ```
 
 ---
 
-<a id="imaginationfinagler591-mcp-hello-world"></a>
-## ✨ [Imaginationfinagler591/mcp-hello-world](https://github.com/Imaginationfinagler591/mcp-hello-world)
+<a id="mircheaaa-spring-ai-weather-tool"></a>
+## ✨ [Mircheaaa/spring-ai-weather-tool](https://github.com/Mircheaaa/spring-ai-weather-tool)
 
-**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agent, ai-integration, client-server, fastapi, fat-jar
+**★ 0** · strong (score 7.5) · Kotlin · tags: ai-agents, ai-integration, ai-tools, chatbot, groq-api
 
-
+🌤️ Build a versatile weather tool with AI capabilities, integrating real-time data and user-friendly features for enhanced travel planning.
 
 ```bash
-cue skills add Imaginationfinagler591/mcp-hello-world --profile backend
+cue skills add Mircheaaa/spring-ai-weather-tool --profile backend
 ```
 
 ---
 
-<a id="f1nthelad-google-contacts-mcp-server"></a>
-## ✨ [f1nthelad/google-contacts-mcp-server](https://github.com/f1nthelad/google-contacts-mcp-server)
+<a id="gnodux-adb-link"></a>
+## ✨ [gnodux/adb-link](https://github.com/gnodux/adb-link)
 
-**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, aws-cdk, aws-lambda, calendar, claude-ai
+**★ 0** · strong (score 6) · Go · tags: agent, ai-tools, data-analysis, database-gateway, go
 
-📇 Access Google Contacts securely with a serverless MCP server on AWS Lambda, using per-user OAuth for real-time, privacy-focused data retrieval.
-
-```bash
-cue skills add f1nthelad/google-contacts-mcp-server --profile backend
-```
-
----
-
-<a id="powlite32-google-docs-mcp-server"></a>
-## ✨ [powlite32/google-docs-mcp-server](https://github.com/powlite32/google-docs-mcp-server)
-
-**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, ai-tools, claude-ai, google, google-drive-api-v3
-
-📄 Connect LLMs with Google Docs through this unofficial MCP server for smarter workflows and efficient document management.
+An MCP server that connects to multiple databases. Supports access control and dynamic SQL query tool registration and invocation.
 
 ```bash
-cue skills add powlite32/google-docs-mcp-server --profile backend
-```
-
----
-
-<a id="manojkumarjanapati-expense-tracker-mcp-server"></a>
-## ✨ [manojkumarjanapati/expense-tracker-mcp-server](https://github.com/manojkumarjanapati/expense-tracker-mcp-server)
-
-**★ 0** · strong (score 7.5) · Java · tags: claude-desktop, fastmcp, jsonrpc2, mcp-inspector, mcp-server
-
-💰 Track your expenses efficiently with this Python-based MCP server, enabling AI assistants to manage and summarize your finances through natural conversation.
-
-```bash
-cue skills add manojkumarjanapati/expense-tracker-mcp-server --profile backend
-```
-
----
-
-<a id="harshitshukla2003-sse-server"></a>
-## ✨ [Harshitshukla2003/SSE-Server](https://github.com/Harshitshukla2003/SSE-Server)
-
-**★ 2** · strong (score 7) · JavaScript · tags: advanced-analytics-integration, agents, anthropic, data-science, deep-research
-
-📊 Monitor real-time HTTP requests with this Server-Sent Events (SSE) tool, featuring a dashboard for instant updates and easy testing integration.
-
-```bash
-cue skills add Harshitshukla2003/SSE-Server --profile backend
-```
-
----
-
-<a id="orderchlorococcalesdresswhites76-bb-bash"></a>
-## ✨ [Orderchlorococcalesdresswhites76/bb-bash](https://github.com/Orderchlorococcalesdresswhites76/bb-bash)
-
-**★ 0** · strong (score 6) · Shell · tags: automation, bash, bash-scripting, bbs, bitbucket
-
-Control Bitbucket Cloud via terminal or AI agents with this zero-config, single-file bash script for seamless PR management and automated workflow integration.
-
-```bash
-cue skills add Orderchlorococcalesdresswhites76/bb-bash --profile backend
-```
-
----
-
-<a id="csoai-org-openmcp"></a>
-## ✨ [CSOAI-ORG/openmcp](https://github.com/CSOAI-ORG/openmcp)
-
-**★ 0** · strong (score 6) · Python · tags: ai-agents, compliance, mcp, mcp-server, model-context-protocol
-
-openMCP — audit + cross-post CLI for MCP servers (Smithery/Registry/Docker/Glama/MCPize/PulseMCP)
-
-```bash
-cue skills add CSOAI-ORG/openmcp --profile backend
+cue skills add gnodux/adb-link --profile backend
 ```
 
 ---

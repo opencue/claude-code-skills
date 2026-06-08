@@ -1,24 +1,39 @@
 ---
 title: "Claude Code Skills for frontend"
-description: "5 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "8 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `frontend`
 
-> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
+> 8 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
+<a id="mustbesimo-cinematic-scroll-skill"></a>
+## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
+
+**★ 4** · exceptional (score 14.3) · HTML · tags: agent-skill, agent-skills, claude-skill, creative-coding, cursor
+
+Agent skill for building cinematic, scroll-driven websites from a brief: visual systems, motion storyboards, vanilla/GSAP demos, and Next.js release-page templates.
+
+✅ SKILL.md
+
+```bash
+cue skills add MustBeSimo/cinematic-scroll-skill --profile frontend
+```
+
+---
+
 <a id="suanfishxyy-suanfish-design-system"></a>
 ## 💎 [SuanFishXYY/suanfish-design-system](https://github.com/SuanFishXYY/suanfish-design-system)
 
-**★ 6** · exceptional (score 10.7) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
+**★ 6** · exceptional (score 10.6) · JavaScript · tags: agent-skills, agent-ui, ai, ai-native, anthropic
 
 🐟 Suanfish Design System — 33 specialized AI design agents across 7 tiers with REJECT mechanism. Multi-agent design language SKILL for Claude Code / Codex CLI / Copilot CLI. v2.5 adds AI-native Path G (streaming · tool-calls · reasoning · citations · artifacts).
 
@@ -26,6 +41,19 @@ tags: [claude-code, frontend, skills, mcp, ai-agents]
 
 ```bash
 cue skills add SuanFishXYY/suanfish-design-system --profile frontend
+```
+
+---
+
+<a id="laith0003-ux-skill"></a>
+## 💎 [Laith0003/ux-skill](https://github.com/Laith0003/ux-skill)
+
+**★ 33** · exceptional (score 8.8) · Python · tags: ai-coding, ai-design, anti-ai-slop, brand-guidelines, claude-code
+
+Design intelligence engine for AI coding tools (Claude Code, Cursor, Windsurf). Deterministic anti-AI-slop linter with 152 rules, 160 brand specs, a 7-axis synthesizer, an MCP server (18 tools), 25 commands, 17 IDEs. Offline, never calls an LLM. MIT.
+
+```bash
+cue skills add Laith0003/ux-skill --profile frontend
 ```
 
 ---
@@ -69,10 +97,23 @@ cue skills add PepinoRancio1/sticky-switcher-funnel-playbook --profile frontend
 
 ---
 
+<a id="ansariwaqqas-storybook-mcp-server"></a>
+## ✨ [ansariwaqqas/storybook-mcp-server](https://github.com/ansariwaqqas/storybook-mcp-server)
+
+**★ 0** · strong (score 7.5) · C++ · tags: anthropic, claude, claude-desktop, component-library, component-testing
+
+🎨 Enhance Storybook with this TypeScript MCP server for seamless AI interaction, allowing easy access to components, stories, and screenshots.
+
+```bash
+cue skills add ansariwaqqas/storybook-mcp-server --profile frontend
+```
+
+---
+
 <a id="aiatelie-ai-atelie"></a>
 ## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
 
-**★ 6** · strong (score 5.8) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+**★ 6** · strong (score 5.7) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
 
 Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
 

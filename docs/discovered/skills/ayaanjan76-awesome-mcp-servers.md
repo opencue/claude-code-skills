@@ -2,7 +2,7 @@
 title: "ayaanjan76/awesome-mcp-servers — Claude Code skill discovered by cue"
 description: "🚀 Explore a curated collection of top Model Context Protocol (MCP) servers for seamless connectivity and enhanced experiences in your projects."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-08
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 10 based on:
 - ⭐ 2 stars
-- 🗓️ Last pushed: 2026-06-05
+- 🗓️ Last pushed: 2026-06-08
 - 🏷️ Tags: ai, ai-agent, awesome, awesome-mcp, collection, context, curated-list, devops, lists, llm, mcp-clients, mcp-database, mcp-server, model-context-protocol, model-context-protocol-server, osint-tool, osint-tools, tool-use
 
 ## Best fit cue profiles

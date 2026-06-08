@@ -1,33 +1,30 @@
 ---
 title: "Discovered Claude Code Skills"
-description: "100 community Claude Code skills curated by cue across 13 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
+description: "100 community Claude Code skills curated by cue across 10 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-08
 tags: [claude-code, skills, mcp, ai-agents, marketplace]
 ---
 
 # 🎯 Discovered Claude Code Skills
 
-> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **13 profiles**.
-> Last updated: 2026-06-07 · refreshed nightly via GitHub Code Search.
+> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **10 profiles**.
+> Last updated: 2026-06-08 · refreshed nightly via GitHub Code Search.
 
 ## Browse by profile
 
 | Profile | Skills | Sample |
 |---|---|---|
-| [**core**](./core.md) | 63 | `context-mode`, `antigravity-workspace-template`, `majia-guanyuan` |
-| [**backend**](./backend.md) | 13 | `Vibe-Agent`, `skillz`, `google-docs-mcp-server` |
-| [**cybersecurity**](./cybersecurity.md) | 8 | `nsauditor-ai-agent-skill`, `hydra`, `slowmist-security-cc` |
-| [**frontend**](./frontend.md) | 5 | `suanfish-design-system`, `lottie-marketplace`, `ionik-capacitor-flux-patterns` |
-| [**creative-media**](./creative-media.md) | 3 | `claude-wechat-bridge-with-files`, `ai-atelie`, `redesigned-pancake` |
-| [**marketing**](./marketing.md) | 2 | `brand-launchpad`, `sticky-switcher-funnel-playbook` |
-| [**research**](./research.md) | 2 | `thesis-figure-skill`, `popper-scope` |
+| [**core**](./core.md) | 70 | `context-mode`, `antigravity-workspace-template`, `hermes-agent` |
+| [**frontend**](./frontend.md) | 8 | `cinematic-scroll-skill`, `suanfish-design-system`, `ux-skill` |
+| [**backend**](./backend.md) | 8 | `awesome-mcp-servers`, `gantry`, `graphql-mcp-bridge` |
+| [**cybersecurity**](./cybersecurity.md) | 7 | `nsauditor-ai-agent-skill`, `hydra`, `elevate` |
+| [**creative-media**](./creative-media.md) | 5 | `claude-wechat-bridge-with-files`, `ux-skill`, `skills-html-showcase` |
+| [**fleet-control**](./fleet-control.md) | 2 | `neo`, `superx-agentic-orchestrator` |
 | [**niche**](./niche.md) | 2 | `grant-thinking-skill`, `grant-thinking-cn-biology` |
-| [**fleet-control**](./fleet-control.md) | 2 | `superx-agentic-orchestrator`, `multi-agent-revenue-orchestrator` |
-| [**video**](./video.md) | 1 | `video-highlight-skill` |
-| [**python**](./python.md) | 1 | `skillz` |
-| [**nextjs**](./nextjs.md) | 1 | `personal-knowledge-nexus` |
-| [**docs-writer**](./docs-writer.md) | 1 | `obsidian-mcp-server` |
+| [**video**](./video.md) | 1 | `higgsfield-ai-prompt-skill` |
+| [**nextjs**](./nextjs.md) | 1 | `cinematic-scroll-skill` |
+| [**marketing**](./marketing.md) | 1 | `sticky-switcher-funnel-playbook` |
 
 ## How scoring works
 
