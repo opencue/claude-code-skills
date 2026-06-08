@@ -13,7 +13,7 @@ import { basename, dirname, join, relative, resolve } from "node:path";
 
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
-import type { AgentKind, ResolvedProfile } from "../../profiles/_types";
+import type { AgentKind } from "../../profiles/_types";
 import { configDir } from "../lib/config-paths";
 import { resolveActiveProfile } from "../lib/cwd-resolver";
 import { getAdapter, AGENT_IDS } from "../lib/agent-adapters";
