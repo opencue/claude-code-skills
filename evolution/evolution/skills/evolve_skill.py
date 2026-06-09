@@ -87,23 +87,31 @@ def _atomic_write(path: Path, text: str) -> None:
 
 
 def _finalize(config, skill_id, skill, skill_path, evolved_body, candidate_ok,
-              improvement, extra_meta=None):
-    """Shared decision: auto-apply (lint-clean + improved/changed) else proposal.
+              improvement, quality_ok=None, propose_only=False, extra_meta=None):
+    """Shared decision: auto-apply else write a proposal. Gates, in order:
 
-    improvement=None means "no numeric metric" (single-shot): gate on lint-clean
-    + body actually changed. Otherwise gate on lint-clean + improvement > 0.
+    - propose_only=True            → never apply (write proposal for review).
+    - improvement is not None (GEPA) → apply iff lint-clean AND improvement > 0.
+    - quality_ok is not None (single-shot self-judge) → apply iff lint-clean AND
+      changed AND the judge said BETTER.
+    - else (single-shot, no judge) → apply iff lint-clean AND changed.
     """
     evolved_full = reassemble_skill(skill["frontmatter"], evolved_body)
     changed = evolved_body.strip() != skill["body"].strip()
-    if improvement is None:
-        should_apply, why = candidate_ok and changed, "lint-clean + body changed"
-    else:
+    if propose_only:
+        should_apply, why = False, "propose-only"
+    elif improvement is not None:
         should_apply, why = candidate_ok and improvement > 1e-6, f"holdout {improvement:+.3f}"
+    elif quality_ok is not None:
+        should_apply = candidate_ok and changed and quality_ok
+        why = "judge: better" if quality_ok else "judge: not better"
+    else:
+        should_apply, why = candidate_ok and changed, "lint-clean + body changed"
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     base = {"ts": ts, "kind": "skill-content", "skill": skill_id,
             "improvement": (round(improvement, 4) if improvement is not None else None),
-            **(extra_meta or {})}
+            "decision": why, **(extra_meta or {})}
 
     if should_apply:
         # Resolve symlinks (resources/skills is a submodule) so the backup lands
@@ -127,8 +135,9 @@ def _finalize(config, skill_id, skill, skill_path, evolved_body, candidate_ok,
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "evolved_SKILL.md").write_text(evolved_full)
     (out_dir / "baseline_SKILL.md").write_text(skill["raw"])
-    reason = ("lint/constraints failed" if not candidate_ok
-              else "body unchanged" if not changed else f"no improvement ({why})")
+    reason = ("propose-only (review before apply)" if propose_only
+              else "lint/constraints failed" if not candidate_ok
+              else "body unchanged" if not changed else why)
     _log_evolution(config, {**base, "path": str(skill_path.resolve()), "applied": False,
                             "reason": reason, "proposal_dir": str(out_dir)})
     console.print(f"\n[yellow]⚠ Not applied ({reason}). Proposal: {out_dir}[/yellow]")
@@ -146,6 +155,7 @@ def evolve(
     dry_run: bool = False,
     use_claude_code: bool = False,
     optimizer: str = "gepa",
+    propose_only: bool = False,
 ) -> int:
     """Main evolution loop. Returns a process exit code."""
 
@@ -207,7 +217,7 @@ def evolve(
 
     # ── Single-shot optimizer: one claude -p call, no DSPy, no dataset, no key ──
     if optimizer == "single-shot":
-        from evolution.skills.reflective import propose_improved_body
+        from evolution.skills.reflective import propose_improved_body, judge_is_better
         console.print(f"\n[bold cyan]Single-shot reflective improve[/bold cyan] "
                       f"({claude_or_model(config)})...")
         evolved_body = propose_improved_body(skill, config)
@@ -215,10 +225,23 @@ def evolve(
         console.print("\n[bold]Candidate constraints[/bold]")
         candidate_ok = _print_constraints(
             validator.validate_all(evolved_body, evolved_full, baseline_body=skill["body"]))
+
+        # Quality gate: a second `claude -p` judges evolved vs baseline. We
+        # auto-apply only on a BETTER verdict (skip the call in propose-only or
+        # when nothing changed — then it can't apply anyway).
+        quality_ok, judge_reason = None, ""
+        changed = evolved_body.strip() != skill["body"].strip()
+        if not propose_only and candidate_ok and changed:
+            console.print("[bold]Self-judge[/bold] (evolved vs baseline)...")
+            quality_ok, judge_reason = judge_is_better(skill, evolved_body, config)
+            console.print(f"  {'✓' if quality_ok else '✗'} {judge_reason}")
+
         return _finalize(
             config, skill_id, skill, skill_path, evolved_body, candidate_ok, improvement=None,
+            quality_ok=quality_ok, propose_only=propose_only,
             extra_meta={"optimizer": "single-shot", "optimizer_model": config.optimizer_model,
-                        "baseline_size": len(skill["body"]), "evolved_size": len(evolved_body)})
+                        "baseline_size": len(skill["body"]), "evolved_size": len(evolved_body),
+                        "judge": judge_reason})
 
     # ── Heavy imports happen ONLY for a real GEPA run ────────────────────
     try:
@@ -355,9 +378,11 @@ def evolve(
               help="gepa = iterative DSPy/GEPA (slow, needs dspy); single-shot = one claude -p call (fast, keyless)")
 @click.option("--use-claude-code", is_flag=True,
               help="Run GEPA through headless `claude -p` — no separate API key (implied by single-shot)")
+@click.option("--propose-only", is_flag=True,
+              help="Never auto-apply; always write a proposal for human review")
 @click.option("--dry-run", is_flag=True, help="Validate cue wiring without optimizing (no LLM, no install)")
 def main(skill_id, iterations, eval_source, dataset_path, optimizer_model, eval_model,
-         cue_repo, optimizer, use_claude_code, dry_run):
+         cue_repo, optimizer, use_claude_code, propose_only, dry_run):
     """Evolve a cue skill's content, gated by `cue lint-skill`. Two optimizers:
     GEPA (DSPy, iterative) or single-shot (one `claude -p` call, keyless)."""
     # single-shot always runs on claude -p; default its model accordingly.
@@ -367,7 +392,7 @@ def main(skill_id, iterations, eval_source, dataset_path, optimizer_model, eval_
         skill_id=skill_id, iterations=iterations, eval_source=eval_source,
         dataset_path=dataset_path, optimizer_model=optimizer_model,
         eval_model=eval_model, cue_repo=cue_repo, dry_run=dry_run,
-        use_claude_code=use_claude_code, optimizer=optimizer,
+        use_claude_code=use_claude_code, optimizer=optimizer, propose_only=propose_only,
     ))
 
 

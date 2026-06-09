@@ -98,6 +98,24 @@ def test_reflective_extract_falls_back_without_sentinel():
     assert _extract_body("<SKILL_BODY></SKILL_BODY>", fb) == fb
 
 
+def test_judge_is_better_parses_verdicts(monkeypatch):
+    """The self-judge maps only BETTER → apply; everything else (incl. an
+    unparseable reply) → don't apply. Conservative by design."""
+    import evolution.skills.reflective as r
+    skill = {"description": "d", "body": "orig"}
+    cfg = CueEvolutionConfig()
+    cases = {
+        "VERDICT: BETTER — clearer triggers": True,
+        "VERDICT: WORSE - dropped a command": False,
+        "VERDICT: EQUAL — just reworded": False,
+        "i think it's fine": False,  # unparseable → False
+    }
+    for reply, expected in cases.items():
+        monkeypatch.setattr(r, "run_claude_p", lambda *a, **k: reply)
+        ok, reason = r.judge_is_better(skill, "revised", cfg)
+        assert ok is expected, f"{reply!r} -> {ok}, expected {expected} ({reason})"
+
+
 def test_config_rejects_lint_cmd_without_path_placeholder():
     """A lint_cmd lacking {path} would lint nothing — reject it at construction."""
     with pytest.raises(ValueError):

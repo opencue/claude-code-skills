@@ -48,6 +48,41 @@ def propose_improved_body(skill: dict, config, signals: str = "", timeout: int =
     return _extract_body(out, fallback=skill["body"])
 
 
+_JUDGE_PROMPT = """You are a strict reviewer of Claude Code SKILL.md bodies. Decide whether the
+REVISED body is genuinely BETTER than the ORIGINAL for an agent deciding when and
+how to use this skill — clearer triggers, tighter procedure, NO loss of critical
+detail (commands, paths, constraints). Be conservative: if the revision drops
+useful content or is merely different, it is NOT better.
+
+Skill description (context): {desc}
+
+ORIGINAL:
+<A>
+{original}
+</A>
+
+REVISED:
+<B>
+{revised}
+</B>
+
+Reply on a single line, exactly: VERDICT: BETTER|EQUAL|WORSE — <one-line reason>"""
+
+
+def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180):
+    """Second `claude -p` call: is the evolved body genuinely better? Returns
+    (is_better: bool, reason: str). Conservative — anything but BETTER → False."""
+    model = claude_model_name(config.optimizer_model)
+    prompt = _JUDGE_PROMPT.format(
+        desc=skill["description"], original=skill["body"], revised=evolved_body)
+    out = run_claude_p(prompt, model=model, timeout=timeout)
+    m = re.search(r"VERDICT:\s*(BETTER|EQUAL|WORSE)\s*[—\-:]*\s*(.*)", out, re.IGNORECASE)
+    if not m:
+        return False, f"unparseable judge verdict: {out.strip()[:120]}"
+    verdict = m.group(1).upper()
+    return verdict == "BETTER", f"{verdict}: {m.group(2).strip()[:160]}"
+
+
 def _extract_body(text: str, fallback: str) -> str:
     """Pull the body from between the sentinels; tolerate stray fences.
 
