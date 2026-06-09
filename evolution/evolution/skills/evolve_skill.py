@@ -98,7 +98,10 @@ def evolve(
     if optimizer_model:
         config.optimizer_model = optimizer_model
     if eval_model:
+        # --eval-model drives BOTH scoring and dataset/judge generation, so an
+        # override doesn't leave judge_model pointed at the default provider.
         config.eval_model = eval_model
+        config.judge_model = eval_model
 
     console.print(
         f"\n[bold cyan]🧬 cue skill-content evolution[/bold cyan] — skill: [bold]{skill_id}[/bold]\n"
