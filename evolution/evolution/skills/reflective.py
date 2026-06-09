@@ -49,9 +49,16 @@ def propose_improved_body(skill: dict, config, signals: str = "", timeout: int =
 
 
 def _extract_body(text: str, fallback: str) -> str:
-    """Pull the body from between the sentinels; tolerate stray fences/preamble."""
+    """Pull the body from between the sentinels; tolerate stray fences.
+
+    If the model did NOT emit the sentinels, treat the response as unusable and
+    return the original body — so a refusal / error-prose becomes a safe no-op
+    ("body unchanged" → proposal), never an applied garbage rewrite.
+    """
     m = re.search(r"<SKILL_BODY>(.*?)</SKILL_BODY>", text, re.DOTALL)
-    body = (m.group(1) if m else text).strip()
+    if not m:
+        return fallback
+    body = m.group(1).strip()
     # Strip a wrapping ```markdown / ``` fence if the model added one.
     body = re.sub(r"^```[a-zA-Z]*\n", "", body)
     body = re.sub(r"\n```$", "", body).strip()

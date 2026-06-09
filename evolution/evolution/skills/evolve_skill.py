@@ -75,7 +75,7 @@ def _atomic_write(path: Path, text: str) -> None:
     """
     fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
     try:
-        with os.fdopen(fd, "w") as fh:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
             fh.write(text)
         os.replace(tmp, path)  # POSIX-atomic rename
     except BaseException:
@@ -110,7 +110,7 @@ def _finalize(config, skill_id, skill, skill_path, evolved_body, candidate_ok,
         # beside the REAL file we overwrite, not beside a link.
         real_path = skill_path.resolve()
         backup = real_path.with_suffix(f".md.bak-{ts}")
-        backup.write_text(skill["raw"])          # backup BEFORE overwrite
+        backup.write_text(skill["raw"], encoding="utf-8")   # backup BEFORE overwrite
         _atomic_write(real_path, evolved_full)    # atomic: never a partial write
         try:
             _log_evolution(config, {**base, "path": str(real_path),
@@ -129,7 +129,7 @@ def _finalize(config, skill_id, skill, skill_path, evolved_body, candidate_ok,
     (out_dir / "baseline_SKILL.md").write_text(skill["raw"])
     reason = ("lint/constraints failed" if not candidate_ok
               else "body unchanged" if not changed else f"no improvement ({why})")
-    _log_evolution(config, {**base, "path": str(skill_path), "applied": False,
+    _log_evolution(config, {**base, "path": str(skill_path.resolve()), "applied": False,
                             "reason": reason, "proposal_dir": str(out_dir)})
     console.print(f"\n[yellow]⚠ Not applied ({reason}). Proposal: {out_dir}[/yellow]")
     return 0

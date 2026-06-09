@@ -85,6 +85,19 @@ def test_lint_gate_fails_closed_when_cmd_broken():
     assert not res.ok and not res.ran
 
 
+def test_reflective_extract_falls_back_without_sentinel():
+    """Model output lacking the sentinels must yield the ORIGINAL body (safe
+    no-op), never raw error-prose that could get applied."""
+    from evolution.skills.reflective import _extract_body
+    fb = "ORIGINAL BODY"
+    # No sentinel (e.g. a refusal) -> fallback.
+    assert _extract_body("Sorry, I can't help with that.", fb) == fb
+    # With sentinel -> extracted, fences stripped.
+    assert _extract_body("<SKILL_BODY>\n```md\nNEW BODY\n```\n</SKILL_BODY>", fb) == "NEW BODY"
+    # Empty sentinel content -> fallback.
+    assert _extract_body("<SKILL_BODY></SKILL_BODY>", fb) == fb
+
+
 def test_config_rejects_lint_cmd_without_path_placeholder():
     """A lint_cmd lacking {path} would lint nothing — reject it at construction."""
     with pytest.raises(ValueError):

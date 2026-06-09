@@ -45,10 +45,13 @@ def run_claude_p(prompt: str, model: str = "sonnet", timeout: int = 300) -> str:
     if not shutil.which("claude"):
         raise RuntimeError("claude CLI not on PATH — needs Claude Code installed.")
     env = {**os.environ, "CUE_AUTO_IMPROVE_INNER": "1"}
-    proc = subprocess.run(
-        ["claude", "-p", "--model", model],
-        input=prompt, capture_output=True, text=True, timeout=timeout, env=env,
-    )
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", "--model", model],
+            input=prompt, capture_output=True, text=True, timeout=timeout, env=env,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"claude -p timed out after {timeout}s") from None
     if proc.returncode != 0:
         raise RuntimeError(f"claude -p failed ({proc.returncode}): {proc.stderr.strip()[:300]}")
     return proc.stdout.strip()

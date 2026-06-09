@@ -19,7 +19,7 @@ def load_skill(skill_path: Path) -> dict:
 
     Returns dict with: path, raw, frontmatter, body, name, description.
     """
-    raw = skill_path.read_text()
+    raw = skill_path.read_text(encoding="utf-8")
 
     frontmatter = ""
     body = raw
