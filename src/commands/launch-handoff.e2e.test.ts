@@ -8,7 +8,7 @@
  * file is being edited concurrently.
  */
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, rm } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -67,6 +67,38 @@ describe.skipIf(!BUN_SPAWNABLE)("cue launch --dry-run exec handoff", () => {
     expect(r.status).toBe(0);
     const p = plan(r.stdout);
     expect(p.command).toEqual(["claude", "--resume", "foo"]);
+  });
+});
+
+describe.skipIf(!BUN_SPAWNABLE)("cue launch help passthrough", () => {
+  let tmp: string;
+
+  beforeEach(async () => {
+    tmp = await mkdtemp(join(tmpdir(), "cue-help-"));
+  });
+
+  afterEach(async () => {
+    await rm(tmp, { recursive: true, force: true });
+  });
+
+  test("agent --help bypasses runtime materialization", async () => {
+    const binDir = join(tmp, "bin");
+    await mkdir(binDir);
+    const fakeClaude = join(binDir, "claude");
+    await writeFile(fakeClaude, "#!/usr/bin/env sh\necho fake-claude-help \"$@\"\nexit 42\n");
+    await chmod(fakeClaude, 0o755);
+
+    const blockedXdg = join(tmp, "xdg-file");
+    await writeFile(blockedXdg, "not a directory\n");
+    const r = cue(["launch", "claude", "--help"], {
+      PATH: `${binDir}:${process.env.PATH ?? ""}`,
+      XDG_CONFIG_HOME: blockedXdg,
+    });
+
+    expect(r.status).toBe(42);
+    expect(r.stdout).toContain("fake-claude-help --help");
+    expect(r.stderr).not.toContain("materialize");
+    expect(r.stderr).not.toContain("ENOTDIR");
   });
 });
 

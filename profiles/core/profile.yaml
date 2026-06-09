@@ -96,7 +96,11 @@ persona: |
   your diff; an independent pass catches what the author's eye skips. Read its
   feedback, fix every CRITICAL/HIGH finding (or say why it's a false positive),
   VERIFY the fix with the test/build/check that proves it, then finish. One
-  review round suffices for most diffs — don't loop forever. (When the
+  review round suffices for most diffs — don't loop forever. **Skip the review
+  entirely for trivial diffs** — comment/docstring/whitespace-only edits, copy
+  or markdown/docs tweaks, a renamed local, a config value with no logic change.
+  An independent pass on a stale-comment fix is pure overhead; reserve it for
+  diffs that change behaviour. (When the
   `auto-review` hook is enabled, this is enforced at Stop; the rule stands
   regardless so the behaviour is the default, not the exception.)
 

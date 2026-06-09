@@ -1,28 +1,3 @@
-<!--
-  Structured data for AI search engines (ChatGPT, Perplexity, Google AI Overviews)
-  and traditional crawlers. GitHub renders the README as raw HTML on github.com/<repo>
-  and via GitHub Pages, so the JSON-LD blocks below are picked up by both Google's
-  rich-results parser and LLM scrapers.
--->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "cuecards",
-  "alternateName": ["cue", "cue-ai"],
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL2)",
-  "description": "cuecards is an open-source agent profile manager for Claude Code, OpenAI Codex, Cursor, Cline, Gemini CLI, GitHub Copilot, Windsurf, Roo Code, Sourcegraph Amp, and Aider. One cuecard per directory — skills, MCPs, plugins, persona, playbooks, gates. Cut per-message token cost 10–25×.",
-  "url": "https://github.com/opencue/cuecards",
-  "downloadUrl": "https://www.npmjs.com/package/cue-ai",
-  "codeRepository": "https://github.com/opencue/cuecards",
-  "license": "https://github.com/opencue/cuecards/blob/main/LICENSE",
-  "programmingLanguage": "TypeScript",
-  "runtimePlatform": "Bun",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-}
-</script>
-
 <br>
 
 <p align="center">
@@ -34,11 +9,11 @@
 <h1 align="center">cuecards.</h1>
 
 <p align="center">
-  <strong>The agent profile manager for AI coding agents.</strong>
+  <strong>The missing layer between you and your coding agent.</strong>
 </p>
 
 <p align="center">
-  <sub>Your agent walks into a directory. The cuecard tells it who to be.</sub>
+  <sub>Your agent walks into a directory. The cuecard tells it who to be — and loads only what the job needs.</sub>
 </p>
 
 <br>
@@ -68,6 +43,43 @@
 
 ---
 
+## the problem.
+
+You installed 330 skills and 15 MCP servers. Your agent re-reads **every one of them, on every message** — including the 320 it doesn't need for the task in front of it.
+
+You pay for that context on every single turn. And the model gets *worse* at picking the right tool, because it's scanning a wall of irrelevant descriptions before it can act.
+
+**cuecards loads only the cuecard for the directory you're in.** One project's skills, MCPs, persona, and gates — not your entire library. Less context, lower cost, sharper tool selection.
+
+<br>
+
+---
+
+## the money shot.
+
+> Loading everything taxes every message. cuecards cut your always-on context **~9–16×** — and you can reproduce every number below with `cue cost --compare`.
+
+| Loadout | Always-on context | Cost / 100 msgs (Sonnet input) |
+|---|---|---|
+| **Without cuecards** — `full` (every skill + MCP) | ~81k tokens | ~$24 😱 |
+| **With cuecards** — `backend` profile | ~9k tokens | ~$2.70 ✅ |
+| **With cuecards** — `caveman-quick` | ~6.8k tokens | ~$2.00 🚀 |
+
+That's **~9× fewer always-on tokens** on a backend loadout (≈12× on `caveman-quick`, up to ≈16× on the leanest profiles) versus loading everything. The savings compound on every message of every session.
+
+```bash
+cue cost                      # token budget for your active profile
+cue cost --compare            # full table: every profile ranked vs the `full` baseline
+```
+
+<p align="center">
+  <sub><strong>&lt; 5 ms</strong> warm launch&nbsp;·&nbsp;<strong>69</strong> pre-built cuecards&nbsp;·&nbsp;<strong>330+</strong> local skills&nbsp;·&nbsp;<strong>10</strong> AI agents&nbsp;·&nbsp;<strong>MIT</strong>&nbsp;·&nbsp;zero telemetry&nbsp;·&nbsp;no daemon</sub>
+</p>
+
+<br>
+
+---
+
 ## what is a cuecard.
 
 A **cuecard** is everything your AI coding agent needs to be useful in one directory — the skills it loads, the MCP servers it connects to, the plugins it boots with, the persona it adopts, the playbooks it follows, the quality gates that block its "done" claim.
@@ -82,6 +94,8 @@ One cuecard per project. Your agent reads the right one the moment you launch.
 | **persona** | how the agent thinks, writes, and self-edits |
 | **playbooks** | the steps the agent follows for known tasks |
 | **gates** | what must pass before the agent says "done" |
+
+This is what separates cuecards from a skills list: a cuecard is *composable expertise* — persona + playbooks + gates + evals + a failure loop — not just "more tools loaded."
 
 <br>
 
@@ -114,76 +128,29 @@ Search. Install. Use. No config files to edit. Works the same with `codex`, `cur
 
 ---
 
-## works with.
-
-<p align="center">
-  <a href="https://github.com/anthropics/claude-code"><img src="https://img.shields.io/badge/Claude_Code-cc785c?style=flat-square&logo=anthropic&logoColor=white" alt="Claude Code"></a>&nbsp;
-  <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/Codex-000000?style=flat-square&logo=openai&logoColor=white" alt="Codex"></a>&nbsp;
-  <a href="https://cursor.sh"><img src="https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white" alt="Cursor"></a>&nbsp;
-  <a href="https://github.com/cline/cline"><img src="https://img.shields.io/badge/Cline-5A45FF?style=flat-square" alt="Cline"></a>&nbsp;
-  <a href="https://github.com/google-gemini/gemini-cli"><img src="https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini"></a>&nbsp;
-  <a href="https://github.com/features/copilot"><img src="https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=github&logoColor=white" alt="Copilot"></a>&nbsp;
-  <a href="https://windsurf.com"><img src="https://img.shields.io/badge/Windsurf-06B6D4?style=flat-square" alt="Windsurf"></a>&nbsp;
-  <a href="https://github.com/RooVetGit/Roo-Code"><img src="https://img.shields.io/badge/Roo-7C3AED?style=flat-square" alt="Roo"></a>&nbsp;
-  <a href="https://sourcegraph.com/amp"><img src="https://img.shields.io/badge/Amp-FF4500?style=flat-square&logo=sourcegraph&logoColor=white" alt="Amp"></a>&nbsp;
-  <a href="https://aider.chat"><img src="https://img.shields.io/badge/Aider-14B8A6?style=flat-square" alt="Aider"></a>
-</p>
-
-<p align="center">
-  <sub>One cuecard. Ten supported agents.</sub>
-</p>
-
-<br>
-
----
-
-## by the numbers.
-
-<p align="center">
-  <strong>up to ~16×</strong>&nbsp;&nbsp;leaner always-on context
-  <br><br>
-  <strong>&lt; 5 ms</strong>&nbsp;&nbsp;warm launch overhead
-  <br><br>
-  <strong>69</strong>&nbsp;&nbsp;pre-built cuecards · <strong>330+</strong> local skills
-  <br><br>
-  <strong>10</strong>&nbsp;&nbsp;AI coding agents supported
-  <br><br>
-  <strong>MIT</strong>&nbsp;&nbsp;open source · zero telemetry · no daemon
-</p>
-
-<br>
-
----
-
-## the money shot.
-
-> Loading everything costs you tokens on every single message. cuecards cut your always-on context ~9–16× — and you can reproduce every number below with `cue cost --compare`.
-
-| Loadout | Always-on context | Cost / 100 msgs (Sonnet input) |
-|---|---|---|
-| **Without cuecards** — `full` (every skill + MCP) | ~81k tokens | ~$24 😱 |
-| **With cuecards** — `backend` profile | ~9k tokens | ~$2.70 ✅ |
-| **With cuecards** — `caveman-quick` | ~6.8k tokens | ~$2.00 🚀 |
-
-That's **~9× fewer always-on tokens** on a backend loadout (≈12× on `caveman-quick`, up to ≈16× on the leanest profiles) versus loading everything. Your model also picks the right tool faster because it's not scanning irrelevant descriptions on every message.
-
-```bash
-cue cost                      # token budget for your active profile
-cue cost --compare            # full table: every profile ranked vs the `full` baseline
-```
-
-<br>
-
----
-
-## why cuecards.
+## why cuecards — and how it compares.
 
 - **Cut always-on context up to ~16×.** Skills, MCPs, and plugins scoped per directory, not globally loaded into every session — reproduce it with `cue cost --compare`.
-- **Five-dimensional agents.** Persona + playbooks + quality gates + evals + failure loop. Not just "more tools loaded" — composable expertise.
+- **Five-dimensional agents.** Persona + playbooks + quality gates + evals + failure loop. Composable expertise, not just a longer tool list.
 - **One cuecard, ten agents.** The same `profile.yaml` materializes into Claude Code, Codex, Cursor, Cline, Gemini, Copilot, Windsurf, Roo, Amp, and Aider native formats.
 
+|  | cuecards | skillport / agent-skills-cli | Kiro Powers |
+|---|---|---|---|
+| Skills | ✅ | ✅ | ✅ |
+| MCPs | ✅ | — | ✅ |
+| Plugins | ✅ | — | — |
+| Per-directory profiles | ✅ | — | ◐ (IDE-only) |
+| Inheritance | ✅ | — | — |
+| Persona / playbooks / gates / evals | ✅ | — | — |
+| Multi-agent (Cursor/Cline/Copilot/etc.) | ✅ (10) | Claude only | IDE-only |
+| CLI installer | ✅ | — | — |
+| Failure-feedback loop | ✅ | — | — |
+| Daemon required | None | None | IDE process |
+
+cuecards is the only one that treats agent expertise as a composable, per-directory system.
+
 <details>
-<summary><b>Other wins</b></summary>
+<summary><b>More wins</b></summary>
 
 <br>
 
@@ -194,63 +161,6 @@ cue cost --compare            # full table: every profile ranked vs the `full` b
 - **Failure-feedback loop.** `cue failures --propose` reads recent session failures and asks Claude to draft profile improvements.
 
 </details>
-
-<br>
-
----
-
-## reading cue's output — the colored tags.
-
-cuecards-managed agents tag every research- or decision-relevant claim with a colored confidence marker so you can scan trust at a glance:
-
-| Tier | Tag | Meaning |
-|---|---|---|
-| 🟢 Green | `[VERIFIED]` / `[KNOWN]` | Trust it (~90–99%) |
-| 🟡 Yellow | `[INFERRED]` / `[ASSUMED]` | Verify if stakes matter (~50–85%) |
-| 🟠 Orange | `[GUESSED]` / `[STALE]` | Verify before acting (~20–45%) |
-| 🔴 Red | `[UNKNOWN]` | Don't trust; agent refused to fabricate |
-
-Optional decile calibration on yellow/orange: `🟡 [INFERRED ~80%]`, `🟠 [GUESSED ~30%]`. The `~` signals it's a rough self-estimate, not a true probability.
-
-Full system + when each tag fires: **[`resources/skills/skills/meta/integrity-tags/SKILL.md`](./resources/skills/skills/meta/integrity-tags/SKILL.md)** · Canonical protocol: **[`resources/personas/integrity-protocol.md`](./resources/personas/integrity-protocol.md)** (auto-injected into every profile via `persona_includes`).
-
-<br>
-
----
-
-## what you'll see during a run — the reviewer.
-
-cuecards can ship an **independent review gate**. When the agent finishes a
-code-producing turn in a cuecard that enables it, cue spawns a *fresh, separate*
-reviewer agent over the working-tree diff **before the turn is allowed to finish**.
-It runs as a normal step of a Claude Code run — so expect to see a reviewer agent
-think for a while (a deep pass can run many minutes and tens of thousands of tokens).
-This is by design, and it earns its keep.
-
-A real catch from a live session: the reviewer flagged a **load-bearing unit bug** —
-a product's `weight` was treated as kilograms in one place but grams in two others
-(`weight >= 1000 ? kg : g`). Left in, the per-kg price renders as `€0.00` and a cart
-reads `20000 kg`. The gate held the merge until it was fixed.
-
-Two things so the behavior isn't surprising:
-
-- **A red "Stop hook error" is the gate working, not a failure.** Claude Code renders
-  any *blocking* hook that way. It means the reviewer found a CRITICAL/HIGH issue and is
-  holding the turn until you address it. It caps at 2 rounds, then releases. Suppress it
-  for one turn with `[skip-auto-review]` in your message; turn it off entirely with
-  `rm ~/.config/cue/auto-review-enabled`.
-- **You can watch the review live.** A long review otherwise shows only a spinner. Run
-  `cue-review-watch` in a second pane to see it move file-by-file with findings as they land:
-
-```
-16:42:03  📄 setup-plate-variants.ts
-16:42:03     → unit convention
-16:42:09     🔴 CRITICAL  weight kg/g ambiguity → per-kg price shows €0.00
-16:45:30  ✅ review complete  1 CRITICAL
-```
-
-Enable the gate with `touch ~/.config/cue/auto-review-enabled`. Full details:
-[`docs/review-visibility.md`](./docs/review-visibility.md).
 
 <br>
 
@@ -317,6 +227,19 @@ claude                        # launches with that cuecard's loadout
 
 The same `profile.yaml` materializes into each agent's native format — `.cursorrules`, `.clinerules`, `~/.gemini/skills/*.md`, `.github/copilot-instructions.md`, etc.
 
+<p align="center">
+  <a href="https://github.com/anthropics/claude-code"><img src="https://img.shields.io/badge/Claude_Code-cc785c?style=flat-square&logo=anthropic&logoColor=white" alt="Claude Code"></a>&nbsp;
+  <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/Codex-000000?style=flat-square&logo=openai&logoColor=white" alt="Codex"></a>&nbsp;
+  <a href="https://cursor.sh"><img src="https://img.shields.io/badge/Cursor-000000?style=flat-square&logo=cursor&logoColor=white" alt="Cursor"></a>&nbsp;
+  <a href="https://github.com/cline/cline"><img src="https://img.shields.io/badge/Cline-5A45FF?style=flat-square" alt="Cline"></a>&nbsp;
+  <a href="https://github.com/google-gemini/gemini-cli"><img src="https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini"></a>&nbsp;
+  <a href="https://github.com/features/copilot"><img src="https://img.shields.io/badge/Copilot-000000?style=flat-square&logo=github&logoColor=white" alt="Copilot"></a>&nbsp;
+  <a href="https://windsurf.com"><img src="https://img.shields.io/badge/Windsurf-06B6D4?style=flat-square" alt="Windsurf"></a>&nbsp;
+  <a href="https://github.com/RooVetGit/Roo-Code"><img src="https://img.shields.io/badge/Roo-7C3AED?style=flat-square" alt="Roo"></a>&nbsp;
+  <a href="https://sourcegraph.com/amp"><img src="https://img.shields.io/badge/Amp-FF4500?style=flat-square&logo=sourcegraph&logoColor=white" alt="Amp"></a>&nbsp;
+  <a href="https://aider.chat"><img src="https://img.shields.io/badge/Aider-14B8A6?style=flat-square" alt="Aider"></a>
+</p>
+
 ```bash
 cue materialize cursor --profile backend     # → .cursorrules + .cursor/mcp.json
 cue materialize --all --profile backend      # → all 10 agents at once
@@ -339,6 +262,58 @@ cue materialize --all --profile backend      # → all 10 agents at once
 | Aider | `cue materialize aider` | `.aider.conventions.md` |
 
 </details>
+
+<br>
+
+---
+
+## built-in rigor.
+
+cuecards don't just load tools — they hold your agent to a standard.
+
+### The reviewer gate
+
+cuecards can ship an **independent review gate**. When the agent finishes a
+code-producing turn in a cuecard that enables it, cue spawns a *fresh, separate*
+reviewer agent over the working-tree diff **before the turn is allowed to finish**.
+
+A real catch from a live session: the reviewer flagged a **load-bearing unit bug** —
+a product's `weight` was treated as kilograms in one place but grams in two others
+(`weight >= 1000 ? kg : g`). Left in, the per-kg price renders as `€0.00` and a cart
+reads `20000 kg`. The gate held the merge until it was fixed.
+
+Two things so the behavior isn't surprising:
+
+- **A red "Stop hook error" is the gate working, not a failure.** Claude Code renders
+  any *blocking* hook that way. It means the reviewer found a CRITICAL/HIGH issue and is
+  holding the turn until you address it. It caps at 2 rounds, then releases. Suppress it
+  for one turn with `[skip-auto-review]` in your message; turn it off entirely with
+  `rm ~/.config/cue/auto-review-enabled`.
+- **You can watch the review live.** Run `cue-review-watch` in a second pane to see it
+  move file-by-file with findings as they land:
+
+```
+16:42:03  📄 setup-plate-variants.ts
+16:42:03     → unit convention
+16:42:09     🔴 CRITICAL  weight kg/g ambiguity → per-kg price shows €0.00
+16:45:30  ✅ review complete  1 CRITICAL
+```
+
+Enable the gate with `touch ~/.config/cue/auto-review-enabled`. Full details:
+[`docs/review-visibility.md`](./docs/review-visibility.md).
+
+### Confidence tags
+
+cuecards-managed agents tag every research- or decision-relevant claim with a colored confidence marker so you can scan trust at a glance:
+
+| Tier | Tag | Meaning |
+|---|---|---|
+| 🟢 Green | `[VERIFIED]` / `[KNOWN]` | Trust it (~90–99%) |
+| 🟡 Yellow | `[INFERRED]` / `[ASSUMED]` | Verify if stakes matter (~50–85%) |
+| 🟠 Orange | `[GUESSED]` / `[STALE]` | Verify before acting (~20–45%) |
+| 🔴 Red | `[UNKNOWN]` | Don't trust; agent refused to fabricate |
+
+Optional decile calibration on yellow/orange: `🟡 [INFERRED ~80%]`, `🟠 [GUESSED ~30%]`. The `~` signals it's a rough self-estimate, not a true probability. Full system: **[`integrity-tags/SKILL.md`](./resources/skills/skills/meta/integrity-tags/SKILL.md)** · canonical protocol auto-injected into every profile via `persona_includes`.
 
 <br>
 
@@ -435,25 +410,6 @@ Cold start: 50–200 ms. Warm start: <5 ms (sha256 compare + `exec`). Impercepti
 <summary><b>Does cue send telemetry?</b></summary>
 
 No. Everything cue computes (including the per-skill usage bars in `cue optimizer`) reads from your local `~/.claude/projects/**/*.jsonl` transcripts. Nothing leaves the machine.
-</details>
-
-<details>
-<summary><b>What's the difference between cue and skillport / Kiro Powers?</b></summary>
-
-| | cue | skillport / agent-skills-cli | Kiro Powers |
-|---|---|---|---|
-| Skills | ✅ | ✅ | ✅ |
-| MCPs | ✅ | — | ✅ |
-| Plugins | ✅ | — | — |
-| Per-directory profiles | ✅ | — | ◐ (IDE-only) |
-| Inheritance | ✅ | — | — |
-| Persona / playbooks / gates / evals | ✅ | — | — |
-| Multi-agent (Cursor/Cline/Copilot/etc.) | ✅ (10) | Claude only | IDE-only |
-| CLI installer | ✅ | — | — |
-| Failure-feedback loop | ✅ | — | — |
-| Daemon required | None | None | IDE process |
-
-cuecards is the only one that treats agent expertise as a composable system.
 </details>
 
 <details>

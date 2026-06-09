@@ -106,6 +106,43 @@ if [ "$rounds" -ge "$MAX_ROUNDS" ]; then
   exit 0
 fi
 
+# ─── Triviality gate (conservative): comment/whitespace/docs-only → skip ───
+# An independent reviewer agent on a stale-comment fix or a docs tweak is pure
+# overhead. Skip ONLY when every changed line is a comment, blank, or lone
+# punctuation — any real code line falls through to review. Untracked (new)
+# files are never trivial, so the gate is bypassed when any exist.
+if [ -z "$(git -C "$cwd" ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  # (a) Docs/prose-only: every changed file is markdown/text → skip regardless
+  # of content (a reworded README needs no code review).
+  changed_files="$(git -C "$cwd" diff HEAD --name-only 2>/dev/null || git -C "$cwd" diff --name-only 2>/dev/null)"
+  if [ -n "$changed_files" ] && ! printf '%s\n' "$changed_files" \
+      | grep -qivE '\.(md|mdx|markdown|txt|rst|adoc)$|(^|/)(CHANGELOG|LICENSE|AUTHORS|NOTICE|README)([.-][^/]*)?$'; then
+    printf '%s\n0\n' "$diff_hash" > "$sfile"
+    exit 0
+  fi
+  # (b) Comment/whitespace-only across code files.
+  # Changed content lines (added/removed), minus the +++/--- file headers,
+  # with the leading +/- and surrounding whitespace stripped.
+  bodies="$(printf '%s\n' "$diff" \
+    | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
+    | sed -E 's/^[+-]//; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+  # Drop blanks, lone brackets/punctuation, and the common comment-line shapes
+  # (//, #, /* */, leading-* JSDoc continuations, <!-- -->, SQL/Lua --). What
+  # remains is "substantive code"; if nothing remains, the diff is trivial.
+  code_lines="$(printf '%s\n' "$bodies" \
+    | grep -vE '^$' \
+    | grep -vE '^[][(){},;:]+$' \
+    | grep -vE '^(//|#)' \
+    | grep -vE '^/\*|\*/$' \
+    | grep -vE '^\*( |$)' \
+    | grep -vE '^(<!--|-->)' \
+    | grep -vE '^--( |$)')"
+  if [ -z "$(printf '%s' "$code_lines" | tr -d '[:space:]')" ]; then
+    printf '%s\n0\n' "$diff_hash" > "$sfile"
+    exit 0
+  fi
+fi
+
 # ─── Live progress channel (best-effort; see docs/review-visibility.md) ─────
 # A second pane running `cue-review-watch` renders these events live, so the user
 # sees which file/dimension is under review and findings as they land instead of

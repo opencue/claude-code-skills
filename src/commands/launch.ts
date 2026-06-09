@@ -145,6 +145,18 @@ function execAgent(bin: string, args: string[], env: NodeJS.ProcessEnv): Promise
   });
 }
 
+function isAgentHelpPassthrough(parsed: ParsedArgs): boolean {
+  return (
+    !parsed.override &&
+    !parsed.forcePick &&
+    !parsed.dryRun &&
+    !parsed.rematerialize &&
+    parsed.subset === null &&
+    parsed.passthrough.length === 1 &&
+    (parsed.passthrough[0] === "--help" || parsed.passthrough[0] === "-h")
+  );
+}
+
 export interface TmuxAnnounceExtras {
   /** Token-overhead summary: dot = 🟢/🟡/🟠/🔴, size = "8K". Both optional. */
   overhead?: { dot: string; size: string };
@@ -1206,6 +1218,16 @@ export async function run(args: string[]): Promise<number> {
   if (!parsed.agent) {
     process.stderr.write("cue launch: missing agent (use 'claude' or 'codex')\n");
     return 1;
+  }
+  if (isAgentHelpPassthrough(parsed)) {
+    const realBin = await findRealBinary(parsed.agent);
+    if (!realBin) {
+      process.stderr.write(
+        `cue launch: couldn't find the real '${parsed.agent}' binary on PATH=${process.env.PATH}\n`,
+      );
+      return 127;
+    }
+    return execAgent(realBin, parsed.passthrough, process.env);
   }
   const agentKind = parsed.agent === "claude" ? "claude-code" : "codex";
 

@@ -107,7 +107,6 @@ skills:
       skills: [neon-postgres]
 plugins:
   - claude-mem@thedotmack
-  - oh-my-claudecode@omc
   - resend@claude-plugins-official
   - frontend-design@claude-plugins-official
   - webwright@webwright
