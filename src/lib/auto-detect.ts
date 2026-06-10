@@ -59,6 +59,8 @@ export interface DepProfileRule {
   deps?: string[];
   /** Scoped-package prefixes, e.g. "@aws-sdk/". */
   prefixes?: string[];
+  /** Python package names (PEP 503 normalized: lowercase, `_`/`.` → `-`). */
+  pyDeps?: string[];
   confidence: number;
   reason: string;
   /**
@@ -70,12 +72,12 @@ export interface DepProfileRule {
 }
 
 export const DEP_PROFILE_RULES: DepProfileRule[] = [
-  { profile: "stripe", deps: ["stripe"], prefixes: ["@stripe/"], confidence: 0.6, reason: "package.json has stripe", companion: true },
-  { profile: "aws", deps: ["aws-sdk", "aws-cdk"], prefixes: ["@aws-sdk/", "@aws-cdk/"], confidence: 0.6, reason: "package.json has @aws-sdk/*", companion: true },
-  { profile: "supabase", prefixes: ["@supabase/"], confidence: 0.6, reason: "package.json has @supabase/*", companion: true },
-  { profile: "slack", prefixes: ["@slack/"], confidence: 0.6, reason: "package.json has @slack/*", companion: true },
-  { profile: "postgres", deps: ["pg", "postgres", "pg-promise"], confidence: 0.55, reason: "package.json has pg/postgres", companion: true },
-  { profile: "resend", deps: ["resend"], confidence: 0.6, reason: "package.json has resend", companion: true },
+  { profile: "stripe", deps: ["stripe"], prefixes: ["@stripe/"], pyDeps: ["stripe"], confidence: 0.6, reason: "package.json has stripe", companion: true },
+  { profile: "aws", deps: ["aws-sdk", "aws-cdk"], prefixes: ["@aws-sdk/", "@aws-cdk/"], pyDeps: ["boto3", "botocore", "aws-cdk-lib"], confidence: 0.6, reason: "package.json has @aws-sdk/*", companion: true },
+  { profile: "supabase", prefixes: ["@supabase/"], pyDeps: ["supabase"], confidence: 0.6, reason: "package.json has @supabase/*", companion: true },
+  { profile: "slack", prefixes: ["@slack/"], pyDeps: ["slack-sdk"], confidence: 0.6, reason: "package.json has @slack/*", companion: true },
+  { profile: "postgres", deps: ["pg", "postgres", "pg-promise"], pyDeps: ["psycopg", "psycopg2", "psycopg2-binary", "asyncpg"], confidence: 0.55, reason: "package.json has pg/postgres", companion: true },
+  { profile: "resend", deps: ["resend"], pyDeps: ["resend"], confidence: 0.6, reason: "package.json has resend", companion: true },
   { profile: "strapi", prefixes: ["@strapi/"], confidence: 0.65, reason: "package.json has @strapi/*", companion: true },
   { profile: "threejs", deps: ["three"], confidence: 0.6, reason: "package.json has three", companion: true },
   // react-native is a primary stack, not a service: an RN repo also has
@@ -86,6 +88,54 @@ export const DEP_PROFILE_RULES: DepProfileRule[] = [
 
 const ex = (cwd: string, rel: string): boolean => existsSync(join(cwd, rel));
 const exAny = (cwd: string, rels: string[]): boolean => rels.some((r) => ex(cwd, r));
+
+/** PEP 503 name normalization: lowercase, runs of `-`/`_`/`.` → single `-`. */
+const normPyName = (name: string): string => name.toLowerCase().replace(/[-_.]+/g, "-");
+
+/**
+ * Best-effort Python dependency names from requirements.txt and
+ * pyproject.toml, for the `pyDeps` side of DEP_PROFILE_RULES. requirements
+ * lines are parsed properly (comments, extras, version specifiers, env
+ * markers stripped); pyproject is a cheap regex over quoted strings in
+ * `dependencies = [...]` arrays plus `[tool.poetry.dependencies]` keys — not
+ * a TOML parser, same best-effort discipline as the rest of this module.
+ * `source` names the file that contributed deps, for detection reasons.
+ */
+function readPythonDeps(cwd: string): { deps: Set<string>; source: string } {
+  const deps = new Set<string>();
+  const sources: string[] = [];
+  try {
+    const raw = readFileSync(join(cwd, "requirements.txt"), "utf8");
+    for (const line of raw.split("\n")) {
+      const bare = line.split("#")[0]!.trim();
+      if (!bare || bare.startsWith("-")) continue; // blank / pip flags (-r, -e, --hash)
+      const m = bare.match(/^([A-Za-z0-9][A-Za-z0-9._-]*)/);
+      if (m) deps.add(normPyName(m[1]!));
+    }
+    if (deps.size > 0) sources.push("requirements.txt");
+  } catch { /* no requirements.txt */ }
+  try {
+    const raw = readFileSync(join(cwd, "pyproject.toml"), "utf8");
+    const before = deps.size;
+    // Quoted entries inside any `dependencies = [...]` array ([project] or
+    // optional-dependencies groups).
+    for (const arr of raw.matchAll(/dependencies\s*=\s*\[([^\]]*)\]/g)) {
+      for (const q of arr[1]!.matchAll(/["']([A-Za-z0-9][A-Za-z0-9._-]*)/g)) {
+        deps.add(normPyName(q[1]!));
+      }
+    }
+    // `[tool.poetry.dependencies]` table keys (one `name = ...` per line).
+    const poetry = raw.match(/\[tool\.poetry\.dependencies\]([^[]*)/);
+    if (poetry) {
+      for (const line of poetry[1]!.split("\n")) {
+        const m = line.match(/^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*=/);
+        if (m && m[1] !== "python") deps.add(normPyName(m[1]!));
+      }
+    }
+    if (deps.size > before) sources.push("pyproject.toml");
+  } catch { /* no pyproject.toml */ }
+  return { deps, source: sources.join(" + ") };
+}
 
 /**
  * Per-extra-signal confidence boost. A profile backed by several independent
@@ -198,6 +248,18 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
         (rule.deps !== undefined && hasAny(allDeps, rule.deps)) ||
         (rule.prefixes ?? []).some((p) => hasPrefix(allDeps, p));
       if (hit) add(rule.profile, rule.confidence, rule.reason);
+    }
+  }
+
+  // ── Python deps (requirements.txt / pyproject.toml) — same rule table ──
+  if (exAny(cwd, ["requirements.txt", "pyproject.toml"])) {
+    const { deps: pyDeps, source } = readPythonDeps(cwd);
+    if (pyDeps.size > 0) {
+      for (const rule of DEP_PROFILE_RULES) {
+        if (rule.pyDeps === undefined) continue;
+        const matched = rule.pyDeps.find((d) => pyDeps.has(d));
+        if (matched !== undefined) add(rule.profile, rule.confidence, `${source} has ${matched}`);
+      }
     }
   }
 

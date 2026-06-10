@@ -199,3 +199,56 @@ describe("detectProfileV2", () => {
   });
 });
 
+
+describe("detectProfileV2 — Python deps", () => {
+  test("requirements.txt with boto3 → aws suggested, python outranks it", () => {
+    writeFileSync(join(tmp, "requirements.txt"), "boto3==1.34.0\n");
+    const results = detectProfileV2(tmp);
+    const aws = results.find(r => r.profile === "aws");
+    const python = results.find(r => r.profile === "python");
+    expect(aws).toBeDefined();
+    expect(aws!.confidence).toBeGreaterThanOrEqual(0.5);
+    expect(aws!.confidence).toBeLessThan(0.7);
+    expect(python).toBeDefined();
+    expect(python!.confidence).toBeGreaterThan(aws!.confidence);
+  });
+
+  test("version specifiers, extras, and comments are stripped", () => {
+    writeFileSync(join(tmp, "requirements.txt"), [
+      "# payments",
+      "stripe==7.0.0",
+      "psycopg2-binary>=2.9 ; python_version >= '3.8'",
+      "uvicorn[standard]~=0.29",
+      "",
+    ].join("\n"));
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "stripe")).toBeDefined();
+    expect(results.find(r => r.profile === "postgres")).toBeDefined();
+  });
+
+  test("pyproject.toml [project] dependencies → supabase suggested", () => {
+    writeFileSync(join(tmp, "pyproject.toml"), [
+      "[project]",
+      'name = "myapp"',
+      "dependencies = [",
+      '  "supabase>=2.0",',
+      '  "httpx",',
+      "]",
+    ].join("\n"));
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "supabase")).toBeDefined();
+  });
+
+  test("PEP 503 normalization: slack_sdk matches slack-sdk", () => {
+    writeFileSync(join(tmp, "requirements.txt"), "slack_sdk==3.27.0\n");
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "slack")).toBeDefined();
+  });
+
+  test("python files without service deps suggest no service profiles", () => {
+    writeFileSync(join(tmp, "requirements.txt"), "requests==2.31.0\nflask\n");
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "aws")).toBeUndefined();
+    expect(results.find(r => r.profile === "stripe")).toBeUndefined();
+  });
+});
