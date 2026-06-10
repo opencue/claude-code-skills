@@ -2,22 +2,22 @@
 title: "googlarz/finance-assistant — Claude Code skill discovered by cue"
 description: "Personal finance copilot — real math, not AI guesses. 6 locales · 13 bank formats · Monte Carlo FIRE. claude.ai · Claude Code · Cowork. Open source, free."
 layout: page
-updated: 2026-06-05
+updated: 2026-06-10
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [googlarz/finance-assistant](https://github.com/googlarz/finance-assistant)
 
-**★ 24** · exceptional (score 17.4) · Python · anthropic, budgeting, claude-code, claude-cowork, claude-skill
+**★ 26** · exceptional (score 17.5) · Python · anthropic, budgeting, claude-code, claude-cowork, claude-skill
 
 > Personal finance copilot — real math, not AI guesses. 6 locales · 13 bank formats · Monte Carlo FIRE. claude.ai · Claude Code · Cowork. Open source, free.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 17.4 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 17.5 based on:
 - ✅ Contains SKILL.md
-- ⭐ 24 stars
-- 🗓️ Last pushed: 2026-06-05
+- ⭐ 26 stars
+- 🗓️ Last pushed: 2026-06-10
 - 🏷️ Tags: anthropic, budgeting, claude-code, claude-cowork, claude-skill, mcp, personal-finance, productivity, skill, tax
 
 ## Best fit cue profiles

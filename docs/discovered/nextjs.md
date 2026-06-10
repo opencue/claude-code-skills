@@ -2,7 +2,7 @@
 title: "Claude Code Skills for nextjs"
 description: "1 community Claude Code skills curated by cue for the nextjs profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-08
+updated: 2026-06-10
 tags: [claude-code, nextjs, skills, mcp, ai-agents]
 ---
 
@@ -15,17 +15,15 @@ tags: [claude-code, nextjs, skills, mcp, ai-agents]
 
 ---
 
-<a id="mustbesimo-cinematic-scroll-skill"></a>
-## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
+<a id="ditakebede1-personal-knowledge-nexus"></a>
+## ✨ [ditakebede1/personal-knowledge-nexus](https://github.com/ditakebede1/personal-knowledge-nexus)
 
-**★ 4** · exceptional (score 14.3) · HTML · tags: agent-skill, agent-skills, claude-skill, creative-coding, cursor
+**★ 0** · strong (score 7.5) · HTML · tags: ai-tools, book-intelligence, claude-code, claude-plugin, claude-skill
 
-Agent skill for building cinematic, scroll-driven websites from a brief: visual systems, motion storyboards, vanilla/GSAP demos, and Next.js release-page templates.
-
-✅ SKILL.md
+Library OS 2026: Auto-Publish Your Deep Book Notes to Your Website
 
 ```bash
-cue skills add MustBeSimo/cinematic-scroll-skill --profile nextjs
+cue skills add ditakebede1/personal-knowledge-nexus --profile nextjs
 ```
 
 ---

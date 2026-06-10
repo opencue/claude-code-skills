@@ -1,47 +1,17 @@
 ---
 title: "Claude Code Skills for niche"
-description: "5 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, niche, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `niche`
 
-> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="can4hou6joeng4-boss-agent-cli"></a>
-## 💎 [can4hou6joeng4/boss-agent-cli](https://github.com/can4hou6joeng4/boss-agent-cli)
-
-**★ 1109** · exceptional (score 21.3) · Python · tags: agent-skill, agent-tools, ai-agent, automation, boss-zhipin
-
-AI-agent-first CLI for BOSS 直聘 — 职位搜索、福利筛选、招聘者工作流、MCP 工具与 AI 简历优化
-
-✅ SKILL.md
-
-```bash
-cue skills add can4hou6joeng4/boss-agent-cli --profile niche
-```
-
----
-
-<a id="martellevaliant19-grant-thinking-cn-biology"></a>
-## 💎 [martellevaliant19/grant-thinking-cn-biology](https://github.com/martellevaliant19/grant-thinking-cn-biology)
-
-**★ 0** · exceptional (score 10.5) · tags: biology, china-grants, claude-code, claude-code-skill, claude-skills
-
-Evaluate biology grant proposals for Chinese funding agencies, identify structural gaps, and improve funding odds through logic assessment and research diagnostics.
-
-✅ SKILL.md
-
-```bash
-cue skills add martellevaliant19/grant-thinking-cn-biology --profile niche
-```
 
 ---
 
@@ -60,32 +30,17 @@ cue skills add Ikramahmadmemon13/grant-thinking-skill --profile niche
 
 ---
 
-<a id="outmansay-devil-chat-coach"></a>
-## 💎 [OutmanSay/devil-chat-coach](https://github.com/OutmanSay/devil-chat-coach)
+<a id="martellevaliant19-grant-thinking-cn-biology"></a>
+## 💎 [martellevaliant19/grant-thinking-cn-biology](https://github.com/martellevaliant19/grant-thinking-cn-biology)
 
-**★ 0** · exceptional (score 10.2) · tags: ai-agent, ai-agent-skill, claude-code, openclaw, prompt-engineering
+**★ 0** · exceptional (score 10.5) · tags: biology, china-grants, claude-code, claude-code-skill, claude-skills
 
-🧠 AI Agent Skill: 实战恋爱聊天教练，贴对方消息按「阶段+温度」给你能用的回复 | AI agent skill for dating-chat coaching
-
-✅ SKILL.md
-
-```bash
-cue skills add OutmanSay/devil-chat-coach --profile niche
-```
-
----
-
-<a id="jayden-lg-costing-master"></a>
-## 💎 [jayden-lg/costing-master](https://github.com/jayden-lg/costing-master)
-
-**★ 4** · exceptional (score 8.7) · tags: ai-agent-skill, china, claude-code, construction, cost-estimation
-
-造价大师 — 中国建设工程造价管理全流程AI助手。遵循GB/T 50500-2024，覆盖投资估算到竣工决算，兼容各省定额与广联达。
+Evaluate biology grant proposals for Chinese funding agencies, identify structural gaps, and improve funding odds through logic assessment and research diagnostics.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add jayden-lg/costing-master --profile niche
+cue skills add martellevaliant19/grant-thinking-cn-biology --profile niche
 ```
 
 ---

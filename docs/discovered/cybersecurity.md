@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for cybersecurity"
-description: "7 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "8 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, cybersecurity, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `cybersecurity`
 
-> 7 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
+> 8 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -33,7 +33,7 @@ cue skills add nsasoft/nsauditor-ai-agent-skill --profile cybersecurity
 <a id="zandereins-hydra"></a>
 ## 💎 [Zandereins/hydra](https://github.com/Zandereins/hydra)
 
-**★ 2** · exceptional (score 14.3) · Python · tags: adversarial-testing, ai-code-review, architecture-review, claude-code, claude-code-skill
+**★ 2** · exceptional (score 14.2) · Python · tags: adversarial-testing, ai-code-review, architecture-review, claude-code, claude-code-skill
 
 Multi-perspective code review council for Claude Code. 3 advisors by default, 10 agents in deep mode (Opus + Codex). Evidence chains, adversarial self-test, dual-path verdict. Based on Karpathy's LLM Council.
 
@@ -45,25 +45,10 @@ cue skills add Zandereins/hydra --profile cybersecurity
 
 ---
 
-<a id="leontynestirredup43-slowmist-security-cc"></a>
-## 💎 [Leontynestirredup43/slowmist-security-cc](https://github.com/Leontynestirredup43/slowmist-security-cc)
-
-**★ 0** · exceptional (score 13) · tags: agent-security, aml, audit, blockchain, claude-code
-
-Audit Claude Code agents with this security framework to detect vulnerabilities, social engineering, and supply chain threats in adversarial environments.
-
-✅ SKILL.md
-
-```bash
-cue skills add Leontynestirredup43/slowmist-security-cc --profile cybersecurity
-```
-
----
-
 <a id="elementalsouls-claude-osint"></a>
 ## 💎 [elementalsouls/Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT)
 
-**★ 1644** · exceptional (score 11.5) · Python · tags: agentskills, claude, skills
+**★ 1645** · exceptional (score 11.4) · Python · tags: agentskills, claude, skills
 
 Two paired Claude skills · 90+ recon modules · 48 secret-regex patterns · 80+ dorks · 9 read-only credential validators · 27 attack-path templates · 5,500+ lines of structured tradecraft. Drop-in SKILL.md files that turn Claude into a god-mode external recon operator for authorized red-team and bug-bounty engagements.
 
@@ -102,12 +87,38 @@ cue skills add davzpogi01/claude-security-research-skill --profile cybersecurity
 <a id="hybridindie-comfyui-mcp"></a>
 ## ✨ [hybridindie/comfyui_mcp](https://github.com/hybridindie/comfyui_mcp)
 
-**★ 2** · strong (score 7.9) · Python · tags: ai-tools, claude, comfyui, image-generation, mcp
+**★ 2** · strong (score 7.8) · Python · tags: ai-tools, claude, comfyui, image-generation, mcp
 
 Secure MCP server for ComfyUI — workflow inspection, path sanitization, rate limiting, and audit logging. Generate images from Claude and other AI assistants with built-in security controls.
 
 ```bash
 cue skills add hybridindie/comfyui_mcp --profile cybersecurity
+```
+
+---
+
+<a id="rizwan723-mcp-security-proxy"></a>
+## ✨ [Rizwan723/MCP-Security-Proxy](https://github.com/Rizwan723/MCP-Security-Proxy)
+
+**★ 0** · strong (score 6.5) · Jupyter Notebook · tags: adversarial-testing, agent-security, ai-security, automation, cli
+
+🔒 Implement a security proxy for Model Context Protocol using ensemble anomaly detection to classify requests as benign or attack for enhanced safety.
+
+```bash
+cue skills add Rizwan723/MCP-Security-Proxy --profile cybersecurity
+```
+
+---
+
+<a id="guidancestudio-code-repository-audit-skill"></a>
+## ✨ [GuidanceStudio/code-repository-audit-skill](https://github.com/GuidanceStudio/code-repository-audit-skill)
+
+**★ 0** · strong (score 6) · Python · tags: claude-skill, code-audit, code-review, owasp, security-audit
+
+Generalist Claude skill for codebase audits — 13-dimension framework, routing by intent, OSS-tooling wired in. Lean, dogfooded.
+
+```bash
+cue skills add GuidanceStudio/code-repository-audit-skill --profile cybersecurity
 ```
 
 ---

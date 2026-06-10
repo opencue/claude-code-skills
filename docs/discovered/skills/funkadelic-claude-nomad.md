@@ -1,8 +1,8 @@
 ---
 title: "funkadelic/claude-nomad — Claude Code skill discovered by cue"
-description: "Sync your Claude Code config across machines, with path remapping and per-host overrides"
+description: "Sync your full Claude Code setup across machines: agents, settings, and session history, with path remapping and per-host overrides"
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, skill, core]
 ---
 
@@ -10,7 +10,7 @@ tags: [claude-code, skill, core]
 
 **★ 2** · strong (score 6.5) · TypeScript · anthropic, claude, claude-code, claudecode, cli
 
-> Sync your Claude Code config across machines, with path remapping and per-host overrides
+> Sync your full Claude Code setup across machines: agents, settings, and session history, with path remapping and per-host overrides
 
 ## Why cue indexed it
 

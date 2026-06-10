@@ -2,7 +2,7 @@
 title: "vl0dyy/claude-agent-kit — Claude Code skill discovered by cue"
 description: "🤖 Build and manage Claude-powered agents with utilities for session handling, message parsing, and real-time experiences."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-10
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-10
 - 🏷️ Tags: agentic-code, agentic-coding, agents, ai-experimentation, anthropic, claude-code, claude-code-plugin, claude-code-skill, claude-code-skills, claude-code-subagents, claude-skills, claude-skills-creator, java, junit, langchain4j, skills, spring-boot, subagents
 
 ## Best fit cue profiles

@@ -1,31 +1,30 @@
 ---
 title: "Discovered Claude Code Skills"
-description: "100 community Claude Code skills curated by cue across 11 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
+description: "100 community Claude Code skills curated by cue across 10 profiles. Find skills for backend, frontend, marketing, cybersecurity, and more."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, skills, mcp, ai-agents, marketplace]
 ---
 
 # 🎯 Discovered Claude Code Skills
 
-> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **11 profiles**.
-> Last updated: 2026-06-09 · refreshed nightly via GitHub Code Search.
+> **100 hidden-gem skills** discovered by [cue](https://github.com/opencue/cuecards) across **10 profiles**.
+> Last updated: 2026-06-10 · refreshed nightly via GitHub Code Search.
 
 ## Browse by profile
 
 | Profile | Skills | Sample |
 |---|---|---|
-| [**core**](./core.md) | 66 | `antigravity-workspace-template`, `wmux`, `lean-ctx` |
-| [**backend**](./backend.md) | 12 | `ops-codegraph-tool`, `Cortex`, `mneme-ai` |
-| [**cybersecurity**](./cybersecurity.md) | 7 | `nsauditor-ai-agent-skill`, `hydra`, `slowmist-security-cc` |
-| [**niche**](./niche.md) | 5 | `boss-agent-cli`, `grant-thinking-cn-biology`, `grant-thinking-skill` |
-| [**docs-writer**](./docs-writer.md) | 4 | `kioku`, `llm-wiki`, `llm-knowledge-base` |
-| [**creative-media**](./creative-media.md) | 4 | `claude-wechat-bridge-with-files`, `social-media-scraper-skill`, `ai-atelie` |
-| [**frontend**](./frontend.md) | 2 | `lottie-marketplace`, `ai-atelie` |
-| [**research**](./research.md) | 1 | `venture-analyst` |
-| [**python**](./python.md) | 1 | `pipulate` |
-| [**video**](./video.md) | 1 | `social-media-scraper-skill` |
-| [**rust**](./rust.md) | 1 | `plsql-intelligence` |
+| [**core**](./core.md) | 68 | `context-mode`, `antigravity-workspace-template`, `finance-assistant` |
+| [**backend**](./backend.md) | 12 | `archestra`, `whoop-mcp`, `phpman` |
+| [**cybersecurity**](./cybersecurity.md) | 8 | `nsauditor-ai-agent-skill`, `hydra`, `Claude-OSINT` |
+| [**creative-media**](./creative-media.md) | 4 | `chrome-devtools-mcp`, `ltx2-vidgen-skill`, `ai-atelie` |
+| [**frontend**](./frontend.md) | 4 | `lottie-marketplace`, `ionik-capacitor-flux-patterns`, `sticky-switcher-funnel-playbook` |
+| [**docs-writer**](./docs-writer.md) | 3 | `project-butler`, `brewpage-openapi`, `bullet-mcp` |
+| [**fleet-control**](./fleet-control.md) | 3 | `superx-agentic-orchestrator`, `CLAUDEmd`, `queen-protocol` |
+| [**niche**](./niche.md) | 2 | `grant-thinking-skill`, `grant-thinking-cn-biology` |
+| [**nextjs**](./nextjs.md) | 1 | `personal-knowledge-nexus` |
+| [**marketing**](./marketing.md) | 1 | `sticky-switcher-funnel-playbook` |
 
 ## How scoring works
 

@@ -2,7 +2,7 @@
 title: "mobeenx20/hermes-codex — Claude Code skill discovered by cue"
 description: "Scoped project rules for Hermes Agent: .hermes/rules/ with YAML path-scoping, equivalent to Claude Code's .claude/rules/ but for Hermes Agent."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, skill, core]
 ---
 

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for creative-media"
 description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-10
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
@@ -15,30 +15,28 @@ tags: [claude-code, creative-media, skills, mcp, ai-agents]
 
 ---
 
-<a id="tinadu-ai-claude-wechat-bridge-with-files"></a>
-## 💎 [TinaDu-AI/claude-wechat-bridge-with-files](https://github.com/TinaDu-AI/claude-wechat-bridge-with-files)
+<a id="bklamheem-chrome-devtools-mcp"></a>
+## 💎 [bklamheem/chrome-devtools-mcp](https://github.com/bklamheem/chrome-devtools-mcp)
 
-**★ 1** · exceptional (score 9) · JavaScript
+**★ 0** · exceptional (score 10) · Python · tags: ai, browser, browser-use, chrome, chromium
 
-Claude Code ↔ WeChat bridge with image/file/voice/video patch — files arrive at ~/.wechat-claude/media/ and inject as [图片:path] / [文件:path]
-
-✅ SKILL.md
+🛠️ Control and inspect a live Chrome browser with `chrome-devtools-mcp` for reliable automation, debugging, and performance insights.
 
 ```bash
-cue skills add TinaDu-AI/claude-wechat-bridge-with-files --profile creative-media
+cue skills add bklamheem/chrome-devtools-mcp --profile creative-media
 ```
 
 ---
 
-<a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
-## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
+<a id="patraxo-ltx2-vidgen-skill"></a>
+## ✨ [patraxo/ltx2-vidgen-skill](https://github.com/patraxo/ltx2-vidgen-skill)
 
-**★ 3** · exceptional (score 8.7) · tags: ai, automation, claude-code, claude-skill, content-analysis
+**★ 3** · strong (score 7.7) · Python · tags: blackwell, claude-code, claude-skill, diffusion-models, generative-ai
 
-Extract and summarize social media content from platforms like Instagram, TikTok, X, and YouTube using Claude Code.
+Drop a photo in Claude Code → get a video. Self-hosted LTX-2.3 (22B) on serverless GPU: text/image/keyframe/video-to-video + canny/depth/pose control, synced audio, batch variations, reel/YouTube/square formats. Own the pipeline — a few cents a clip, no API meter.
 
 ```bash
-cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile creative-media
+cue skills add patraxo/ltx2-vidgen-skill --profile creative-media
 ```
 
 ---
