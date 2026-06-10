@@ -24,7 +24,7 @@
  * touching `~/`.
  */
 
-import { readFile, readdir, copyFile, stat } from "node:fs/promises";
+import { readFile, readdir, copyFile, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 interface CredentialsBlob {
@@ -202,4 +202,98 @@ export async function syncFreshestToSource(
   } catch {
     return { synced: false };
   }
+}
+
+/**
+ * Known Claude account dirs a runtime's credentials could belong to:
+ * `~/.claude` plus every `~/.claude-accounts/<name>` (authmux's parallel
+ * account convention — the CLAUDE_CONFIG_DIRs its claude-<name> aliases set).
+ */
+export async function listKnownAccountDirs(homeDir: string): Promise<string[]> {
+  const dirs = [join(homeDir, ".claude")];
+  const parallelRoot = join(homeDir, ".claude-accounts");
+  try {
+    for (const name of await readdir(parallelRoot)) {
+      const p = join(parallelRoot, name);
+      try {
+        if ((await stat(p)).isDirectory()) dirs.push(p);
+      } catch { /* unreadable entry — skip */ }
+    }
+  } catch { /* no parallel accounts */ }
+  return dirs;
+}
+
+/**
+ * Write a runtime's login-fresh credentials back to the account dir that
+ * OWNS them (matched by accountUuid).
+ *
+ * Why this exists: `/login` inside a cue-launched session writes tokens into
+ * the per-PROFILE runtime dir, not the account's CLAUDE_CONFIG_DIR. The heal
+ * in `syncFreshestToSource` only runs at the next launch *of that same
+ * account* — but runtimes are shared per profile, so when a DIFFERENT
+ * account launches the profile first, the account-identity guard discards
+ * the runtime's `.claude.json`/`.credentials.json`. Anthropic rotates the
+ * refresh token on every refresh, so that discarded copy was the only live
+ * token for the account: its source still holds a dead one → forced re-login
+ * every time two accounts alternate on one profile. Calling this before
+ * materialization (and after the session exits) returns the tokens home
+ * before they can be destroyed.
+ *
+ * Strictness rules mirror `syncFreshestToSource`:
+ *   - runtime must have a readable accountUuid and non-empty refreshToken
+ *   - the owner dir's uuid must match exactly
+ *   - copy only when the runtime's expiresAt is *strictly* newer
+ *   - copy is tmp + atomic rename so a concurrent reader never sees a
+ *     partial file
+ */
+export async function rescueRuntimeCredentials(
+  runtimeClaudeDir: string,
+  accountDirs: string[],
+): Promise<{ rescued: false } | { rescued: true; to: string; expiresAt: number }> {
+  const cand = await readCredentials(runtimeClaudeDir);
+  if (!cand || !cand.accountUuid || cand.refreshToken.trim().length === 0) return { rescued: false };
+
+  const readOwnerExpiresAt = async (dir: string): Promise<number> => {
+    try {
+      const raw = await readFile(join(dir, ".credentials.json"), "utf8");
+      const parsed = JSON.parse(raw) as CredentialsBlob;
+      return parsed?.claudeAiOauth?.expiresAt ?? 0;
+    } catch {
+      return 0; // missing/corrupt — anything is better
+    }
+  };
+
+  // Heal EVERY dir claiming this uuid, not just the first match — `~/.claude`
+  // and an authmux account dir can both hold the same account, and stopping
+  // at the first would leave the other with a dead rotated token.
+  const rescuedTo: string[] = [];
+  for (const dir of accountDirs) {
+    const ownerUuid = await readAccountUuid(dir);
+    if (ownerUuid !== cand.accountUuid) continue;
+    if (cand.expiresAt <= await readOwnerExpiresAt(dir)) continue;
+
+    const dest = join(dir, ".credentials.json");
+    try {
+      // tmp lives next to dest so the rename is same-device atomic; the
+      // cross-device step (runtime → account dir) is the copyFile into tmp,
+      // which a concurrent reader never sees.
+      const tmp = `${dest}.cue-rescue.${process.pid}`;
+      await copyFile(cand.path, tmp);
+      // Re-check freshness right before the swap: the owning account may have
+      // a LIVE session rotating tokens concurrently. A fresher token landing
+      // between the check above and this rename must win. (A write inside
+      // this final window can still lose — Claude Code's own writes are
+      // atomic renames too, so the loser is a whole consistent file, and the
+      // next launch's heal repairs it.)
+      if (cand.expiresAt <= await readOwnerExpiresAt(dir)) {
+        await rm(tmp, { force: true });
+        continue;
+      }
+      await rename(tmp, dest);
+      rescuedTo.push(dest);
+    } catch { /* best-effort per dir — keep trying the others */ }
+  }
+
+  if (rescuedTo.length === 0) return { rescued: false };
+  return { rescued: true, to: rescuedTo.join(", "), expiresAt: cand.expiresAt };
 }

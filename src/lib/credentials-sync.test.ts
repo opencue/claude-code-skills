@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { findFreshestCredentials, syncFreshestToSource } from "./credentials-sync";
+import { findFreshestCredentials, listKnownAccountDirs, rescueRuntimeCredentials, syncFreshestToSource } from "./credentials-sync";
 
 let root: string;
 beforeEach(async () => { root = await mkdtemp(join(tmpdir(), "cue-credsync-")); });
@@ -204,5 +204,125 @@ describe("syncFreshestToSource", () => {
 
     const after = JSON.parse(await readFile(join(sourceDir, ".credentials.json"), "utf8"));
     expect(after.claudeAiOauth.refreshToken).toBe("rt-A");
+  });
+});
+
+describe("rescueRuntimeCredentials", () => {
+  test("rescues fresher runtime creds to the account dir owning the uuid", async () => {
+    // The user's bug in miniature: account2 logged in inside the shared
+    // runtime (fresh token lives ONLY there), account2's own dir holds the
+    // dead rotated token. Rescue must return the fresh token home before the
+    // identity guard wipes the runtime for the other account.
+    const account1 = join(root, "accounts", "account1");
+    const account2 = join(root, "accounts", "account2");
+    await writeAccountDir(account1, UUID_A, { refreshToken: "rt-a1", expiresAt: 5000 });
+    await writeAccountDir(account2, UUID_B, { refreshToken: "rt-a2-dead", expiresAt: 1000 });
+
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, UUID_B, { refreshToken: "rt-a2-fresh", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [account1, account2]);
+    expect(result.rescued).toBe(true);
+    if (result.rescued) expect(result.to).toBe(join(account2, ".credentials.json"));
+
+    const after = JSON.parse(await readFile(join(account2, ".credentials.json"), "utf8"));
+    expect(after.claudeAiOauth.refreshToken).toBe("rt-a2-fresh");
+    // The other account's dir is untouched.
+    const other = JSON.parse(await readFile(join(account1, ".credentials.json"), "utf8"));
+    expect(other.claudeAiOauth.refreshToken).toBe("rt-a1");
+  });
+
+  test("skips when the owner already holds creds as fresh or fresher", async () => {
+    const account = join(root, "accounts", "account2");
+    await writeAccountDir(account, UUID_B, { refreshToken: "rt-owner", expiresAt: 9999 });
+
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, UUID_B, { refreshToken: "rt-runtime", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [account]);
+    expect(result.rescued).toBe(false);
+    const after = JSON.parse(await readFile(join(account, ".credentials.json"), "utf8"));
+    expect(after.claudeAiOauth.refreshToken).toBe("rt-owner");
+    // The runtime copy must be left untouched too.
+    const runtimeAfter = JSON.parse(await readFile(join(runtimeDir, ".credentials.json"), "utf8"));
+    expect(runtimeAfter.claudeAiOauth.refreshToken).toBe("rt-runtime");
+  });
+
+  test("heals EVERY dir claiming the uuid, not just the first match", async () => {
+    // ~/.claude and an authmux account dir can both hold the same account.
+    const homeClaude = join(root, ".claude");
+    const accountDir = join(root, "accounts", "account2");
+    await writeAccountDir(homeClaude, UUID_B, { refreshToken: "rt-home-dead", expiresAt: 1000 });
+    await writeAccountDir(accountDir, UUID_B, { refreshToken: "rt-acct-dead", expiresAt: 2000 });
+
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, UUID_B, { refreshToken: "rt-fresh", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [homeClaude, accountDir]);
+    expect(result.rescued).toBe(true);
+
+    for (const dir of [homeClaude, accountDir]) {
+      const after = JSON.parse(await readFile(join(dir, ".credentials.json"), "utf8"));
+      expect(after.claudeAiOauth.refreshToken).toBe("rt-fresh");
+    }
+  });
+
+  test("skips when no account dir matches the runtime's uuid", async () => {
+    const account = join(root, "accounts", "account1");
+    await writeAccountDir(account, UUID_A, { refreshToken: "rt-a1", expiresAt: 1000 });
+
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, UUID_B, { refreshToken: "rt-b", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [account]);
+    expect(result.rescued).toBe(false);
+    const after = JSON.parse(await readFile(join(account, ".credentials.json"), "utf8"));
+    expect(after.claudeAiOauth.refreshToken).toBe("rt-a1");
+  });
+
+  test("skips when the runtime has no readable accountUuid", async () => {
+    const account = join(root, "accounts", "account1");
+    await writeAccountDir(account, UUID_A, { refreshToken: "rt-a1", expiresAt: 1000 });
+
+    // Credentials without a .claude.json — owner unknowable, must not guess.
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, undefined, { refreshToken: "rt-mystery", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [account]);
+    expect(result.rescued).toBe(false);
+  });
+
+  test("writes to an owner dir that has identity but no credentials yet", async () => {
+    const account = join(root, "accounts", "account2");
+    await writeAccountDir(account, UUID_B, undefined);
+
+    const runtimeDir = join(root, "runtime", "core", "claude");
+    await writeAccountDir(runtimeDir, UUID_B, { refreshToken: "rt-fresh", expiresAt: 9999 });
+
+    const result = await rescueRuntimeCredentials(runtimeDir, [account]);
+    expect(result.rescued).toBe(true);
+    const after = JSON.parse(await readFile(join(account, ".credentials.json"), "utf8"));
+    expect(after.claudeAiOauth.refreshToken).toBe("rt-fresh");
+  });
+});
+
+describe("listKnownAccountDirs", () => {
+  test("returns ~/.claude plus every ~/.claude-accounts/<name> directory", async () => {
+    await mkdir(join(root, ".claude"), { recursive: true });
+    await mkdir(join(root, ".claude-accounts", "account1"), { recursive: true });
+    await mkdir(join(root, ".claude-accounts", "account2"), { recursive: true });
+    // A stray file must not be listed.
+    await writeFile(join(root, ".claude-accounts", "notes.txt"), "x");
+
+    const dirs = await listKnownAccountDirs(root);
+    expect(dirs).toContain(join(root, ".claude"));
+    expect(dirs).toContain(join(root, ".claude-accounts", "account1"));
+    expect(dirs).toContain(join(root, ".claude-accounts", "account2"));
+    expect(dirs).not.toContain(join(root, ".claude-accounts", "notes.txt"));
+  });
+
+  test("works when ~/.claude-accounts does not exist", async () => {
+    const dirs = await listKnownAccountDirs(root);
+    expect(dirs).toEqual([join(root, ".claude")]);
   });
 });

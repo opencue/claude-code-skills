@@ -1189,6 +1189,30 @@ async function resolveClaudeCredentialsSource(): Promise<string> {
   return resolveSharedClaudeCredentialsSource({ healFromRuntime: true });
 }
 
+/**
+ * Write the runtime's login-fresh `.credentials.json` back to the account
+ * dir that owns it (matched by accountUuid). Runs (a) before materialization
+ * — so the account-identity guard can't destroy the only live copy of the
+ * OTHER account's rotated token when two authmux accounts alternate on one
+ * profile — and (b) after the agent exits, so a `/login` done inside the
+ * session lands in the account's CLAUDE_CONFIG_DIR immediately instead of
+ * waiting for that account's next launch. Best-effort: never blocks launch.
+ */
+async function rescueRuntimeCredsToOwner(profileName: string): Promise<void> {
+  try {
+    const { listKnownAccountDirs, rescueRuntimeCredentials } = await import("../lib/credentials-sync");
+    // basename() pins the path inside the runtime tree — this helper WRITES
+    // token files, so a profile name with a path separator must not escape.
+    const runtimeClaudeDir = join(configDir(), "runtime", basename(profileName), "claude");
+    const result = await rescueRuntimeCredentials(runtimeClaudeDir, await listKnownAccountDirs(homedir()));
+    if (result.rescued) {
+      process.stderr.write(`▸ cue: wrote login-fresh credentials back to ${result.to}\n`);
+    }
+  } catch (err) {
+    debug("launch:cred-rescue", err);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
@@ -1534,6 +1558,11 @@ export async function run(args: string[]): Promise<number> {
     }
   }
 
+  // Rescue-before-wipe: if this runtime's credentials belong to a different
+  // account than credentialsSource, the materializer's identity guard is
+  // about to discard them — return them to their owning account dir first.
+  if (agentKind === "claude-code") await rescueRuntimeCredsToOwner(profileName);
+
   const runtime = await materializeRuntime({
     profile: await applyWorkspaceOverrides(profile),
     agent: agentKind,
@@ -1817,5 +1846,9 @@ export async function run(args: string[]): Promise<number> {
     health: healthBadge,
   });
 
-  return execAgent(realBin, parsed.passthrough, childEnv);
+  const exitCode = await execAgent(realBin, parsed.passthrough, childEnv);
+  // Persist any /login done inside the session to its account dir now —
+  // don't leave the only live rotated token stranded in the shared runtime.
+  if (agentKind === "claude-code") await rescueRuntimeCredsToOwner(profileName);
+  return exitCode;
 }
