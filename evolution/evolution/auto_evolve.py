@@ -47,9 +47,36 @@ def _parse_ts(ts: str) -> float:
             return 0.0
 
 
+def _skills_from_event(ev: dict) -> list[str]:
+    """Skills an event attributes a gap to. Three sources, all counted:
+
+    - critic / learning events: the explicit `skill` field (highest signal).
+    - L1 hook events: any `soft-load:<slug>` in the `signals` array — a skill
+      the agent had to demand at runtime because the profile lacked it. The slug
+      is a bare name (e.g. "coolify"); selection's find_skill resolves it.
+
+    Other L1 signals (tool-error, retry-loop, …) carry no skill attribution and
+    are intentionally not counted here — they need the critic to name a target.
+    """
+    skills: list[str] = []
+    skill = (ev.get("skill") or "").strip()
+    if skill and skill.upper() != "NONE":
+        skills.append(skill)
+    for sig in ev.get("signals") or []:
+        if isinstance(sig, str) and sig.startswith("soft-load:"):
+            slug = sig.split(":", 1)[1].strip()
+            if slug:
+                skills.append(slug)
+    # One event = at most one vote per skill. If both the `skill` field and a
+    # soft-load signal name the same skill, that's still one gap, not two.
+    return list(dict.fromkeys(skills))
+
+
 def count_skill_gaps(analytics_path: Path, window_days: int = 7, now: float | None = None) -> dict:
-    """Count skill_gap events per skill within the window. Uses the critic's
-    `skill` field; ignores NONE/empty. Returns {skill_id: count}."""
+    """Count skill_gap events per skill within the window. Credits the critic's
+    `skill` field, `source:"learning"` events, AND L1 `soft-load:<slug>` signals
+    so the loop no longer hinges on a single LLM critic call. Returns
+    {skill_id: count}."""
     if not analytics_path.exists():
         return {}
     now = now if now is not None else datetime.now(timezone.utc).timestamp()
@@ -68,10 +95,8 @@ def count_skill_gaps(analytics_path: Path, window_days: int = 7, now: float | No
                 continue
             if _parse_ts(ev.get("ts", "")) < cutoff:
                 continue
-            skill = (ev.get("skill") or "").strip()
-            if not skill or skill.upper() == "NONE":
-                continue
-            counts[skill] = counts.get(skill, 0) + 1
+            for skill in _skills_from_event(ev):
+                counts[skill] = counts.get(skill, 0) + 1
     return counts
 
 
@@ -128,6 +153,14 @@ def main(window_days, cooldown_days, do_apply, cue_repo, dry_run):
     config = CueEvolutionConfig()
     if cue_repo:
         config.cue_repo_path = Path(cue_repo)
+
+    # Canary first: roll back any recently-applied skill that drew a fresh spike
+    # of friction after it landed. Reverting a bad change is always safe, so it
+    # runs every tick (even in --dry-run, where it only reports).
+    from evolution.core.canary import check_canaries
+    for a in check_canaries(config, apply_revert=not dry_run):
+        verb = "reverted" if a["reverted"] else ("would revert" if dry_run else "revert FAILED for")
+        click.echo(f"auto-evolve: canary {verb} '{a['skill']}' ({a['friction']} fresh gap(s) after apply)")
 
     skill_id, count = select_skill(config, window_days, cooldown_days)
     if not skill_id:

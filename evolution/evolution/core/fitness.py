@@ -101,6 +101,10 @@ def skill_fitness_metric(example: "dspy.Example", prediction: "dspy.Prediction",
     Accepts extra args/kwargs because GEPA invokes metrics with additional
     positional/keyword params (pred_name, pred_trace, …); ignoring them keeps
     one metric usable by both optimizers.
+
+    This is the OFFLINE / CI default — it makes no LLM call. For a real behavioral
+    signal use `make_judge_metric` (LLM-as-judge), which is opt-in because it
+    costs one eval call per scored example.
     """
     agent_output = getattr(prediction, "output", "") or ""
     expected = getattr(example, "expected_behavior", "") or ""
@@ -116,6 +120,38 @@ def skill_fitness_metric(example: "dspy.Example", prediction: "dspy.Prediction",
         score = 0.3 + (0.7 * overlap)
 
     return min(1.0, max(0.0, score))
+
+
+def make_judge_metric(config: CueEvolutionConfig, skill_text: str = ""):
+    """Build a DSPy-compatible metric backed by the multi-dimensional `LLMJudge`.
+
+    Returns the judge's `composite` (0.5·correctness + 0.3·procedure + 0.2·
+    conciseness − length_penalty) instead of the keyword-overlap proxy, so GEPA
+    and the holdout comparison optimize "did the agent behave well against the
+    rubric" rather than "do the words overlap". One eval-model call per scored
+    example — opt in with `--metric judge` / `CUE_EVOLVE_METRIC=judge`.
+
+    Fails SOFT to overlap on any judge error so a flaky eval endpoint degrades
+    the signal rather than crashing the optimization run.
+    """
+    judge = LLMJudge(config)
+
+    def _judge_metric(example, prediction, trace=None, *args, **kwargs) -> float:
+        agent_output = getattr(prediction, "output", "") or ""
+        if not agent_output.strip():
+            return 0.0
+        try:
+            return judge.score(
+                task_input=getattr(example, "task_input", "") or "",
+                expected_behavior=getattr(example, "expected_behavior", "") or "",
+                agent_output=agent_output,
+                skill_text=skill_text,
+            ).composite
+        except Exception:
+            # Degrade to the cheap proxy rather than aborting the whole run.
+            return skill_fitness_metric(example, prediction)
+
+    return _judge_metric
 
 
 def _parse_score(value) -> float:

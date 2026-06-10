@@ -3,7 +3,7 @@
  * Scans cwd for project signals and scores against known profiles.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -88,6 +88,63 @@ export const DEP_PROFILE_RULES: DepProfileRule[] = [
 
 const ex = (cwd: string, rel: string): boolean => existsSync(join(cwd, rel));
 const exAny = (cwd: string, rels: string[]): boolean => rels.some((r) => ex(cwd, r));
+
+/**
+ * Cap on workspace child package.jsons read per detection. The picker calls
+ * detectProfileV2 synchronously on every launch, so a huge monorepo must not
+ * turn profile suggestion into a directory crawl.
+ */
+const MAX_WORKSPACE_PKGS = 24;
+
+/**
+ * Union of dependency names across workspace child packages, so a monorepo
+ * ROOT cwd still detects service deps (stripe in packages/api). Patterns come
+ * from package.json `workspaces` (array or {packages}) and pnpm-workspace.yaml.
+ * Best-effort glob support: exact paths and single trailing `/*` only — deeper
+ * globs (`**`, `a/*/b`) are skipped, negations ignored.
+ */
+function readWorkspaceDeps(cwd: string): Set<string> {
+  const patterns: string[] = [];
+  try {
+    const pkg = JSON.parse(readFileSync(join(cwd, "package.json"), "utf8"));
+    const ws = Array.isArray(pkg.workspaces) ? pkg.workspaces : pkg.workspaces?.packages;
+    if (Array.isArray(ws)) for (const w of ws) if (typeof w === "string") patterns.push(w);
+  } catch { /* no root package.json */ }
+  try {
+    const raw = readFileSync(join(cwd, "pnpm-workspace.yaml"), "utf8");
+    const section = raw.match(/^packages:\s*\n((?:[ \t]*-[^\n]*\n?)*)/m);
+    if (section) {
+      for (const m of section[1]!.matchAll(/-\s*["']?([^"'\n#]+)/g)) patterns.push(m[1]!.trim());
+    }
+  } catch { /* no pnpm workspace file */ }
+
+  const deps = new Set<string>();
+  let read = 0;
+  for (const pattern of patterns) {
+    if (pattern.startsWith("!")) continue;
+    const dirs: string[] = [];
+    if (pattern.endsWith("/*") && !pattern.slice(0, -2).includes("*")) {
+      const base = pattern.slice(0, -2);
+      try {
+        for (const e of readdirSync(join(cwd, base), { withFileTypes: true })) {
+          if (e.isDirectory()) dirs.push(join(base, e.name));
+        }
+      } catch { /* glob base missing */ }
+    } else if (!pattern.includes("*")) {
+      dirs.push(pattern);
+    }
+    for (const dir of dirs) {
+      if (read >= MAX_WORKSPACE_PKGS) return deps;
+      try {
+        const pkg = JSON.parse(readFileSync(join(cwd, dir, "package.json"), "utf8"));
+        read += 1;
+        for (const k of Object.keys(pkg.dependencies ?? {})) deps.add(k);
+        for (const k of Object.keys(pkg.devDependencies ?? {})) deps.add(k);
+      } catch { /* dir without package.json */ }
+    }
+  }
+  return deps;
+}
 
 /** PEP 503 name normalization: lowercase, runs of `-`/`_`/`.` → single `-`. */
 const normPyName = (name: string): string => name.toLowerCase().replace(/[-_.]+/g, "-");
@@ -248,6 +305,19 @@ export function detectProfileV2(cwd: string): DetectionResultV2[] {
         (rule.deps !== undefined && hasAny(allDeps, rule.deps)) ||
         (rule.prefixes ?? []).some((p) => hasPrefix(allDeps, p));
       if (hit) add(rule.profile, rule.confidence, rule.reason);
+    }
+  }
+
+  // ── Workspace child deps (monorepo roots) — same rule table ──
+  if (exAny(cwd, ["package.json", "pnpm-workspace.yaml"])) {
+    const wsDeps = readWorkspaceDeps(cwd);
+    if (wsDeps.size > 0) {
+      for (const rule of DEP_PROFILE_RULES) {
+        const hit =
+          (rule.deps !== undefined && hasAny(wsDeps, rule.deps)) ||
+          (rule.prefixes ?? []).some((p) => hasPrefix(wsDeps, p));
+        if (hit) add(rule.profile, rule.confidence, `workspace ${rule.reason}`);
+      }
     }
   }
 

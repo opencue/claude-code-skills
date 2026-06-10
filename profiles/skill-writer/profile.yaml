@@ -132,6 +132,11 @@ hooks:
   # and (with the live critic) judges the gap, feeding `cue profile self-improve`.
   # OFF until `touch ~/.config/cue/.auto-improve-enabled`. See docs/self-learner.md.
   - profile-self-improve.json
+  # SessionStart hook: surface the most recent cross-session learnings (from
+  # bin/cue-learnings) into context so the model reads them automatically — the
+  # read-back half of the learnings loop. Read-only, fail-open, no-op when none
+  # exist. Disable with CUE_LEARNINGS_SURFACE_OFF=1.
+  - learnings-surface.json
 
 mcps:
   - gbrain

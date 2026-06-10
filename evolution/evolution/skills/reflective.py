@@ -14,12 +14,20 @@ import re
 from evolution.core.claude_lm import run_claude_p, claude_model_name
 
 
-_PROMPT = """You are improving a Claude Code SKILL.md **body** (the markdown after the YAML
-frontmatter). Rewrite it to be sharper and more effective while keeping it
-lint-clean by cue conventions: concise, imperative, with clear trigger cues and
-a tight procedure. Do NOT include YAML frontmatter. Do NOT bloat it — stay within
-roughly 20% of the current length. Preserve the skill's intent and any critical
-commands/paths verbatim.
+_PROMPT = """You are a cue skill-engineering specialist improving a Claude Code SKILL.md
+**body** (the markdown after the YAML frontmatter). Rewrite it to be sharper and
+more effective while keeping it lint-clean by cue conventions.
+
+Rules (cue house style — how `cue lint-skill` and reviewers judge it):
+- Concise and imperative. Lead each step with the verb or the answer.
+- Keep clear trigger cues and a tight, numbered procedure. Every step that runs
+  something shows the exact command in a code block, not "you could try…".
+- Preserve the skill's intent and EVERY critical command, path, flag, and URL
+  verbatim — dropping one is a regression that fails the gate.
+- Do NOT include YAML frontmatter. Do NOT bloat it — stay within roughly 20% of
+  the current length; shorter is better when nothing is lost.
+- Voice: no em dashes; no AI filler (delve, crucial, robust, comprehensive,
+  leverage, seamless, furthermore, moreover). Plain, direct sentences.
 
 Skill description (for context, do not edit): {desc}
 {signals_block}
@@ -48,14 +56,15 @@ def propose_improved_body(skill: dict, config, signals: str = "", timeout: int =
     return _extract_body(out, fallback=skill["body"])
 
 
-_JUDGE_PROMPT = """You are a strict reviewer of Claude Code SKILL.md bodies. Decide whether the
-REVISED body is genuinely BETTER than the ORIGINAL for an agent deciding when and
-how to use this skill — clearer triggers, tighter procedure, NO loss of critical
-detail (commands, paths, constraints). Be conservative: if the revision drops
-useful content or is merely different, it is NOT better.
+_JUDGE_PROMPT = """You are a strict, INDEPENDENT reviewer of Claude Code SKILL.md bodies — you did
+not write the revision and have no stake in it. Decide whether the REVISED body is
+genuinely BETTER than the ORIGINAL for an agent deciding when and how to use this
+skill — clearer triggers, tighter procedure, NO loss of critical detail (commands,
+paths, constraints). Be conservative: if the revision drops useful content or is
+merely different, it is NOT better.
 
 Skill description (context): {desc}
-
+{evidence_block}
 ORIGINAL:
 <A>
 {original}
@@ -69,12 +78,22 @@ REVISED:
 Reply on a single line, exactly: VERDICT: BETTER|EQUAL|WORSE — <one-line reason>"""
 
 
-def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180):
-    """Second `claude -p` call: is the evolved body genuinely better? Returns
-    (is_better: bool, reason: str). Conservative — anything but BETTER → False."""
-    model = claude_model_name(config.optimizer_model)
+def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180,
+                    evidence: str = ""):
+    """Independent reviewer `claude -p` call: is the evolved body genuinely
+    better? Returns (is_better: bool, reason: str). Conservative — anything but
+    BETTER → False.
+
+    Uses `config.reviewer_model` (a DIFFERENT, stronger model than the proposer's
+    `optimizer_model`) so the rewrite isn't graded by its own author, and is fed
+    deterministic `evidence` (lint/size/token-preservation results) to anchor the
+    verdict in facts rather than vibes.
+    """
+    model = claude_model_name(config.reviewer_model)
+    evidence_block = f"\nDeterministic gate results (already checked):\n{evidence}\n" if evidence.strip() else ""
     prompt = _JUDGE_PROMPT.format(
-        desc=skill["description"], original=skill["body"], revised=evolved_body)
+        desc=skill["description"], original=skill["body"], revised=evolved_body,
+        evidence_block=evidence_block)
     out = run_claude_p(prompt, model=model, timeout=timeout)
     m = re.search(r"VERDICT:\s*(BETTER|EQUAL|WORSE)\s*[—\-:]*\s*(.*)", out, re.IGNORECASE)
     if not m:

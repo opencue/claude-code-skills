@@ -39,6 +39,7 @@ from rich.table import Table
 from evolution.core.config import CueEvolutionConfig
 from evolution.core.constraints import ConstraintValidator
 from evolution.core.cue_skill import find_skill, load_skill, reassemble_skill
+from evolution.core.claude_lm import claude_model_name
 
 console = Console()
 
@@ -156,17 +157,26 @@ def evolve(
     use_claude_code: bool = False,
     optimizer: str = "gepa",
     propose_only: bool = False,
+    metric: Optional[str] = None,
 ) -> int:
     """Main evolution loop. Returns a process exit code."""
 
     config = CueEvolutionConfig(iterations=iterations)
     if cue_repo:
         config.cue_repo_path = Path(cue_repo)
+    # Quality signal for GEPA + holdout: "overlap" (keyword proxy, offline, the
+    # default) or "judge" (the multi-dimensional LLMJudge — a real behavioral
+    # signal, one eval call per scored example). CLI/env overridable.
+    metric_mode = (metric or os.getenv("CUE_EVOLVE_METRIC", "overlap")).lower()
     # --use-claude-code: run the whole optimizer through headless `claude -p`
     # (no separate API key). Explicit --optimizer-model/--eval-model still win.
     if use_claude_code:
         optimizer_model = optimizer_model or "claude-code/sonnet"
         eval_model = eval_model or "claude-code/sonnet"
+        # Independent reviewer = a DIFFERENT, stronger model (opus) on the keyless
+        # backend, so the single-shot gate isn't sonnet grading sonnet's own work.
+        config.reviewer_model = config.reviewer_model if config.reviewer_model.startswith(
+            "claude-code/") else "claude-code/opus"
     if optimizer_model:
         config.optimizer_model = optimizer_model
     if eval_model:
@@ -209,6 +219,7 @@ def evolve(
         else:
             console.print(f"  Would build eval dataset (source: {eval_source})")
             console.print(f"  Would run GEPA ({iterations} iters, optimizer={config.optimizer_model})")
+            console.print(f"  Metric: {'LLMJudge (multi-dimensional)' if metric_mode == 'judge' else 'keyword-overlap proxy'}")
             if config.optimizer_model.startswith("claude-code/"):
                 console.print("  LM backend: headless `claude -p` — no API key needed")
         console.print(f"  Would auto-apply IF candidate improves AND `cue lint-skill` passes")
@@ -223,17 +234,23 @@ def evolve(
         evolved_body = propose_improved_body(skill, config)
         evolved_full = reassemble_skill(skill["frontmatter"], evolved_body)
         console.print("\n[bold]Candidate constraints[/bold]")
-        candidate_ok = _print_constraints(
-            validator.validate_all(evolved_body, evolved_full, baseline_body=skill["body"]))
+        candidate_results = validator.validate_all(
+            evolved_body, evolved_full, baseline_body=skill["body"])
+        candidate_ok = _print_constraints(candidate_results)
 
-        # Quality gate: a second `claude -p` judges evolved vs baseline. We
-        # auto-apply only on a BETTER verdict (skip the call in propose-only or
-        # when nothing changed — then it can't apply anyway).
+        # Quality gate: an INDEPENDENT reviewer (config.reviewer_model, not the
+        # proposer) judges evolved vs baseline, fed the deterministic gate results
+        # as evidence. Auto-apply only on a BETTER verdict (skip the call in
+        # propose-only or when nothing changed — then it can't apply anyway).
         quality_ok, judge_reason = None, ""
         changed = evolved_body.strip() != skill["body"].strip()
         if not propose_only and candidate_ok and changed:
-            console.print("[bold]Self-judge[/bold] (evolved vs baseline)...")
-            quality_ok, judge_reason = judge_is_better(skill, evolved_body, config)
+            evidence = "; ".join(f"{c.constraint_name}: {'pass' if c.passed else 'FAIL'}"
+                                 for c in candidate_results)
+            console.print(f"[bold]Independent review[/bold] ({claude_model_name(config.reviewer_model)}, "
+                          f"evolved vs baseline)...")
+            quality_ok, judge_reason = judge_is_better(
+                skill, evolved_body, config, evidence=evidence)
             console.print(f"  {'✓' if quality_ok else '✗'} {judge_reason}")
 
         return _finalize(
@@ -259,8 +276,17 @@ def evolve(
         EvalDataset,
         GoldenDatasetLoader,
     )
-    from evolution.core.fitness import skill_fitness_metric
+    from evolution.core.fitness import skill_fitness_metric, make_judge_metric
     from evolution.skills.skill_module import SkillModule
+
+    # Pick the quality signal: keyword-overlap proxy (offline default) or the
+    # LLMJudge composite (a real behavioral signal, opt-in via --metric judge).
+    if metric_mode == "judge":
+        fitness_metric = make_judge_metric(config, skill_text=skill["body"])
+        console.print("  Metric: [bold]LLMJudge[/bold] (multi-dimensional, 1 eval call/example)")
+    else:
+        fitness_metric = skill_fitness_metric
+        console.print("  Metric: keyword-overlap proxy (offline; use --metric judge for LLMJudge)")
 
     # ── 3. Build / load eval dataset ─────────────────────────────────────
     console.print(f"\n[bold]Building eval dataset[/bold] (source: {eval_source})")
@@ -304,7 +330,7 @@ def evolve(
     budget = max(6, iterations * 6)
     try:
         optimizer = dspy.GEPA(
-            metric=skill_fitness_metric,
+            metric=fitness_metric,
             reflection_lm=reflection_lm,
             max_metric_calls=budget,
             track_stats=False,
@@ -314,7 +340,7 @@ def evolve(
         console.print(f"[yellow]GEPA unavailable ({e}); falling back to MIPROv2[/yellow]")
         # Explicit tiny budget (not auto='light' = 10 trials) so it completes
         # even on a rate-limited free endpoint.
-        optimizer = dspy.MIPROv2(metric=skill_fitness_metric, auto=None, num_candidates=2)
+        optimizer = dspy.MIPROv2(metric=fitness_metric, auto=None, num_candidates=2)
         optimized = optimizer.compile(
             baseline_module, trainset=trainset, valset=valset,
             num_trials=max(2, iterations), max_bootstrapped_demos=1,
@@ -335,8 +361,8 @@ def evolve(
     base_scores, evo_scores = [], []
     for ex in holdout:
         with dspy.context(lm=lm):
-            base_scores.append(skill_fitness_metric(ex, baseline_module(task_input=ex.task_input)))
-            evo_scores.append(skill_fitness_metric(ex, optimized(task_input=ex.task_input)))
+            base_scores.append(fitness_metric(ex, baseline_module(task_input=ex.task_input)))
+            evo_scores.append(fitness_metric(ex, optimized(task_input=ex.task_input)))
     avg_base = sum(base_scores) / max(1, len(base_scores))
     avg_evo = sum(evo_scores) / max(1, len(evo_scores))
     improvement = avg_evo - avg_base
@@ -376,13 +402,15 @@ def evolve(
 @click.option("--cue-repo", default=None, help="Path to the cue repo (else auto-discovered)")
 @click.option("--optimizer", default="gepa", type=click.Choice(["gepa", "single-shot"]),
               help="gepa = iterative DSPy/GEPA (slow, needs dspy); single-shot = one claude -p call (fast, keyless)")
+@click.option("--metric", default=None, type=click.Choice(["overlap", "judge"]),
+              help="GEPA/holdout quality signal: overlap (keyword proxy, offline default) or judge (LLMJudge, 1 eval call/example)")
 @click.option("--use-claude-code", is_flag=True,
               help="Run GEPA through headless `claude -p` — no separate API key (implied by single-shot)")
 @click.option("--propose-only", is_flag=True,
               help="Never auto-apply; always write a proposal for human review")
 @click.option("--dry-run", is_flag=True, help="Validate cue wiring without optimizing (no LLM, no install)")
 def main(skill_id, iterations, eval_source, dataset_path, optimizer_model, eval_model,
-         cue_repo, optimizer, use_claude_code, propose_only, dry_run):
+         cue_repo, optimizer, metric, use_claude_code, propose_only, dry_run):
     """Evolve a cue skill's content, gated by `cue lint-skill`. Two optimizers:
     GEPA (DSPy, iterative) or single-shot (one `claude -p` call, keyless)."""
     # single-shot always runs on claude -p; default its model accordingly.
@@ -393,6 +421,7 @@ def main(skill_id, iterations, eval_source, dataset_path, optimizer_model, eval_
         dataset_path=dataset_path, optimizer_model=optimizer_model,
         eval_model=eval_model, cue_repo=cue_repo, dry_run=dry_run,
         use_claude_code=use_claude_code, optimizer=optimizer, propose_only=propose_only,
+        metric=metric,
     ))
 
 

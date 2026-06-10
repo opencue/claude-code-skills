@@ -27,6 +27,12 @@ _DEFAULT_OPTIMIZER_MODEL = os.getenv(
 _DEFAULT_EVAL_MODEL = os.getenv(
     "CUE_EVOLVE_EVAL_MODEL", "anthropic/claude-haiku-4-5"
 )
+# Independent reviewer for the single-shot quality gate. Deliberately a DIFFERENT
+# (stronger) model than the optimizer so the proposer isn't grading its own work
+# — mirrors the auto-review fresh-reviewer pattern.
+_DEFAULT_REVIEWER_MODEL = os.getenv(
+    "CUE_EVOLVE_REVIEWER_MODEL", "anthropic/claude-opus-4-1"
+)
 
 
 @dataclass
@@ -44,6 +50,7 @@ class CueEvolutionConfig:
     optimizer_model: str = _DEFAULT_OPTIMIZER_MODEL
     eval_model: str = _DEFAULT_EVAL_MODEL
     judge_model: str = _DEFAULT_OPTIMIZER_MODEL  # dataset generation
+    reviewer_model: str = _DEFAULT_REVIEWER_MODEL  # independent single-shot gate
 
     # Constraints — mirror hermes defaults; the real gate is `cue lint-skill`.
     max_skill_size: int = 15_000  # 15KB
@@ -86,7 +93,7 @@ class CueEvolutionConfig:
     def _uses_nvidia_nim(self) -> bool:
         return any(
             str(m).startswith("nvidia_nim/")
-            for m in (self.optimizer_model, self.eval_model, self.judge_model)
+            for m in (self.optimizer_model, self.eval_model, self.judge_model, self.reviewer_model)
         )
 
     def lm_kwargs(self) -> dict:

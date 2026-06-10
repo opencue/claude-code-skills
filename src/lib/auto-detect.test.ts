@@ -252,3 +252,56 @@ describe("detectProfileV2 — Python deps", () => {
     expect(results.find(r => r.profile === "stripe")).toBeUndefined();
   });
 });
+
+describe("detectProfileV2 — monorepo workspaces", () => {
+  test("workspaces glob: packages/*/package.json deps surface at the root", () => {
+    writeFileSync(join(tmp, "package.json"), JSON.stringify({
+      private: true,
+      workspaces: ["packages/*"],
+    }));
+    mkdirSync(join(tmp, "packages/api"), { recursive: true });
+    writeFileSync(join(tmp, "packages/api/package.json"), JSON.stringify({
+      dependencies: { stripe: "14.0.0" },
+    }));
+    const results = detectProfileV2(tmp);
+    const stripe = results.find(r => r.profile === "stripe");
+    expect(stripe).toBeDefined();
+    expect(stripe!.reasons.join(" ")).toContain("workspace");
+  });
+
+  test("pnpm-workspace.yaml globs are honored", () => {
+    writeFileSync(join(tmp, "package.json"), JSON.stringify({ private: true }));
+    writeFileSync(join(tmp, "pnpm-workspace.yaml"), 'packages:\n  - "apps/*"\n');
+    mkdirSync(join(tmp, "apps/web"), { recursive: true });
+    writeFileSync(join(tmp, "apps/web/package.json"), JSON.stringify({
+      dependencies: { "@aws-sdk/client-s3": "3.0.0" },
+    }));
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "aws")).toBeDefined();
+  });
+
+  test("exact workspace paths (no glob) are scanned too", () => {
+    writeFileSync(join(tmp, "package.json"), JSON.stringify({
+      private: true,
+      workspaces: { packages: ["apps/web"] },
+    }));
+    mkdirSync(join(tmp, "apps/web"), { recursive: true });
+    writeFileSync(join(tmp, "apps/web/package.json"), JSON.stringify({
+      dependencies: { "@supabase/supabase-js": "2.0.0" },
+    }));
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "supabase")).toBeDefined();
+  });
+
+  test("packages/ without a workspaces declaration is NOT scanned", () => {
+    writeFileSync(join(tmp, "package.json"), JSON.stringify({
+      dependencies: { express: "4.0.0" },
+    }));
+    mkdirSync(join(tmp, "packages/api"), { recursive: true });
+    writeFileSync(join(tmp, "packages/api/package.json"), JSON.stringify({
+      dependencies: { stripe: "14.0.0" },
+    }));
+    const results = detectProfileV2(tmp);
+    expect(results.find(r => r.profile === "stripe")).toBeUndefined();
+  });
+});

@@ -13,6 +13,7 @@ from typing import Optional
 
 from evolution.core.config import CueEvolutionConfig
 from evolution.core.cue_lint import lint_text
+from evolution.core.regression import check_preservation
 
 
 @dataclass
@@ -50,9 +51,23 @@ class ConstraintValidator:
         ]
         if baseline_body is not None:
             results.append(self._check_growth(candidate_body, baseline_body))
+            results.append(self._check_critical_tokens(candidate_body, baseline_body))
         # The decisive gate: cue's own linter on the reassembled file.
         results.append(self._check_lint(full_skill_text))
         return results
+
+    def _check_critical_tokens(self, body: str, baseline: str) -> ConstraintResult:
+        """Regression gate: the rewrite must not drop load-bearing tokens
+        (inline-code, commands, paths, URLs) the baseline marked as literal."""
+        ok, dropped = check_preservation(baseline, body)
+        if ok:
+            return ConstraintResult(True, "critical_tokens", "No critical tokens dropped")
+        preview = ", ".join(dropped[:5]) + (" …" if len(dropped) > 5 else "")
+        return ConstraintResult(
+            False, "critical_tokens",
+            f"Dropped {len(dropped)} critical token(s): {preview}",
+            details="\n".join(dropped),
+        )
 
     def _check_lint(self, full_skill_text: str) -> ConstraintResult:
         res = lint_text(full_skill_text, self.config)
