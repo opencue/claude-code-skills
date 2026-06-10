@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { detectProfile, detectProfileV2 } from "./auto-detect";
+import { detectProfileV2 } from "./auto-detect";
 
 let tmp: string;
 
@@ -199,12 +199,3 @@ describe("detectProfileV2", () => {
   });
 });
 
-describe("detectProfile (v1 compat)", () => {
-  test("returns results with confidence 0-100", () => {
-    writeFileSync(join(tmp, "Cargo.toml"), "");
-    const results = detectProfile(tmp);
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.confidence).toBeGreaterThan(0);
-    expect(results[0]!.confidence).toBeLessThanOrEqual(100);
-  });
-});

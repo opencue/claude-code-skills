@@ -14,7 +14,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import * as p from "@clack/prompts";
 
-import { detectProfile } from "../lib/auto-detect";
+import { detectProfileV2 } from "../lib/auto-detect";
 import { scanProject } from "../lib/project-scanner";
 import { listProfiles } from "../lib/profile-loader";
 import { getCachedGemsForProfile, autoInstallClis } from "./discover";
@@ -248,7 +248,7 @@ export async function run(args: string[]): Promise<number> {
   }
 
   // Score
-  const suggestions = detectProfile(cwd);
+  const suggestions = detectProfileV2(cwd);
   const allProfiles = await listProfiles();
 
   // Present options
@@ -259,7 +259,7 @@ export async function run(args: string[]): Promise<number> {
     options.push({
       value: s.profile,
       label: s.profile,
-      hint: `${s.confidence}% match — ${s.signals.join(", ")}`,
+      hint: `${Math.round(s.confidence * 100)}% match — ${s.reasons.join(", ")}`,
     });
   }
 
