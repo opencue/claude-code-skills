@@ -1,135 +1,172 @@
 ---
 title: "Claude Code Skills for backend"
-description: "12 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "16 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 12 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
+> 16 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="archestra-ai-archestra"></a>
-## 💎 [archestra-ai/archestra](https://github.com/archestra-ai/archestra)
+<a id="buildingjoshbetter-truememory"></a>
+## 💎 [buildingjoshbetter/TrueMemory](https://github.com/buildingjoshbetter/TrueMemory)
 
-**★ 3819** · exceptional (score 17) · TypeScript · tags: a2a, a2a-mcp, acp, agent, ai
+**★ 277** · exceptional (score 17.6) · Python · tags: agent-memory, ai, ai-agent, ai-agents, ai-memory
 
-Enterprise AI Platform with guardrails, MCP registry, gateway & orchestrator
+The memory your AI should have had from the start. Automatic capture, automatic recall, 100% local. One SQLite file, zero cloud. Works with Claude Code, Claude CLI, Cursor, Codex CLI, Gemini CLI.
 
 ```bash
-cue skills add archestra-ai/archestra --profile backend
+cue skills add buildingjoshbetter/TrueMemory --profile backend
 ```
 
 ---
 
-<a id="shashankswe2020-ux-whoop-mcp"></a>
-## 💎 [shashankswe2020-ux/whoop-mcp](https://github.com/shashankswe2020-ux/whoop-mcp)
+<a id="n8n-io-n8n"></a>
+## 💎 [n8n-io/n8n](https://github.com/n8n-io/n8n)
 
-**★ 109** · exceptional (score 11.8) · TypeScript · tags: agentskills, fitness-tracker, mcp-server, npm-package, whoop-api
+**★ 192020** · exceptional (score 15) · TypeScript · tags: ai, apis, automation, cli, data-flow
 
-MCP server to connect to whoop API
+Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.
 
 ```bash
-cue skills add shashankswe2020-ux/whoop-mcp --profile backend
+cue skills add n8n-io/n8n --profile backend
 ```
 
 ---
 
-<a id="chedong-phpman"></a>
-## 💎 [chedong/phpman](https://github.com/chedong/phpman)
+<a id="thelunarcompany-lunar"></a>
+## 💎 [TheLunarCompany/lunar](https://github.com/TheLunarCompany/lunar)
 
-**★ 1** · exceptional (score 11.3) · PHP · tags: json-api, linux-commands, linux-man-pages, markdown, mcp-server
+**★ 453** · exceptional (score 14) · TypeScript · tags: agent-skills, api-proxy, mcp, mcp-client, mcp-gateway
 
-php manual: Man Page / Perldoc / Info / Pydoc / Ri Page Web Interface  with JSON Markdown & MCP Server
-
-✅ SKILL.md
+lunar.dev: Agent native MCP Gateway for governance and security
 
 ```bash
-cue skills add chedong/phpman --profile backend
+cue skills add TheLunarCompany/lunar --profile backend
 ```
 
 ---
 
-<a id="kochetkov-ma-brewpage-openapi"></a>
-## 💎 [kochetkov-ma/brewpage-openapi](https://github.com/kochetkov-ma/brewpage-openapi)
+<a id="cranot-roam-code"></a>
+## 💎 [Cranot/roam-code](https://github.com/Cranot/roam-code)
 
-**★ 1** · exceptional (score 10.8) · JavaScript · tags: ai-agent, ai-tools, anthropic, api-documentation, api-hosting
+**★ 473** · exceptional (score 13.8) · Python · tags: ai-agents, ai-coding, cli, code-analysis, code-graph
 
-Open API Specification for https://brewpage.app - Free HTML, Markdown, AI Artifacts & File Instant Hosting
+Local codebase intelligence CLI + MCP server for AI coding agents: SQLite code graph, 28 languages, 238 commands, 224 MCP tools, change-safety gates, audit evidence, zero API keys.
 
 ```bash
-cue skills add kochetkov-ma/brewpage-openapi --profile backend
+cue skills add Cranot/roam-code --profile backend
 ```
 
 ---
 
-<a id="plateerlab-synaptic-memory"></a>
-## 💎 [PlateerLab/synaptic-memory](https://github.com/PlateerLab/synaptic-memory)
+<a id="jjang-ai-vmlx"></a>
+## 💎 [jjang-ai/vmlx](https://github.com/jjang-ai/vmlx)
 
-**★ 29** · exceptional (score 10) · Python · tags: ai-agent, embedding, graph-database, hebbian-learning, knowledge-graph
+**★ 643** · exceptional (score 13.8) · Python · tags: anthropic-api, kvcache-compression, kvcache-optimization, kvcache-reuse, llm
 
-Brain-inspired knowledge graph: spreading activation, Hebbian learning, memory consolidation.
+vMLX - JANGTQ Uber Compressed MLX Models - L2 Disk Cache (survives restart) + L1 Paged (super fast ttft) + Hybrid SSM Scheduler  + Cont Batching + etc!
 
 ```bash
-cue skills add PlateerLab/synaptic-memory --profile backend
+cue skills add jjang-ai/vmlx --profile backend
 ```
 
 ---
 
-<a id="bklamheem-chrome-devtools-mcp"></a>
-## 💎 [bklamheem/chrome-devtools-mcp](https://github.com/bklamheem/chrome-devtools-mcp)
+<a id="hanyeol-model-compose"></a>
+## 💎 [hanyeol/model-compose](https://github.com/hanyeol/model-compose)
 
-**★ 0** · exceptional (score 10) · Python · tags: ai, browser, browser-use, chrome, chromium
+**★ 73** · exceptional (score 13.3) · Python · tags: agent-framework, ai-agents, ai-infrastructure, ai-workflow, anthropic
 
-🛠️ Control and inspect a live Chrome browser with `chrome-devtools-mcp` for reliable automation, debugging, and performance insights.
+Portable AI runtime inspired by docker-compose. Compose agents, RAG pipelines, and MCP servers in one YAML file and run them anywhere.
 
 ```bash
-cue skills add bklamheem/chrome-devtools-mcp --profile backend
+cue skills add hanyeol/model-compose --profile backend
 ```
 
 ---
 
-<a id="thotischner-observability-mcp"></a>
-## 💎 [ThoTischner/observability-mcp](https://github.com/ThoTischner/observability-mcp)
+<a id="ignatrozhkotr-governed-workflow"></a>
+## 💎 [IgnatRozhkoTR/governed-workflow](https://github.com/IgnatRozhkoTR/governed-workflow)
 
-**★ 5** · exceptional (score 8) · TypeScript · tags: ai-agents, anomaly-detection, anthropic, claude, gateway
+**★ 8** · exceptional (score 12.3) · Python · tags: agentic-workflow, ai-agents, anthropic, claude, claude-code
 
-Unified observability gateway for AI agents — one MCP server for Prometheus, Loki, and any backend, with cross-signal anomaly detection and a built-in Web UI.
+Web admin panel and MCP server for Claude Code — phase gates, scope locks, and human approval for agentic coding sessions.
 
 ```bash
-cue skills add ThoTischner/observability-mcp --profile backend
+cue skills add IgnatRozhkoTR/governed-workflow --profile backend
 ```
 
 ---
 
-<a id="patraxo-ltx2-vidgen-skill"></a>
-## ✨ [patraxo/ltx2-vidgen-skill](https://github.com/patraxo/ltx2-vidgen-skill)
+<a id="lorisunjunbin-petp"></a>
+## 💎 [lorisunjunbin/petp](https://github.com/lorisunjunbin/petp)
 
-**★ 3** · strong (score 7.7) · Python · tags: blackwell, claude-code, claude-skill, diffusion-models, generative-ai
+**★ 6** · exceptional (score 10) · Python · tags: ai-tools, automated-testing, devops-tools, gui-application, mcp-server
 
-Drop a photo in Claude Code → get a video. Self-hosted LTX-2.3 (22B) on serverless GPU: text/image/keyframe/video-to-video + canny/depth/pose control, synced audio, batch variations, reel/YouTube/square formats. Own the pipeline — a few cents a clip, no API meter.
+Python RPA toolkit with 80+ processors orchestrating browser automation, AI/LLM (10 providers), databases, SSH, email, and HTTP tasks. Configurable pipelines with cron scheduling and loops. Runs as wxPython GUI, headless service, or  Docker container. Built-in MCP Tool Server (Streamable-HTTP) for AI agent integration.
 
 ```bash
-cue skills add patraxo/ltx2-vidgen-skill --profile backend
+cue skills add lorisunjunbin/petp --profile backend
 ```
 
 ---
 
-<a id="hafsamudassar-apifox-mcp"></a>
-## ✨ [HafsaMudassar/apifox-mcp](https://github.com/HafsaMudassar/apifox-mcp)
+<a id="johnfire-notes-world"></a>
+## ✨ [johnfire/notes-world](https://github.com/johnfire/notes-world)
 
-**★ 0** · strong (score 7.5) · Python · tags: ai-tools, api-documentation, apifox, docker, java
+**★ 1** · strong (score 7.8) · TypeScript · tags: docker, mcp-server, notes-app, notes-application, notes-keeper-organization-tool
 
-🚀 Manage Apifox projects effortlessly using natural language commands with the MCP server for seamless integration with LLMs like Claude.
+an app for your computer that  holds notes, organizes them and has an MCP, so it interfaces to AI
 
 ```bash
-cue skills add HafsaMudassar/apifox-mcp --profile backend
+cue skills add johnfire/notes-world --profile backend
+```
+
+---
+
+<a id="getgantry-gantry"></a>
+## ✨ [getgantry/gantry](https://github.com/getgantry/gantry)
+
+**★ 31** · strong (score 7.7) · Swift · tags: ai-agents, containers, developer-tools, docker, macos
+
+Native macOS app for managing and monitoring Docker — local and over SSH. Agent-ready: built-in MCP server and App Intents. Free and open source.
+
+```bash
+cue skills add getgantry/gantry --profile backend
+```
+
+---
+
+<a id="chenjxin-agent-taskboard"></a>
+## ✨ [chenjxin/agent-taskboard](https://github.com/chenjxin/agent-taskboard)
+
+**★ 0** · strong (score 7.5) · TypeScript · tags: agent-coordination, agile, ai-agents, claude-code, kanban
+
+MCP task-coordination board for teams of AI coding agents — register work, declare scope, catch overlaps before code is written, negotiate boundaries in-thread, run bug verification loops and async standups. The board informs; it never assigns. (中文文档)
+
+```bash
+cue skills add chenjxin/agent-taskboard --profile backend
+```
+
+---
+
+<a id="scavio-ai-scavio-mcp"></a>
+## ✨ [scavio-ai/scavio-mcp](https://github.com/scavio-ai/scavio-mcp)
+
+**★ 3** · strong (score 6.7) · TypeScript · tags: ai, amazon, claude, cursor, google-search
+
+Production ready MCP server with real-time search & extract in Google, Amazon, Youtube, Walmart, Reddit and Tiktok
+
+```bash
+cue skills add scavio-ai/scavio-mcp --profile backend
 ```
 
 ---
@@ -137,12 +174,25 @@ cue skills add HafsaMudassar/apifox-mcp --profile backend
 <a id="alex-jb-bilingual-content-sync-agent"></a>
 ## ✨ [alex-jb/bilingual-content-sync-agent](https://github.com/alex-jb/bilingual-content-sync-agent)
 
-**★ 2** · strong (score 6.5) · Python · tags: batch-api, chinese, claude, english, i18n
+**★ 2** · strong (score 6.4) · Python · tags: batch-api, chinese, claude, english, i18n
 
 🌏 EN ↔ 中文 i18n diff + Claude translate + HITL apply. Batch API path @ 50% off. MIT.
 
 ```bash
 cue skills add alex-jb/bilingual-content-sync-agent --profile backend
+```
+
+---
+
+<a id="orderchlorococcalesdresswhites76-bb-bash"></a>
+## ✨ [Orderchlorococcalesdresswhites76/bb-bash](https://github.com/Orderchlorococcalesdresswhites76/bb-bash)
+
+**★ 0** · strong (score 6) · Shell · tags: automation, bash, bash-scripting, bbs, bitbucket
+
+Control Bitbucket Cloud via terminal or AI agents with this zero-config, single-file bash script for seamless PR management and automated workflow integration.
+
+```bash
+cue skills add Orderchlorococcalesdresswhites76/bb-bash --profile backend
 ```
 
 ---

@@ -2,21 +2,21 @@
 title: "aadiieee/multi-agent-revenue-orchestrator — Claude Code skill discovered by cue"
 description: "2026 Multi-Agent BD Orchestrator – Apollo, Notion, Gmail & Slack Integration"
 layout: page
-updated: 2026-06-07
+updated: 2026-06-11
 tags: [claude-code, skill, fleet-control]
 ---
 
 # ✨ [aadiieee/multi-agent-revenue-orchestrator](https://github.com/aadiieee/multi-agent-revenue-orchestrator)
 
-**★ 0** · strong (score 7.5) · HTML · agents, ai-agents, ai-sdr, apollo-io, business-development
+**★ 1** · strong (score 7.8) · HTML · agents, ai-agents, ai-sdr, apollo-io, business-development
 
 > 2026 Multi-Agent BD Orchestrator – Apollo, Notion, Gmail & Slack Integration
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
-- ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-07
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
+- ⭐ 1 stars
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: agents, ai-agents, ai-sdr, apollo-io, business-development, claude-code, claude-plugin, claude-skill, outreach, sales-automation
 
 ## Best fit cue profiles

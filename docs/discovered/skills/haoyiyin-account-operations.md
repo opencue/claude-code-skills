@@ -2,7 +2,7 @@
 title: "haoyiyin/account-operations — Claude Code skill discovered by cue"
 description: "Universal account cultivation skill for any website. Uses Camoufox for Cloudflare bypass, UI interaction, and content humanization."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, skill, core]
 ---
 

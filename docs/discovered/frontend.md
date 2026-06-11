@@ -1,17 +1,32 @@
 ---
 title: "Claude Code Skills for frontend"
-description: "4 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "3 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `frontend`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
+> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
+
+---
+
+<a id="v0id-byte-peg-design-system"></a>
+## 💎 [v0id-byte/peg-design-system](https://github.com/v0id-byte/peg-design-system)
+
+**★ 0** · exceptional (score 11) · HTML · tags: ai-slides, anthropic, claude-design, claude-skill, css-tokens
+
+Minimal, type-led HTML/CSS/React design system for slide decks and data-driven presentations. 极简演示文稿设计系统，含7种幻灯片模板与React组件。
+
+✅ SKILL.md
+
+```bash
+cue skills add v0id-byte/peg-design-system --profile frontend
+```
 
 ---
 
@@ -28,41 +43,15 @@ cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
 
 ---
 
-<a id="cs32dasdasd-ionik-capacitor-flux-patterns"></a>
-## ✨ [cs32dasdasd/ionik-capacitor-flux-patterns](https://github.com/cs32dasdasd/ionik-capacitor-flux-patterns)
+<a id="tarastsavolyk-claude-code-frontend"></a>
+## 🔹 [TarasTsavolyk/claude-code-frontend](https://github.com/TarasTsavolyk/claude-code-frontend)
 
-**★ 0** · strong (score 7.5) · HTML · tags: agent, agents, ai, ai-coding, android
+**★ 1** · potential (score 3.3)
 
-Ionic Capacitor Pro 2026: AI-Powered Hybrid App Builder for React, Angular & Vue
-
-```bash
-cue skills add cs32dasdasd/ionik-capacitor-flux-patterns --profile frontend
-```
-
----
-
-<a id="pepinorancio1-sticky-switcher-funnel-playbook"></a>
-## ✨ [PepinoRancio1/sticky-switcher-funnel-playbook](https://github.com/PepinoRancio1/sticky-switcher-funnel-playbook)
-
-**★ 0** · strong (score 7.5) · HTML · tags: agency-toolkit, ai-coding-agent, claude-code, claude-code-skill, conversion-optimization
-
-Modern Web Design Playbook 2026 – Niche Tokens, Sticky Switcher & Conversion Funnel
+Production-ready Claude Code configuration for frontend projects: specialized agents, path-scoped rules, and workflow skills. Vue 3 · Vue-Router · Pinia · TypeScript optional · Tailwind CSS · any package manager.
 
 ```bash
-cue skills add PepinoRancio1/sticky-switcher-funnel-playbook --profile frontend
-```
-
----
-
-<a id="aiatelie-ai-atelie"></a>
-## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
-
-**★ 6** · strong (score 5.7) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
-
-Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
-
-```bash
-cue skills add aiatelie/ai-atelie --profile frontend
+cue skills add TarasTsavolyk/claude-code-frontend --profile frontend
 ```
 
 ---

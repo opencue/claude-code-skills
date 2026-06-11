@@ -2,7 +2,7 @@
 title: "Claude Code Skills for docs-writer"
 description: "3 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
@@ -30,28 +30,28 @@ cue skills add JamesShi96/project-butler --profile docs-writer
 
 ---
 
-<a id="kochetkov-ma-brewpage-openapi"></a>
-## 💎 [kochetkov-ma/brewpage-openapi](https://github.com/kochetkov-ma/brewpage-openapi)
+<a id="howdow698-ui-llm-wiki"></a>
+## 💎 [howdow698-ui/llm-wiki](https://github.com/howdow698-ui/llm-wiki)
 
-**★ 1** · exceptional (score 10.8) · JavaScript · tags: ai-agent, ai-tools, anthropic, api-documentation, api-hosting
+**★ 0** · exceptional (score 8.5) · tags: agent-skill, claude-code-skill, cli, codex, gemini
 
-Open API Specification for https://brewpage.app - Free HTML, Markdown, AI Artifacts & File Instant Hosting
+Build a structured knowledge base with LLM agents to automate documentation, link concepts, and maintain long-term information retention in Markdown.
 
 ```bash
-cue skills add kochetkov-ma/brewpage-openapi --profile docs-writer
+cue skills add howdow698-ui/llm-wiki --profile docs-writer
 ```
 
 ---
 
-<a id="chaos2555-bullet-mcp"></a>
-## ✨ [Chaos2555/bullet-mcp](https://github.com/Chaos2555/bullet-mcp)
+<a id="mindgameolympiangames78-llm-knowledge-base"></a>
+## 💎 [mindgameolympiangames78/llm-knowledge-base](https://github.com/mindgameolympiangames78/llm-knowledge-base)
 
-**★ 0** · strong (score 6.5) · TypeScript · tags: ai, bullet-points, cognitive-science, documentation, information-architecture
+**★ 0** · exceptional (score 8) · tags: bert-models, biomedical-informatics, claude-code, claude-code-skill, gpt
 
-📝 Enhance bullet point clarity with bullet-mcp. This tool scores and improves your lists using research-backed principles for effective communication.
+Automate your personal knowledge base in Obsidian using Claude. Feed raw content and let the LLM organize, link, and synthesize your notes.
 
 ```bash
-cue skills add Chaos2555/bullet-mcp --profile docs-writer
+cue skills add mindgameolympiangames78/llm-knowledge-base --profile docs-writer
 ```
 
 ---

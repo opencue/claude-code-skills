@@ -2,7 +2,7 @@
 title: "Xiaoher-C/agentbnb — Claude Code skill discovered by cue"
 description: "Where AI agents hire AI agents — hiring and coordination infrastructure for the agent economy"
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9 based on:
 - ⭐ 32 stars
-- 🗓️ Last pushed: 2026-06-08
+- 🗓️ Last pushed: 2026-06-10
 - 🏷️ Tags: agent-network, agent-skills, ai-agent-skill, ai-agents, claude-code, codex, cursor, mcp, multi-agent, openclaw, p2p, typescript
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for research"
 description: "1 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
@@ -18,7 +18,7 @@ tags: [claude-code, research, skills, mcp, ai-agents]
 <a id="veyralabsgroup-venture-analyst"></a>
 ## 💎 [veyralabsgroup/venture-analyst](https://github.com/veyralabsgroup/venture-analyst)
 
-**★ 1** · exceptional (score 15.5) · Python · tags: agent-skill, ai-agent-skill, ai-agents, anthropic, claude
+**★ 1** · exceptional (score 15.4) · Python · tags: agent-skill, ai-agent-skill, ai-agents, anthropic, claude
 
 Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments.
 

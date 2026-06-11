@@ -1,29 +1,42 @@
 ---
 title: "Claude Code Skills for python"
-description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `python`
 
-> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="pipulate-pipulate"></a>
-## 💎 [pipulate/pipulate](https://github.com/pipulate/pipulate)
+<a id="ignatrozhkotr-governed-workflow"></a>
+## 💎 [IgnatRozhkoTR/governed-workflow](https://github.com/IgnatRozhkoTR/governed-workflow)
 
-**★ 12** · exceptional (score 10.2) · Python · tags: ai, fasthtml, htmx, machine-learning, mcp
+**★ 8** · exceptional (score 12.3) · Python · tags: agentic-workflow, ai-agents, anthropic, claude, claude-code
 
-Local First AI SEO Software on Nix, FastHTML & HTMX
+Web admin panel and MCP server for Claude Code — phase gates, scope locks, and human approval for agentic coding sessions.
 
 ```bash
-cue skills add pipulate/pipulate --profile python
+cue skills add IgnatRozhkoTR/governed-workflow --profile python
+```
+
+---
+
+<a id="lorisunjunbin-petp"></a>
+## 💎 [lorisunjunbin/petp](https://github.com/lorisunjunbin/petp)
+
+**★ 6** · exceptional (score 10) · Python · tags: ai-tools, automated-testing, devops-tools, gui-application, mcp-server
+
+Python RPA toolkit with 80+ processors orchestrating browser automation, AI/LLM (10 providers), databases, SSH, email, and HTTP tasks. Configurable pipelines with cron scheduling and loops. Runs as wxPython GUI, headless service, or  Docker container. Built-in MCP Tool Server (Streamable-HTTP) for AI agent integration.
+
+```bash
+cue skills add lorisunjunbin/petp --profile python
 ```
 
 ---

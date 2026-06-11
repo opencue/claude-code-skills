@@ -2,7 +2,7 @@
 title: "JamesShi96/project-butler — Claude Code skill discovered by cue"
 description: "Project memory system for AI coding assistants (Claude Code, Cursor, Codex): session logs, project wiki, rules, TODOs, and handoff."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, skill, docs-writer]
 ---
 
@@ -17,7 +17,7 @@ tags: [claude-code, skill, docs-writer]
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 21 based on:
 - ✅ Contains SKILL.md
 - ⭐ 156 stars
-- 🗓️ Last pushed: 2026-06-10
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: ai-agent, ai-coding, ai-workflow, changelog, claude-code, claude-skill, codex, coding-assistant, context-engineering, cursor, developer-tools, documentation, file-organization, knowledge-management, openai-codex, project-management, project-memory, session-memory, task-management, workflow
 
 ## Best fit cue profiles

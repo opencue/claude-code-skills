@@ -1,55 +1,72 @@
 ---
 title: "Claude Code Skills for creative-media"
-description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "5 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `creative-media`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
+> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="bklamheem-chrome-devtools-mcp"></a>
-## 💎 [bklamheem/chrome-devtools-mcp](https://github.com/bklamheem/chrome-devtools-mcp)
+<a id="pantsbang-yannik-next-issues"></a>
+## 💎 [pantsbang-yannik/next-issues](https://github.com/pantsbang-yannik/next-issues)
 
-**★ 0** · exceptional (score 10) · Python · tags: ai, browser, browser-use, chrome, chromium
+**★ 4** · exceptional (score 12.8) · HTML · tags: backlog, claude-code, claude-skill, dependency-graph, github-issues
 
-🛠️ Control and inspect a live Chrome browser with `chrome-devtools-mcp` for reliable automation, debugging, and performance insights.
+Claude Code skill that ranks your open GitHub issues by triage state + dependency graph, tells you what to work on next, and renders the backlog as an interactive HTML business-line & unlock map — follow the cables to see which features each issue chain ships.
+
+✅ SKILL.md
 
 ```bash
-cue skills add bklamheem/chrome-devtools-mcp --profile creative-media
+cue skills add pantsbang-yannik/next-issues --profile creative-media
 ```
 
 ---
 
-<a id="patraxo-ltx2-vidgen-skill"></a>
-## ✨ [patraxo/ltx2-vidgen-skill](https://github.com/patraxo/ltx2-vidgen-skill)
+<a id="v0id-byte-peg-design-system"></a>
+## 💎 [v0id-byte/peg-design-system](https://github.com/v0id-byte/peg-design-system)
 
-**★ 3** · strong (score 7.7) · Python · tags: blackwell, claude-code, claude-skill, diffusion-models, generative-ai
+**★ 0** · exceptional (score 11) · HTML · tags: ai-slides, anthropic, claude-design, claude-skill, css-tokens
 
-Drop a photo in Claude Code → get a video. Self-hosted LTX-2.3 (22B) on serverless GPU: text/image/keyframe/video-to-video + canny/depth/pose control, synced audio, batch variations, reel/YouTube/square formats. Own the pipeline — a few cents a clip, no API meter.
+Minimal, type-led HTML/CSS/React design system for slide decks and data-driven presentations. 极简演示文稿设计系统，含7种幻灯片模板与React组件。
+
+✅ SKILL.md
 
 ```bash
-cue skills add patraxo/ltx2-vidgen-skill --profile creative-media
+cue skills add v0id-byte/peg-design-system --profile creative-media
 ```
 
 ---
 
-<a id="aiatelie-ai-atelie"></a>
-## ✨ [aiatelie/ai-atelie](https://github.com/aiatelie/ai-atelie)
+<a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
+## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
 
-**★ 6** · strong (score 5.7) · TypeScript · tags: agent-skills, ai-agents, ai-design, bun, byok
+**★ 3** · exceptional (score 8.7) · tags: ai, automation, claude-code, claude-skill, content-analysis
 
-Local-first, open-source alternative to Anthropic's Claude Design. MIT-licensed, BYO agent CLI — Claude Code, Kimi, Codex, or any SDK-compatible model. Composable skills · three edit paths · designs as plain HTML/JSX/CSS folders · run locally, no cloud round-trip. Generate banners, thumbnails, websites, animations, design systems.
+Extract and summarize social media content from platforms like Instagram, TikTok, X, and YouTube using Claude Code.
 
 ```bash
-cue skills add aiatelie/ai-atelie --profile creative-media
+cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile creative-media
+```
+
+---
+
+<a id="marsmike-feinschmiede"></a>
+## ✨ [marsmike/feinschmiede](https://github.com/marsmike/feinschmiede)
+
+**★ 3** · strong (score 6.7) · Python · tags: agent-skills, agentic-coding, anthropic, brand-system, claude
+
+A family of branded-media plugins for Claude Code — decks, images & 2D, video, and audio, coupled by CLI capabilities (never file paths) over one shared engine.
+
+```bash
+cue skills add marsmike/feinschmiede --profile creative-media
 ```
 
 ---

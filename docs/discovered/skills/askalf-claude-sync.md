@@ -2,7 +2,7 @@
 title: "askalf/claude-sync — Claude Code skill discovered by cue"
 description: "Sync Claude Code sessions across machines. Pack a local CC session into a portable .ccsync file, ship it via Dropbox / iCloud / Syncthing / USB stick, unpack on"
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 3.3 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-09
+- 🗓️ Last pushed: 2026-06-10
 - 🏷️ Tags: (none)
 
 ## Best fit cue profiles

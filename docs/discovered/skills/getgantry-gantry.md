@@ -2,21 +2,21 @@
 title: "getgantry/gantry — Claude Code skill discovered by cue"
 description: "Native macOS app for managing and monitoring Docker — local and over SSH. Agent-ready: built-in MCP server and App Intents. Free and open source."
 layout: page
-updated: 2026-06-08
+updated: 2026-06-11
 tags: [claude-code, skill, backend]
 ---
 
-# 💎 [getgantry/gantry](https://github.com/getgantry/gantry)
+# ✨ [getgantry/gantry](https://github.com/getgantry/gantry)
 
-**★ 16** · exceptional (score 8.4) · Swift · ai-agents, containers, developer-tools, docker, macos
+**★ 31** · strong (score 7.7) · Swift · ai-agents, containers, developer-tools, docker, macos
 
 > Native macOS app for managing and monitoring Docker — local and over SSH. Agent-ready: built-in MCP server and App Intents. Free and open source.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 8.4 based on:
-- ⭐ 16 stars
-- 🗓️ Last pushed: 2026-06-08
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.7 based on:
+- ⭐ 31 stars
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: ai-agents, containers, developer-tools, docker, macos, mcp, mcp-server, ssh, swift, swiftui
 
 ## Best fit cue profiles

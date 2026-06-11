@@ -1,22 +1,22 @@
 ---
 title: "johnfire/notes-world — Claude Code skill discovered by cue"
-description: "an app for your computer that  holds notes, organizes them and has an MCP"
+description: "an app for your computer that  holds notes, organizes them and has an MCP, so it interfaces to AI"
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, skill, backend]
 ---
 
 # ✨ [johnfire/notes-world](https://github.com/johnfire/notes-world)
 
-**★ 1** · strong (score 6.3) · TypeScript · docker, mcp-server, notes-app, notes-application, notes-keeper-organization-tool
+**★ 1** · strong (score 7.8) · TypeScript · docker, mcp-server, notes-app, notes-application, notes-keeper-organization-tool
 
-> an app for your computer that  holds notes, organizes them and has an MCP
+> an app for your computer that  holds notes, organizes them and has an MCP, so it interfaces to AI
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 6.3 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-09
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: docker, mcp-server, notes-app, notes-application, notes-keeper-organization-tool, notes-management-system, notes-tool
 
 ## Best fit cue profiles

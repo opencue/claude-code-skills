@@ -2,21 +2,21 @@
 title: "zhitongblog/unterm — Claude Code skill discovered by cue"
 description: "The terminal AI agents can drive — 67 MCP methods across 11 namespaces. macOS / Linux / Windows, local-first, $0, MIT."
 layout: page
-updated: 2026-06-09
+updated: 2026-06-11
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [zhitongblog/unterm](https://github.com/zhitongblog/unterm)
 
-**★ 3** · exceptional (score 9.2) · Rust · agent-tools, claude, claude-code, codex, cursor
+**★ 5** · exceptional (score 9.4) · Rust · agent-tools, claude, claude-code, codex, cursor
 
 > The terminal AI agents can drive — 67 MCP methods across 11 namespaces. macOS / Linux / Windows, local-first, $0, MIT.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.2 based on:
-- ⭐ 3 stars
-- 🗓️ Last pushed: 2026-06-09
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.4 based on:
+- ⭐ 5 stars
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: agent-tools, claude, claude-code, codex, cursor, gemini-cli, linux, macos, mcp, mcp-server, model-context-protocol, opencode, pty, rust, terminal, tty, wezterm, windows
 
 ## Best fit cue profiles

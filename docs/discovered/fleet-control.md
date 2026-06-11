@@ -1,55 +1,29 @@
 ---
 title: "Claude Code Skills for fleet-control"
-description: "3 community Claude Code skills curated by cue for the fleet-control profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the fleet-control profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-10
+updated: 2026-06-11
 tags: [claude-code, fleet-control, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `fleet-control`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **fleet-control** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **fleet-control** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="marcos-auguusto-superx-agentic-orchestrator"></a>
-## 💎 [Marcos-Auguusto/superx-agentic-orchestrator](https://github.com/Marcos-Auguusto/superx-agentic-orchestrator)
+<a id="aadiieee-multi-agent-revenue-orchestrator"></a>
+## ✨ [aadiieee/multi-agent-revenue-orchestrator](https://github.com/aadiieee/multi-agent-revenue-orchestrator)
 
-**★ 0** · exceptional (score 10) · HTML · tags: agent-orchestration, ai-agent, ai-coding, ai-orchestration, anthropic
+**★ 1** · strong (score 7.8) · HTML · tags: agents, ai-agents, ai-sdr, apollo-io, business-development
 
-SuperX Autonomous AI Agent 2026: 14 Specialized Coders, 10x Parallel Execution & Adaptive Skill Learning
-
-```bash
-cue skills add Marcos-Auguusto/superx-agentic-orchestrator --profile fleet-control
-```
-
----
-
-<a id="annsharry-claudemd"></a>
-## 💎 [AnnsHarry/CLAUDEmd](https://github.com/AnnsHarry/CLAUDEmd)
-
-**★ 0** · exceptional (score 10) · HTML · tags: agentic-ai, agentic-framework, ai-assistant, bulk-utilities, claude-code
-
-🍟 Enhance AI collaboration with CLAUDE.md, orchestrating Claude for efficient context retrieval and analysis using Auggie, Codex, and Gemini.
+2026 Multi-Agent BD Orchestrator – Apollo, Notion, Gmail & Slack Integration
 
 ```bash
-cue skills add AnnsHarry/CLAUDEmd --profile fleet-control
-```
-
----
-
-<a id="raydenai-queen-protocol"></a>
-## ✨ [raydenai/queen-protocol](https://github.com/raydenai/queen-protocol)
-
-**★ 2** · strong (score 5.3) · Shell · tags: agent-protocol, anthropic, claude-code, claude-mesh, codex
-
-Queen Protocol v2.14.0 — Auto-acquire dispatch-lock from prompt-file path. Closes v2.13's adoption gap (one queen acquiring + other queen bypassing). kimi-task.sh now refuses dispatch when another queen holds the shard lock. Plus colony-watcher daemon + 10 named operator-discipline patterns from production. Workers: claude/kimi/codex/gemma4-local.
-
-```bash
-cue skills add raydenai/queen-protocol --profile fleet-control
+cue skills add aadiieee/multi-agent-revenue-orchestrator --profile fleet-control
 ```
 
 ---

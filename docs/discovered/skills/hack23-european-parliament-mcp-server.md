@@ -2,7 +2,7 @@
 title: "Hack23/European-Parliament-MCP-Server — Claude Code skill discovered by cue"
 description: "European Parliament MCP Server Model Context Protocol Server for European Parliament Open Data Providing AI assistants with structured access to parliamentary d"
 layout: page
-updated: 2026-06-05
+updated: 2026-06-11
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 11.2 based on:
 - ⭐ 16 stars
-- 🗓️ Last pushed: 2026-06-05
+- 🗓️ Last pushed: 2026-06-11
 - 🏷️ Tags: civic-tech, eu-parlament, european-union, mcp, mcp-server, osint, parliamentary-debate, parliamentary-monitoring
 
 ## Best fit cue profiles
