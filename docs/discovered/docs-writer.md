@@ -1,31 +1,29 @@
 ---
 title: "Claude Code Skills for docs-writer"
-description: "3 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `docs-writer`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="jamesshi96-project-butler"></a>
-## 💎 [JamesShi96/project-butler](https://github.com/JamesShi96/project-butler)
+<a id="sandsower-memento-vault"></a>
+## 💎 [sandsower/memento-vault](https://github.com/sandsower/memento-vault)
 
-**★ 156** · exceptional (score 21) · tags: ai-agent, ai-coding, ai-workflow, changelog, claude-code
+**★ 9** · exceptional (score 9.8) · Python · tags: ai-memory, claude-code, codex, coding-agents, cursor
 
-Project memory system for AI coding assistants (Claude Code, Cursor, Codex): session logs, project wiki, rules, TODOs, and handoff.
-
-✅ SKILL.md
+Persistent knowledge capture for coding agents. Auto-triages sessions into searchable Zettelkasten notes with epistemic metadata. Works with Claude Code, Codex, Cursor, Windsurf via hooks or MCP. Local-only, markdown + git.
 
 ```bash
-cue skills add JamesShi96/project-butler --profile docs-writer
+cue skills add sandsower/memento-vault --profile docs-writer
 ```
 
 ---
@@ -39,19 +37,6 @@ Build a structured knowledge base with LLM agents to automate documentation, lin
 
 ```bash
 cue skills add howdow698-ui/llm-wiki --profile docs-writer
-```
-
----
-
-<a id="mindgameolympiangames78-llm-knowledge-base"></a>
-## 💎 [mindgameolympiangames78/llm-knowledge-base](https://github.com/mindgameolympiangames78/llm-knowledge-base)
-
-**★ 0** · exceptional (score 8) · tags: bert-models, biomedical-informatics, claude-code, claude-code-skill, gpt
-
-Automate your personal knowledge base in Obsidian using Claude. Feed raw content and let the LLM organize, link, and synthesize your notes.
-
-```bash
-cue skills add mindgameolympiangames78/llm-knowledge-base --profile docs-writer
 ```
 
 ---

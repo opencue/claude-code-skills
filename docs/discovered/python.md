@@ -1,42 +1,29 @@
 ---
 title: "Claude Code Skills for python"
-description: "2 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `python`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **python** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="ignatrozhkotr-governed-workflow"></a>
-## 💎 [IgnatRozhkoTR/governed-workflow](https://github.com/IgnatRozhkoTR/governed-workflow)
+<a id="salems-3dpov-ai-agent-pipeline"></a>
+## ✨ [salems-3Dpov/ai-agent-pipeline](https://github.com/salems-3Dpov/ai-agent-pipeline)
 
-**★ 8** · exceptional (score 12.3) · Python · tags: agentic-workflow, ai-agents, anthropic, claude, claude-code
+**★ 1** · strong (score 7.8) · Python · tags: agent, agentic-ai, agents, aws, cicd
 
-Web admin panel and MCP server for Claude Code — phase gates, scope locks, and human approval for agentic coding sessions.
-
-```bash
-cue skills add IgnatRozhkoTR/governed-workflow --profile python
-```
-
----
-
-<a id="lorisunjunbin-petp"></a>
-## 💎 [lorisunjunbin/petp](https://github.com/lorisunjunbin/petp)
-
-**★ 6** · exceptional (score 10) · Python · tags: ai-tools, automated-testing, devops-tools, gui-application, mcp-server
-
-Python RPA toolkit with 80+ processors orchestrating browser automation, AI/LLM (10 providers), databases, SSH, email, and HTTP tasks. Configurable pipelines with cron scheduling and loops. Runs as wxPython GUI, headless service, or  Docker container. Built-in MCP Tool Server (Streamable-HTTP) for AI agent integration.
+🐙 AI Agent Pipeline routes queries by intent to docs, weather, or chat, with LangGraph, ChromaDB, and LangSmith for modular, observable workflows across CLI and UI.
 
 ```bash
-cue skills add lorisunjunbin/petp --profile python
+cue skills add salems-3Dpov/ai-agent-pipeline --profile python
 ```
 
 ---

@@ -1,31 +1,44 @@
 ---
 title: "Claude Code Skills for frontend"
-description: "3 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "4 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `frontend`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
+> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="v0id-byte-peg-design-system"></a>
-## 💎 [v0id-byte/peg-design-system](https://github.com/v0id-byte/peg-design-system)
+<a id="mustbesimo-cinematic-scroll-skill"></a>
+## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
 
-**★ 0** · exceptional (score 11) · HTML · tags: ai-slides, anthropic, claude-design, claude-skill, css-tokens
+**★ 5** · exceptional (score 14.4) · TypeScript · tags: agent-skill, agent-skills, claude-skill, creative-coding, cursor
 
-Minimal, type-led HTML/CSS/React design system for slide decks and data-driven presentations. 极简演示文稿设计系统，含7种幻灯片模板与React组件。
+Agent skill for building cinematic, scroll-driven websites from a brief: visual systems, motion storyboards, vanilla/GSAP demos, and Next.js release-page templates.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add v0id-byte/peg-design-system --profile frontend
+cue skills add MustBeSimo/cinematic-scroll-skill --profile frontend
+```
+
+---
+
+<a id="cobacobaini-vibe"></a>
+## 💎 [COBACOBAINI/vibe](https://github.com/COBACOBAINI/vibe)
+
+**★ 8** · exceptional (score 9.9) · TypeScript · tags: 3d-human-pose, ai, ai-agents, component-library, cross-platform
+
+Transcribe audio and video offline with OpenAI Whisper on your device, keeping data private. Supports many languages with fast, fully local, reliable transcription. 🐙
+
+```bash
+cue skills add COBACOBAINI/vibe --profile frontend
 ```
 
 ---

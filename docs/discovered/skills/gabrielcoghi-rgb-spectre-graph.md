@@ -2,7 +2,7 @@
 title: "gabrielcoghi-rgb/spectre-graph — Claude Code skill discovered by cue"
 description: "Spectre AI 2026: Next-Gen OSINT Engine & Autonomous Graph Disambiguation Toolkit"
 layout: page
-updated: 2026-06-07
+updated: 2026-06-12
 tags: [claude-code, skill, cybersecurity]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, cybersecurity]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 5.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-12
 - 🏷️ Tags: ai-agents, ai-plugin, automation, mcp, mcp-server, osint, osint-tool, recon, spectre
 
 ## Best fit cue profiles

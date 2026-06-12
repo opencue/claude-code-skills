@@ -1,46 +1,31 @@
 ---
 title: "Claude Code Skills for creative-media"
-description: "5 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `creative-media`
 
-> 5 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
+> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **creative-media** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="pantsbang-yannik-next-issues"></a>
-## 💎 [pantsbang-yannik/next-issues](https://github.com/pantsbang-yannik/next-issues)
+<a id="danielgwilson-image-skill-cli"></a>
+## 💎 [danielgwilson/image-skill-cli](https://github.com/danielgwilson/image-skill-cli)
 
-**★ 4** · exceptional (score 12.8) · HTML · tags: backlog, claude-code, claude-skill, dependency-graph, github-issues
+**★ 1** · exceptional (score 13.8) · JavaScript · tags: 3d-generation, agent-skill, agent-skills, ai-agents, audio-generation
 
-Claude Code skill that ranks your open GitHub issues by triage state + dependency graph, tells you what to work on next, and renders the backlog as an interactive HTML business-line & unlock map — follow the cables to see which features each issue chain ships.
-
-✅ SKILL.md
-
-```bash
-cue skills add pantsbang-yannik/next-issues --profile creative-media
-```
-
----
-
-<a id="v0id-byte-peg-design-system"></a>
-## 💎 [v0id-byte/peg-design-system](https://github.com/v0id-byte/peg-design-system)
-
-**★ 0** · exceptional (score 11) · HTML · tags: ai-slides, anthropic, claude-design, claude-skill, css-tokens
-
-Minimal, type-led HTML/CSS/React design system for slide decks and data-driven presentations. 极简演示文稿设计系统，含7种幻灯片模板与React组件。
+Zero-setup creative media for agents — generate & edit images, generate video & audio, create 3D, with no API key, no OAuth, durable hosted URLs, recoverable jobs, and cost receipts.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add v0id-byte/peg-design-system --profile creative-media
+cue skills add danielgwilson/image-skill-cli --profile creative-media
 ```
 
 ---

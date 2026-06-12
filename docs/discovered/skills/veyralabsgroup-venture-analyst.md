@@ -2,7 +2,7 @@
 title: "veyralabsgroup/venture-analyst — Claude Code skill discovered by cue"
 description: "Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, skill, research]
 ---
 

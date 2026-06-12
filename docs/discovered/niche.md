@@ -1,32 +1,17 @@
 ---
 title: "Claude Code Skills for niche"
-description: "3 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, niche, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `niche`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="dhcnsa-netizen-lecture-builder"></a>
-## 💎 [dhcnsa-netizen/lecture-builder](https://github.com/dhcnsa-netizen/lecture-builder)
-
-**★ 0** · exceptional (score 10.5) · Python · tags: agent-skills, claude-code-skill, claude-skill, claude-skills, docx
-
-讲义制作工作流：用知识点+题目一键生成学生版/教师版 Word 讲义（图片与公式逐字节保真）
-
-✅ SKILL.md
-
-```bash
-cue skills add dhcnsa-netizen/lecture-builder --profile niche
-```
 
 ---
 

@@ -2,7 +2,7 @@
 title: "rhino-ty/polymedia-review-skill — Claude Code skill discovered by cue"
 description: "AI agent skill: deep, Socratic-maieutic review notes for books / games / movies / music in Obsidian format"
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, skill, core]
 ---
 

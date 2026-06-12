@@ -2,7 +2,7 @@
 title: "veyralabsgroup/venture-suite — Claude Code skill discovered by cue"
 description: "Venture Intelligence pack for Claude Code. Includes venture-analyst for idea validation, competitor research, and Bull/Bear/Judge verdict."
 layout: page
-updated: 2026-06-11
+updated: 2026-06-12
 tags: [claude-code, skill, core]
 ---
 

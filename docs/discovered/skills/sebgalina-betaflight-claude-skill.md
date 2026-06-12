@@ -2,22 +2,22 @@
 title: "SebGalina/betaflight-claude-skill — Claude Code skill discovered by cue"
 description: "Claude skill for Betaflight: FPV drone configuration, PID tuning, log analysis, and troubleshooting."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-12
 tags: [claude-code, skill, core]
 ---
 
 # 💎 [SebGalina/betaflight-claude-skill](https://github.com/SebGalina/betaflight-claude-skill)
 
-**★ 1** · exceptional (score 11.3) · HTML · agent-skills, ai-tools, betaflight, betaflight-blackbox, claude
+**★ 22** · exceptional (score 12.6) · HTML · agent-skills, ai-tools, betaflight, betaflight-blackbox, claude
 
 > Claude skill for Betaflight: FPV drone configuration, PID tuning, log analysis, and troubleshooting.
 
 ## Why cue indexed it
 
-cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 11.3 based on:
+cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 12.6 based on:
 - ✅ Contains SKILL.md
-- ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-06
+- ⭐ 22 stars
+- 🗓️ Last pushed: 2026-06-12
 - 🏷️ Tags: agent-skills, ai-tools, betaflight, betaflight-blackbox, claude, claude-skill, claude-skills, flight-controller, fpv, fpv-drones, llm-tools, quadcopter
 
 ## Best fit cue profiles
