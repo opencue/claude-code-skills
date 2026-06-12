@@ -419,6 +419,120 @@ describe("materializeRuntime", () => {
     expect(creds.claudeAiOauth.refreshToken).toBe("live");
   });
 
+  test("credentialsSource: cache hit re-seeds a FILE .claude.json on account switch", async () => {
+    // Regression: runtime dirs are keyed by profile, so two authmux accounts
+    // share one runtime. Claude's atomic rewrite turns the .claude.json symlink
+    // into a local FILE owned by the last-logged-in account; the overlay's
+    // "cue override — don't touch" rule then left the OLD account's identity
+    // paired with the NEW account's tokens, forcing a re-login every time the
+    // accounts alternated on a profile.
+    const credSrcA = join(root, "accA");
+    const credSrcB = join(root, "accB");
+    await mkdir(credSrcA, { recursive: true });
+    await mkdir(credSrcB, { recursive: true });
+    await writeFile(join(credSrcA, ".credentials.json"), '{"claudeAiOauth":{"refreshToken":"A"}}');
+    await writeFile(join(credSrcB, ".credentials.json"), '{"claudeAiOauth":{"refreshToken":"B"}}');
+    await writeFile(join(credSrcA, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" } }));
+    await writeFile(join(credSrcB, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-B" } }));
+
+    const args = {
+      profile: { ...sampleProfile, name: "acct-switch" },
+      agent: "claude-code" as const,
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id: string) => `/fake/source/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem" } },
+      userClaudeMd: "",
+    };
+
+    const first = await materializeRuntime({ ...args, credentialsSource: credSrcA });
+    expect(first.rebuilt).toBe(true);
+    // Simulate Claude Code's atomic rewrite: the .claude.json symlink becomes
+    // a local regular file carrying account A's identity + session state.
+    await rm(join(first.runtimeDir, ".claude.json"), { force: true });
+    await writeFile(
+      join(first.runtimeDir, ".claude.json"),
+      JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" }, projects: { "/w": {} } }),
+    );
+
+    // Account B launches the same profile → cache hit → identity must follow.
+    const second = await materializeRuntime({ ...args, credentialsSource: credSrcB });
+    expect(second.rebuilt).toBe(false);
+    const cj = JSON.parse(await readFile(join(second.runtimeDir, ".claude.json"), "utf8"));
+    expect(cj.oauthAccount.accountUuid).toBe("uuid-B");
+    const creds = JSON.parse(await readFile(join(second.runtimeDir, ".credentials.json"), "utf8"));
+    expect(creds.claudeAiOauth.refreshToken).toBe("B");
+  });
+
+  test("credentialsSource: cache hit keeps a FILE .claude.json when the account matches", async () => {
+    // Same-account relaunch must NOT clobber per-profile session state
+    // (projects list etc.) that Claude wrote into the runtime's local file.
+    const credSrc = join(root, "accSame");
+    await mkdir(credSrc, { recursive: true });
+    await writeFile(join(credSrc, ".credentials.json"), '{"claudeAiOauth":{"refreshToken":"A"}}');
+    await writeFile(join(credSrc, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" } }));
+
+    const args = {
+      profile: { ...sampleProfile, name: "acct-same" },
+      agent: "claude-code" as const,
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id: string) => `/fake/source/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem" } },
+      userClaudeMd: "",
+    };
+
+    const first = await materializeRuntime({ ...args, credentialsSource: credSrc });
+    await rm(join(first.runtimeDir, ".claude.json"), { force: true });
+    const localState = JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" }, projects: { "/w": { history: [1] } } });
+    await writeFile(join(first.runtimeDir, ".claude.json"), localState);
+
+    const second = await materializeRuntime({ ...args, credentialsSource: credSrc });
+    expect(second.rebuilt).toBe(false);
+    // Identity + per-profile session state preserved (syncMcpsIntoClaudeJson
+    // legitimately rewrites the file to merge mcpServers, so compare fields,
+    // not bytes).
+    const cj = JSON.parse(await readFile(join(second.runtimeDir, ".claude.json"), "utf8"));
+    expect(cj.oauthAccount.accountUuid).toBe("uuid-A");
+    expect(cj.projects).toEqual({ "/w": { history: [1] } });
+  });
+
+  test("credentialsSource: rebuild does not resurrect another account's identity or tokens", async () => {
+    // The preserve step's expiresAt comparison is meaningless across accounts:
+    // the old runtime's token may expire later yet belong to the OTHER account.
+    // On a cross-account rebuild the source state must win wholesale.
+    const credSrcA = join(root, "rebA");
+    const credSrcB = join(root, "rebB");
+    await mkdir(credSrcA, { recursive: true });
+    await mkdir(credSrcB, { recursive: true });
+    const LATER = 9_000_000_000_000;
+    await writeFile(join(credSrcA, ".credentials.json"), JSON.stringify({ claudeAiOauth: { expiresAt: LATER, refreshToken: "A" } }));
+    await writeFile(join(credSrcB, ".credentials.json"), JSON.stringify({ claudeAiOauth: { expiresAt: 1_000, refreshToken: "B" } }));
+    await writeFile(join(credSrcA, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" } }));
+    await writeFile(join(credSrcB, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-B" } }));
+
+    const base = {
+      agent: "claude-code" as const,
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id: string) => `/fake/source/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem" } },
+      userClaudeMd: "",
+    };
+    const p1: ResolvedProfile = { ...sampleProfile, name: "acct-rebuild" };
+    const p2: ResolvedProfile = { ...sampleProfile, name: "acct-rebuild", skills: { local: [{ id: "design/ui-ux-pro-max" }, { id: "design/extra" }], npx: [] } };
+
+    const first = await materializeRuntime({ ...base, profile: p1, credentialsSource: credSrcA });
+    // Claude's rewrite pins account A's identity into the runtime as a FILE.
+    await rm(join(first.runtimeDir, ".claude.json"), { force: true });
+    await writeFile(join(first.runtimeDir, ".claude.json"), JSON.stringify({ oauthAccount: { accountUuid: "uuid-A" } }));
+
+    // Account B relaunches with a changed profile → rebuild + preserve step.
+    const second = await materializeRuntime({ ...base, profile: p2, credentialsSource: credSrcB });
+    expect(second.rebuilt).toBe(true);
+    const creds = JSON.parse(await readFile(join(second.runtimeDir, ".credentials.json"), "utf8"));
+    expect(creds.claudeAiOauth.refreshToken).toBe("B");
+    const cj = JSON.parse(await readFile(join(second.runtimeDir, ".claude.json"), "utf8"));
+    expect(cj.oauthAccount.accountUuid).toBe("uuid-B");
+  });
+
   test("CLAUDE.md stamp uses real ISO timestamp, not literal $(date)", async () => {
     const out = await materializeRuntime({
       profile: sampleProfile,

@@ -723,7 +723,21 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
   //   rm ~/.config/cue/runtime/<profile>/claude/.credentials.json
   //   rm ~/.config/cue/runtime/<profile>/claude/.claude.json
   // Next launch will copy current source state.
-  const preserveFiles = [".claude.json", ".credentials.json", "backups"];
+  // Account-identity guard: runtime dirs are keyed by PROFILE, so two authmux
+  // accounts (claude-account1 / claude-account2 with different
+  // CLAUDE_CONFIG_DIRs) share the same runtime. When the OLD runtime belongs
+  // to a different account than the current credentialsSource, resurrecting
+  // its .claude.json/.credentials.json would pair the old account's identity
+  // with the new account's tokens (or vice versa) — and the expiresAt
+  // comparison below is meaningless across accounts. Skip preservation
+  // entirely and let the overlay's source state win.
+  let sameAccount = true;
+  if (input.credentialsSource) {
+    const srcUuid = await accountUuidAt(join(input.credentialsSource, ".claude.json"));
+    const oldUuid = await accountUuidAt(join(runtimeDir, ".claude.json"));
+    if (srcUuid && oldUuid && srcUuid !== oldUuid) sameAccount = false;
+  }
+  const preserveFiles = sameAccount ? [".claude.json", ".credentials.json", "backups"] : [];
   for (const name of preserveFiles) {
     const oldPath = join(runtimeDir, name);
     const newPath = join(tmpDir, name);
@@ -774,6 +788,24 @@ async function credentialsExpiresAt(path: string): Promise<number> {
     return typeof exp === "number" ? exp : 0;
   } catch {
     return 0;
+  }
+}
+
+/**
+ * Read `oauthAccount.accountUuid` from a `.claude.json` at `path`. Returns
+ * undefined when the file is missing, unparseable, or carries no account —
+ * callers treat "unknown" as "don't make account-based decisions".
+ *
+ * Sibling of `readAccountUuid` in credentials-sync.ts (dir-based); keep the
+ * schema (`oauthAccount.accountUuid`) in sync if it ever changes.
+ */
+async function accountUuidAt(path: string): Promise<string | undefined> {
+  try {
+    const raw = await readFile(path, "utf8");
+    const parsed = JSON.parse(raw) as { oauthAccount?: { accountUuid?: string } };
+    return parsed?.oauthAccount?.accountUuid;
+  } catch {
+    return undefined;
   }
 }
 
@@ -907,7 +939,36 @@ async function overlaySourceState(targetDir: string, sourceDir: string): Promise
     // a shared one that gets clobbered when 2 profiles run concurrently.
     const isCopyFile = name === ".credentials.json" || isLegacyClaudeJson;
 
-    if (existingType === "other" && !isCopyFile) continue; // cue override — don't touch
+    if (existingType === "other" && !isCopyFile) {
+      // Account-identity guard: .claude.json starts life as a symlink into the
+      // source dir, but Claude Code's atomic rewrite (tmp → rename) replaces it
+      // with a local FILE owned by whichever account last logged in here. Since
+      // runtime dirs are keyed by profile (not account), a different authmux
+      // account launching the same profile used to find its fresh tokens paired
+      // with the OLD account's identity — booting into the login flow every time
+      // the two accounts alternated on a profile. When the uuids differ, re-seed
+      // identity from the source so it follows CLAUDE_CONFIG_DIR.
+      //
+      // Trade-off: the swap replaces the whole file, so the OLD account's
+      // per-profile session state (projects list etc.) in this runtime is
+      // discarded — acceptable, since it belongs to a different account.
+      if (name === ".claude.json") {
+        const srcUuid = await accountUuidAt(sourcePath);
+        const dstUuid = await accountUuidAt(targetPath);
+        if (srcUuid && dstUuid && srcUuid !== dstUuid) {
+          try {
+            // Copy to a sibling tmp + atomic rename — never leaves a window
+            // where .claude.json is missing/partial while a concurrent claude
+            // process might read or atomically rewrite it.
+            const { copyFile } = await import("node:fs/promises");
+            const tmp = `${targetPath}.cue-swap.${process.pid}`;
+            await copyFile(sourcePath, tmp);
+            await rename(tmp, targetPath);
+          } catch { /* non-fatal — keep existing file */ }
+        }
+      }
+      continue; // cue override — don't touch
+    }
 
     if (existingType === "symlink" || (existingType === "other" && isCopyFile)) {
       // Replace if it points elsewhere (e.g. previous account on cache hit).
