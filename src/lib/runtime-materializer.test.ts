@@ -2,6 +2,7 @@ import { describe, expect, test, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, rm, readlink, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import net from "node:net";
 
 import { utimes } from "node:fs/promises";
 
@@ -74,6 +75,47 @@ describe("materializeRuntime", () => {
     expect(settings.env).toEqual({ CLAUDE_CODE_SUBAGENT_MODEL: "claude-sonnet-4-6" });
     // unresolved "${...}" placeholder and non-allowlisted keys stay out
     expect(settings.env.AWS_SECRET_ACCESS_KEY).toBeUndefined();
+  });
+
+  test("surfaces ANTHROPIC_BASE_URL when the proxy is reachable (health-gate pass)", async () => {
+    // Stand up a throwaway loopback listener so the proxy liveness probe passes.
+    const server = net.createServer();
+    await new Promise<void>((res) => server.listen(0, "127.0.0.1", () => res()));
+    const port = (server.address() as { port: number }).port;
+    try {
+      const out = await materializeRuntime({
+        profile: { ...sampleProfile, env: { ANTHROPIC_BASE_URL: `http://127.0.0.1:${port}` } },
+        agent: "claude-code",
+        runtimeRoot: join(root, "runtime"),
+        skillSourceLookup: async (id) => `/fake/skills/${id}`,
+        mcpRegistry: { "claude-mem": { command: "claude-mem", args: [] } },
+        userClaudeMd: "# user CLAUDE.md\n",
+      });
+      const settings = JSON.parse(await readFile(join(out.runtimeDir, "settings.json"), "utf8"));
+      expect(settings.env).toEqual({ ANTHROPIC_BASE_URL: `http://127.0.0.1:${port}` });
+    } finally {
+      await new Promise<void>((res) => server.close(() => res()));
+    }
+  });
+
+  test("drops ANTHROPIC_BASE_URL when the proxy is unreachable (health-gate fail-open)", async () => {
+    // Reserve a loopback port then close it, so the proxy probe is guaranteed to fail.
+    const probe = net.createServer();
+    await new Promise<void>((res) => probe.listen(0, "127.0.0.1", () => res()));
+    const closedPort = (probe.address() as { port: number }).port;
+    await new Promise<void>((res) => probe.close(() => res()));
+
+    const out = await materializeRuntime({
+      profile: { ...sampleProfile, env: { ANTHROPIC_BASE_URL: `http://127.0.0.1:${closedPort}` } },
+      agent: "claude-code",
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id) => `/fake/skills/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem", args: [] } },
+      userClaudeMd: "# user CLAUDE.md\n",
+    });
+    const settings = JSON.parse(await readFile(join(out.runtimeDir, "settings.json"), "utf8"));
+    // Fail-open: the unreachable base URL is dropped, so Claude talks to Anthropic directly.
+    expect(settings.env?.ANTHROPIC_BASE_URL).toBeUndefined();
   });
 
   test("second call with same profile is a no-op (rebuilt=false)", async () => {

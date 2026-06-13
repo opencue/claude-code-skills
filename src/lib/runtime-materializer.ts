@@ -8,6 +8,7 @@
  */
 
 import { createHash } from "node:crypto";
+import net from "node:net";
 import { mkdir, rename, rm, symlink, writeFile, readFile, mkdtemp, readdir, lstat } from "node:fs/promises";
 import { dirname, join, resolve as resolvePath, basename, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -1041,6 +1042,52 @@ export async function linkPluginCache(targetDir: string, sourceDir: string): Pro
   }
 }
 
+/**
+ * Parse a loopback proxy target from a URL. Returns {host, port} only for
+ * loopback hosts (127.0.0.1 / ::1 / localhost) — those are the ones we
+ * health-gate; any other host is treated as a managed remote and left alone.
+ */
+function parseLoopbackHostPort(rawUrl: string): { host: string; port: number } | null {
+  try {
+    const u = new URL(rawUrl);
+    const host = u.hostname;
+    if (host !== "127.0.0.1" && host !== "::1" && host !== "localhost") return null;
+    const port = u.port ? Number(u.port) : u.protocol === "https:" ? 443 : 80;
+    if (!Number.isFinite(port) || port <= 0) return null;
+    return { host, port };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a proxy base URL should be applied to settings.json. Non-loopback
+ * URLs are always "reachable" (not gated — assumed deliberately managed). A
+ * loopback URL is reachable only if a TCP connect to its host:port succeeds
+ * within `timeoutMs` — a fast, dependency-free liveness probe so the
+ * materializer never writes a base URL that would brick Claude when the local
+ * proxy (e.g. the headroom compression wrap) is down.
+ */
+async function isProxyReachable(rawUrl: string, timeoutMs = 400): Promise<boolean> {
+  const target = parseLoopbackHostPort(rawUrl);
+  if (!target) return true;
+  return await new Promise<boolean>((resolveProbe) => {
+    const socket = new net.Socket();
+    let settled = false;
+    const finish = (ok: boolean): void => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolveProbe(ok);
+    };
+    socket.setTimeout(timeoutMs);
+    socket.once("connect", () => finish(true));
+    socket.once("timeout", () => finish(false));
+    socket.once("error", () => finish(false));
+    socket.connect(target.port, target.host);
+  });
+}
+
 async function buildClaudeSettings(
   profile: ResolvedProfile,
   agent: AgentKind,
@@ -1140,6 +1187,7 @@ async function buildClaudeSettings(
     // into settings.json. To surface a new one, append its key here.
     const CLAUDE_RUNTIME_ENV_KEYS = [
       "CLAUDE_CODE_SUBAGENT_MODEL", // run Task/Agent subagents on a cheaper model
+      "ANTHROPIC_BASE_URL", // route Claude traffic through a local proxy (e.g. the headroom compression wrap). Health-gated below: a loopback URL is dropped when the proxy isn't answering, so a dead proxy falls back to direct Anthropic instead of bricking Claude.
     ];
     // Preserve any account-level env from credentialsSource (spread in via
     // baseSettings above); profile-declared keys overlay it (profile is more
@@ -1151,9 +1199,24 @@ async function buildClaudeSettings(
     };
     for (const key of CLAUDE_RUNTIME_ENV_KEYS) {
       const val = profile.env?.[key];
-      if (typeof val === "string" && val.length > 0 && !val.includes("${")) {
-        runtimeEnv[key] = val;
+      if (typeof val !== "string" || val.length === 0 || val.includes("${")) {
+        continue;
       }
+      // Health-gate the proxy wrap. ANTHROPIC_BASE_URL pointed at an unreachable
+      // local proxy would make Claude unable to reach Anthropic at all. Only
+      // surface it when a loopback proxy actually answers; otherwise drop it
+      // (fail-open to direct Anthropic) and warn. Non-loopback URLs are not
+      // gated — they're assumed to be a deliberately-managed remote endpoint.
+      if (key === "ANTHROPIC_BASE_URL" && !(await isProxyReachable(val))) {
+        console.warn(
+          `[cue] ANTHROPIC_BASE_URL=${val} is unreachable — dropping the proxy ` +
+            `wrap for profile "${profile.name}"; Claude will talk to Anthropic ` +
+            `directly. Start the proxy (e.g. \`systemctl --user start headroom-proxy\`) ` +
+            `to enable compression.`,
+        );
+        continue;
+      }
+      runtimeEnv[key] = val;
     }
     if (Object.keys(runtimeEnv).length > 0) {
       settings.env = runtimeEnv;

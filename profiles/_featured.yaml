@@ -15,6 +15,7 @@
 featured:
   # --- focused workflow profiles ---
   - improver   # 📈 plan → rank by ROI → goal-with-a-check → improve existing repos
+  - headroom   # 🪶 context compression — 60–95% fewer tokens (MCP tools + full Claude-traffic wrap)
   # --- consolidation target: the 8 (appear once created) ---
   - commerce
   - growth
