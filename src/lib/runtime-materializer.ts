@@ -153,6 +153,23 @@ function computeHash(profile: ResolvedProfile, agent: AgentKind): string {
   return createHash("sha256").update(canonical).digest("hex");
 }
 
+/**
+ * Whether to emit the per-session telemetry sections — `## Skill Usage`,
+ * `## Last Session`, `## Common Workflows` — into the materialized memory file.
+ *
+ * Default OFF. These are usage-analytics / warm-start blocks: they change every
+ * time analytics or the last session change, cost ~0.6KB on a heavy profile, and
+ * carry no triggering signal (a skill's `description` is what makes it fire, not
+ * a hit count). The capability table and `## Available Skills` already name every
+ * skill, so dropping these loses no trigger surface — only volatile noise.
+ *
+ * Opt back in with `CUE_SESSION_TELEMETRY=1|true` (mirrors the file's other
+ * default-off knobs like `CUE_TRIGGER_PHRASES`).
+ */
+export function shouldIncludeSessionTelemetry(env: Record<string, string | undefined>): boolean {
+  return env.CUE_SESSION_TELEMETRY === "1" || env.CUE_SESSION_TELEMETRY === "true";
+}
+
 export async function materializeRuntime(input: MaterializeInput): Promise<MaterializeOutput> {
   const { profile, agent, runtimeRoot } = input;
   const runtimeDir = join(runtimeRoot, profile.name, agentSubdir(agent));
@@ -578,34 +595,41 @@ export async function materializeRuntime(input: MaterializeInput): Promise<Mater
     stamp += `## MCP Servers: ${mcpsList.join(", ")}\n\n`;
   }
 
-  // Skill usage analytics — help the model prioritize frequently-used skills
-  try {
-    const { skillStats } = await import("./analytics");
-    const stats = skillStats(profile.name);
-    if (stats.length > 0) {
-      stamp += `## Skill Usage (last 30 days)\n\n`;
-      stamp += `Prioritize these skills — they're the ones actually used:\n`;
-      for (const s of stats.slice(0, 8)) {
-        stamp += `- \`${s.skill}\` (${s.hits}× used)\n`;
+  // Per-session telemetry sections (Skill Usage / Last Session / Common
+  // Workflows). Default-off: volatile usage/warm-start noise with no triggering
+  // value — every skill is already named in the capability table and
+  // "## Available Skills". Opt back in with CUE_SESSION_TELEMETRY=1. Skipping
+  // the block also skips the analytics/session disk reads below.
+  if (shouldIncludeSessionTelemetry(process.env)) {
+    // Skill usage analytics — help the model prioritize frequently-used skills
+    try {
+      const { skillStats } = await import("./analytics");
+      const stats = skillStats(profile.name);
+      if (stats.length > 0) {
+        stamp += `## Skill Usage (last 30 days)\n\n`;
+        stamp += `Prioritize these skills — they're the ones actually used:\n`;
+        for (const s of stats.slice(0, 8)) {
+          stamp += `- \`${s.skill}\` (${s.hits}× used)\n`;
+        }
+        stamp += "\n";
       }
-      stamp += "\n";
+    } catch { /* analytics unavailable — skip */ }
+
+    // Profile fit monitoring — formerly a ~150-token hardcoded block; now a
+    // skill (meta/profile-fit-monitor) loaded on demand. Net per-message cost
+    // drops to just the skill's description line in "## Available Skills".
+
+    // #8: Warm-start context — last session summary
+    const lastSession = await getLastSessionSummary(profile.name);
+    if (lastSession) {
+      stamp += `## Last Session\n\n${lastSession}\n\n`;
     }
-  } catch { /* analytics unavailable — skip */ }
 
-  // Profile fit monitoring — formerly a ~150-token hardcoded block; now a
-  // skill (meta/profile-fit-monitor) loaded on demand. Net per-message cost
-  // drops to just the skill's description line in "## Available Skills".
-
-  // #8: Warm-start context — last session summary
-  const lastSession = await getLastSessionSummary(profile.name);
-  if (lastSession) {
-    stamp += `## Last Session\n\n${lastSession}\n\n`;
-  }
-
-  // #9: Skill chaining hints — common workflows from usage patterns
-  const chains = await getSkillChains(skillsList);
-  if (chains) {
-    stamp += `## Common Workflows\n\n${chains}\n\n`;
+    // #9: Skill chaining hints — common workflows from usage patterns
+    const chains = await getSkillChains(skillsList);
+    if (chains) {
+      stamp += `## Common Workflows\n\n${chains}\n\n`;
+    }
   }
 
   // Rules — index only. Symlinks live in rules/; Claude reads on demand instead
