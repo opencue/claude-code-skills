@@ -1,45 +1,17 @@
 ---
 title: "Claude Code Skills for frontend"
-description: "4 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "3 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `frontend`
 
-> 4 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
+> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **frontend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
-
----
-
-<a id="mustbesimo-cinematic-scroll-skill"></a>
-## 💎 [MustBeSimo/cinematic-scroll-skill](https://github.com/MustBeSimo/cinematic-scroll-skill)
-
-**★ 5** · exceptional (score 14.4) · TypeScript · tags: agent-skill, agent-skills, claude-skill, creative-coding, cursor
-
-Agent skill for building cinematic, scroll-driven websites from a brief: visual systems, motion storyboards, vanilla/GSAP demos, and Next.js release-page templates.
-
-✅ SKILL.md
-
-```bash
-cue skills add MustBeSimo/cinematic-scroll-skill --profile frontend
-```
-
----
-
-<a id="cobacobaini-vibe"></a>
-## 💎 [COBACOBAINI/vibe](https://github.com/COBACOBAINI/vibe)
-
-**★ 8** · exceptional (score 9.9) · TypeScript · tags: 3d-human-pose, ai, ai-agents, component-library, cross-platform
-
-Transcribe audio and video offline with OpenAI Whisper on your device, keeping data private. Supports many languages with fast, fully local, reliable transcription. 🐙
-
-```bash
-cue skills add COBACOBAINI/vibe --profile frontend
-```
 
 ---
 
@@ -52,6 +24,19 @@ Search, fetch, and integrate Lottie animations into React, Vue, Flutter, and oth
 
 ```bash
 cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
+```
+
+---
+
+<a id="giovannisacca-pixel-mcp-workflow"></a>
+## ✨ [giovannisacca/pixel-mcp-workflow](https://github.com/giovannisacca/pixel-mcp-workflow)
+
+**★ 0** · strong (score 7.5) · HTML · tags: ai-coding-agent, claude-code, claude-skill, design-to-code, figma
+
+🔧 AI-Powered Design-to-Code Pipeline 2026: Figma to React in 6-Phase Parallel Workflow
+
+```bash
+cue skills add giovannisacca/pixel-mcp-workflow --profile frontend
 ```
 
 ---

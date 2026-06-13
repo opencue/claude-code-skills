@@ -2,7 +2,7 @@
 title: "rhino-ty/review-myblog-converter — Claude Code skill discovered by cue"
 description: "AI agent skill: convert Obsidian review notes into your personal blog tone (Naver Blog · Tistory · Velog) — companion to polymedia-review-skill"
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, skill, core]
 ---
 

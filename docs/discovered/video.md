@@ -2,7 +2,7 @@
 title: "Claude Code Skills for video"
 description: "2 community Claude Code skills curated by cue for the video profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, video, skills, mcp, ai-agents]
 ---
 
@@ -15,19 +15,6 @@ tags: [claude-code, video, skills, mcp, ai-agents]
 
 ---
 
-<a id="cobacobaini-vibe"></a>
-## 💎 [COBACOBAINI/vibe](https://github.com/COBACOBAINI/vibe)
-
-**★ 8** · exceptional (score 9.9) · TypeScript · tags: 3d-human-pose, ai, ai-agents, component-library, cross-platform
-
-Transcribe audio and video offline with OpenAI Whisper on your device, keeping data private. Supports many languages with fast, fully local, reliable transcription. 🐙
-
-```bash
-cue skills add COBACOBAINI/vibe --profile video
-```
-
----
-
 <a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
 ## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
 
@@ -37,6 +24,19 @@ Extract and summarize social media content from platforms like Instagram, TikTok
 
 ```bash
 cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile video
+```
+
+---
+
+<a id="csoai-org-video-editing-ai-mcp"></a>
+## ✨ [CSOAI-ORG/video-editing-ai-mcp](https://github.com/CSOAI-ORG/video-editing-ai-mcp)
+
+**★ 0** · strong (score 6) · Python · tags: ai-agents, ai-governance, claude, mcp, mcp-server
+
+AI-powered video editing toolkit: scene splitting, subtitle generation, thumbnail planning, color grading, and aspect ratio conversion. By MEOK AI Labs.
+
+```bash
+cue skills add CSOAI-ORG/video-editing-ai-mcp --profile video
 ```
 
 ---

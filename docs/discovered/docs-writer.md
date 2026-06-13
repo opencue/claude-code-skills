@@ -2,7 +2,7 @@
 title: "Claude Code Skills for docs-writer"
 description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,17 @@ tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 
 ---
 
-<a id="sandsower-memento-vault"></a>
-## 💎 [sandsower/memento-vault](https://github.com/sandsower/memento-vault)
+<a id="jamesbuckett-skill-build-educational-site"></a>
+## 💎 [jamesbuckett/skill-build-educational-site](https://github.com/jamesbuckett/skill-build-educational-site)
 
-**★ 9** · exceptional (score 9.8) · Python · tags: ai-memory, claude-code, codex, coding-agents, cursor
+**★ 0** · exceptional (score 15) · HTML · tags: claude-code, claude-code-skill, claude-skill, educational-content, fintech
 
-Persistent knowledge capture for coding agents. Auto-triages sessions into searchable Zettelkasten notes with epistemic metadata. Works with Claude Code, Codex, Cursor, Windsurf via hooks or MCP. Local-only, markdown + git.
+Turns a topic name into a single self-contained HTML explainer page for technical and regulatory subjects.
+
+✅ SKILL.md
 
 ```bash
-cue skills add sandsower/memento-vault --profile docs-writer
+cue skills add jamesbuckett/skill-build-educational-site --profile docs-writer
 ```
 
 ---

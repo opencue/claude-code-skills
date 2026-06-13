@@ -2,7 +2,7 @@
 title: "netresearch/automated-assessment-skill — Claude Code skill discovered by cue"
 description: "Systematic project assessment against checkpoint-enabled skills with scripted verification + LLM review - by Netresearch"
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, skill, core]
 ---
 

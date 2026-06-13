@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for cybersecurity"
-description: "7 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "6 community Claude Code skills curated by cue for the cybersecurity profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, cybersecurity, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `cybersecurity`
 
-> 7 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
+> 6 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **cybersecurity** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -48,7 +48,7 @@ cue skills add Leontynestirredup43/slowmist-security-cc --profile cybersecurity
 <a id="elementalsouls-claude-osint"></a>
 ## 💎 [elementalsouls/Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT)
 
-**★ 1657** · exceptional (score 11.3) · Python · tags: agentskills, claude, skills
+**★ 1664** · exceptional (score 11.3) · Python · tags: agentskills, claude, skills
 
 Two paired Claude skills · 90+ recon modules · 48 secret-regex patterns · 80+ dorks · 9 read-only credential validators · 27 attack-path templates · 5,500+ lines of structured tradecraft. Drop-in SKILL.md files that turn Claude into a god-mode external recon operator for authorized red-team and bug-bounty engagements.
 
@@ -84,28 +84,15 @@ cue skills add davzpogi01/claude-security-research-skill --profile cybersecurity
 
 ---
 
-<a id="hybridindie-comfyui-mcp"></a>
-## 💎 [hybridindie/comfyui_mcp](https://github.com/hybridindie/comfyui_mcp)
+<a id="cognis-digital-maritimeint"></a>
+## ✨ [cognis-digital/maritimeint](https://github.com/cognis-digital/maritimeint)
 
-**★ 2** · exceptional (score 8) · Python · tags: ai-tools, claude, comfyui, image-generation, mcp
+**★ 1** · strong (score 6.3) · Python · tags: automation, cli, cognis-digital, cognis-neural-suite, maritimeint
 
-Secure MCP server for ComfyUI — workflow inspection, path sanitization, rate limiting, and audit logging. Generate images from Claude and other AI assistants with built-in security controls.
-
-```bash
-cue skills add hybridindie/comfyui_mcp --profile cybersecurity
-```
-
----
-
-<a id="gabrielcoghi-rgb-spectre-graph"></a>
-## ✨ [gabrielcoghi-rgb/spectre-graph](https://github.com/gabrielcoghi-rgb/spectre-graph)
-
-**★ 0** · strong (score 5.5) · HTML · tags: ai-agents, ai-plugin, automation, mcp, mcp-server
-
-Spectre AI 2026: Next-Gen OSINT Engine & Autonomous Graph Disambiguation Toolkit
+AIS vessel tracking & sanctions-evasion anomaly detection
 
 ```bash
-cue skills add gabrielcoghi-rgb/spectre-graph --profile cybersecurity
+cue skills add cognis-digital/maritimeint --profile cybersecurity
 ```
 
 ---

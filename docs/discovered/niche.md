@@ -1,17 +1,32 @@
 ---
 title: "Claude Code Skills for niche"
-description: "2 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "3 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, niche, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `niche`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
+> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
+
+---
+
+<a id="jayden-lg-costing-master"></a>
+## 💎 [jayden-lg/costing-master](https://github.com/jayden-lg/costing-master)
+
+**★ 5** · exceptional (score 10.7) · tags: ai-agent-skill, china, claude-code, construction, cost-estimation
+
+造价大师 — 中国建设工程造价管理全流程AI助手。遵循GB/T 50500-2024，覆盖投资估算到竣工决算，兼容各省定额与广联达。
+
+✅ SKILL.md
+
+```bash
+cue skills add jayden-lg/costing-master --profile niche
+```
 
 ---
 

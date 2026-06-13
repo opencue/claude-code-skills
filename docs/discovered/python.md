@@ -2,7 +2,7 @@
 title: "Claude Code Skills for python"
 description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,15 @@ tags: [claude-code, python, skills, mcp, ai-agents]
 
 ---
 
-<a id="salems-3dpov-ai-agent-pipeline"></a>
-## ✨ [salems-3Dpov/ai-agent-pipeline](https://github.com/salems-3Dpov/ai-agent-pipeline)
+<a id="hanlulong-openecon-data"></a>
+## 💎 [hanlulong/openecon-data](https://github.com/hanlulong/openecon-data)
 
-**★ 1** · strong (score 7.8) · Python · tags: agent, agentic-ai, agents, aws, cicd
+**★ 52** · exceptional (score 14) · Python · tags: ai, data-visualization, economic-data, economic-indicators, economics
 
-🐙 AI Agent Pipeline routes queries by intent to docs, weather, or chat, with LangGraph, ChromaDB, and LangSmith for modular, observable workflows across CLI and UI.
+Give your AI agent accurate economic data. 330K indicators from FRED, World Bank, IMF, Eurostat & more. MCP server + web UI.
 
 ```bash
-cue skills add salems-3Dpov/ai-agent-pipeline --profile python
+cue skills add hanlulong/openecon-data --profile python
 ```
 
 ---

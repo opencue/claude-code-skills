@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for research"
-description: "3 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the research profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-12
+updated: 2026-06-13
 tags: [claude-code, research, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `research`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **research** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **research** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -18,7 +18,7 @@ tags: [claude-code, research, skills, mcp, ai-agents]
 <a id="veyralabsgroup-venture-analyst"></a>
 ## 💎 [veyralabsgroup/venture-analyst](https://github.com/veyralabsgroup/venture-analyst)
 
-**★ 1** · exceptional (score 15.4) · Python · tags: agent-skill, ai-agent-skill, ai-agents, anthropic, claude
+**★ 1** · exceptional (score 15.3) · Python · tags: agent-skill, ai-agent-skill, ai-agents, anthropic, claude
 
 Startup and SaaS idea validation skill for Claude Code. Research market evidence, map competitors, score viability, generate validation experiments.
 
@@ -26,19 +26,6 @@ Startup and SaaS idea validation skill for Claude Code. Research market evidence
 
 ```bash
 cue skills add veyralabsgroup/venture-analyst --profile research
-```
-
----
-
-<a id="1dark134-arxiv-mcp-server"></a>
-## 💎 [1Dark134/arxiv-mcp-server](https://github.com/1Dark134/arxiv-mcp-server)
-
-**★ 17** · exceptional (score 9.4) · Python · tags: academic-papers, academic-research, ai, ai-assistant, claude-ai
-
-arXiv MCP Server Client 🐙 enables AI assistants to search, retrieve, analyze, and summarize arXiv papers with features like author/category browsing, trends, and citation insights.
-
-```bash
-cue skills add 1Dark134/arxiv-mcp-server --profile research
 ```
 
 ---
