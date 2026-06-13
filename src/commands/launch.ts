@@ -28,7 +28,7 @@ import {
 
 import { loadProfile, listProfiles, listFeaturedProfiles, parseProfileSelector } from "../lib/profile-loader";
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
-import { DIVIDER_PREFIX, runPicker, type PickerOption, type ProfileTally } from "../lib/picker";
+import { DIVIDER_PREFIX, dedupeSelectorParts, runPicker, type PickerOption, type ProfileTally } from "../lib/picker";
 import { materializeRuntime } from "../lib/runtime-materializer";
 import { startLoader } from "../lib/launch-loader";
 import { ensureClaudeLogoPath } from "../lib/claude-logo";
@@ -742,22 +742,29 @@ const PICKER_WARNINGS: Record<string, { labelSuffix: string; hint: string }> = {
  * label lists the parts so the stack is self-describing.
  */
 function makeSelectorOption(selector: string, allProfileOpts: PickerOption[]): PickerOption | undefined {
-  const existing = allProfileOpts.find((o) => o.value === selector);
+  // Dedupe parts up front: legacy analytics / combo history can carry a selector
+  // with the same profile repeated many times (an old pre-dedup picker path
+  // appended companions to the resolved profile each launch, snowballing
+  // "gstack+core+…+gstack+core"). Normalize before we synthesize a row so the
+  // value we pin/launch and the label we show each list every profile once.
+  const parts = dedupeSelectorParts([selector]);
+  const normalized = parts.join("+");
+  const existing = allProfileOpts.find((o) => o.value === normalized);
   if (existing) return existing;
   // No standalone option. A composite (`a+b+c`) is a valid stacked pick we
-  // synthesize a self-describing row for; a bare unknown name is a stale or
-  // deleted profile and is dropped (undefined) so it never shows in the picker.
-  if (!selector.includes("+")) return undefined;
+  // synthesize a self-describing row for; a bare unknown name (one part, no
+  // matching option) is a stale or deleted profile and is dropped (undefined)
+  // so it never shows in the picker.
+  if (parts.length <= 1) return undefined;
   // Reuse each part's own option label so the combined row carries every part's
   // icon — emoji or kitty image placeholder — e.g. "📈 improver + 🔒 secops + 🐻
   // builder" instead of bare "improver + secops + builder". Parts with no
   // resolved option (stale) fall back to the bare name.
-  const label = selector
-    .split("+")
+  const label = parts
     .map((part) => allProfileOpts.find((o) => o.value === part)?.label ?? part)
     .join(" + ");
   return {
-    value: selector,
+    value: normalized,
     label,
     hint: "stacked profile",
   };
