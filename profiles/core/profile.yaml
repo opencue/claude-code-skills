@@ -302,3 +302,16 @@ hooks:
   # Edit-scope guard, opt-in via /freeze <dir>. No-op until
   # ~/.config/cue/freeze-dir exists.
   - freeze-edit-scope.json
+  # Stop hook: cue self-learner CAPTURE. Records where the active profile's skills
+  # fell short (friction signals + an optional once-per-session live critic) as
+  # skill_gap events in ~/.config/cue/analytics.jsonl. Promoted from the
+  # skill-writer pilot to core so every profile learns. Never blocks Stop, fail-
+  # open. OFF until BOTH `touch ~/.config/cue/.auto-improve-enabled` and telemetry
+  # consent exist. See docs/self-learner.md.
+  - profile-self-improve.json
+  # Stop hook: cue self-learner ACT. Picks the most-flagged skill from the
+  # captured skill_gap signals and evolves it (single-shot writer→lint→critic
+  # loop, propose-only). 24h cooldown, canary auto-revert, never blocks Stop.
+  # OFF until ALSO `touch ~/.config/cue/.auto-evolve-enabled`. See
+  # docs/self-evolution-upgrade-plan.md.
+  - auto-evolve.json

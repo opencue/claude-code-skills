@@ -26,7 +26,18 @@ CFG="${XDG_CONFIG_HOME:-$HOME/.config}/cue"
 [ -f "$CFG/.auto-improve-enabled" ] || exit 0
 [ -f "$CFG/.auto-evolve-enabled" ]  || exit 0
 
-EVO_DIR="${CUE_EVOLUTION_DIR:-$HOME/Documents/cue/evolution}"
+# Resolve the evolution/ package dir robustly so a core-wide promotion works
+# regardless of where cue is checked out:
+#   1. CUE_EVOLUTION_DIR wins (explicit override).
+#   2. else derive it from THIS script's real path — the materialized hook is a
+#      symlink back into the repo at resources/hooks/, so the repo root is two
+#      dirs up and the package is <repo>/evolution. python3 (already required
+#      below for portable mtime) does the realpath so this works on macOS too.
+#   3. else the known default checkout.
+_self="$(python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")"
+_repo="$(cd "$(dirname "$_self")/../.." 2>/dev/null && pwd || true)"
+EVO_DIR="${CUE_EVOLUTION_DIR:-${_repo:+$_repo/evolution}}"
+[ -n "$EVO_DIR" ] && [ -x "$EVO_DIR/bin/auto-evolve" ] || EVO_DIR="$HOME/Documents/cue/evolution"
 wrapper="$EVO_DIR/bin/auto-evolve"
 [ -x "$wrapper" ] || exit 0
 
