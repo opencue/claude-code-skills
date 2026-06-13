@@ -14,7 +14,7 @@
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import { basename, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import { configDir } from "../lib/config-paths";
 import { debug } from "../lib/debug-log";
@@ -1103,7 +1103,8 @@ async function readSharedClaudeMd(profile?: { name: string; inheritanceChain?: s
 }
 
 async function buildUserClaudeMd(profile: ResolvedProfile, agent: "claude-code" | "codex"): Promise<string> {
-  let content = await readSharedClaudeMd(profile) + await readUserClaudeMd(agent);
+  const appendUser = shouldAppendUserClaudeMd({ agent, cwd: process.cwd(), home: homedir() });
+  let content = await readSharedClaudeMd(profile) + (appendUser ? await readUserClaudeMd(agent) : "");
 
   // First-time profile suggestion: if no .cue.profile in cwd, inject marker
   const cueProfilePath = join(process.cwd(), ".cue.profile");
@@ -1145,6 +1146,50 @@ async function getProfileListForStamp(): Promise<string> {
   } catch {
     return "";
   }
+}
+
+/**
+ * Decide whether cue should append the user's global agent memory file
+ * (`~/.claude/CLAUDE.md` for claude-code, `~/.codex/AGENTS.md` for codex) into
+ * the materialized runtime memory file.
+ *
+ * Claude Code already loads `~/.claude/CLAUDE.md` on its own whenever the launch
+ * cwd sits under $HOME — verified: it appears as its own distinct memory source
+ * in the running session even though cue relocates CLAUDE_CONFIG_DIR to the
+ * runtime dir. So cue's appended copy is byte-for-byte redundant there (~9KB
+ * injected twice, every session, on every profile). Skip it in that case.
+ *
+ * Still append (cue is the only source) when:
+ *   - agent is codex (its memory-load model isn't verified here), or
+ *   - cwd is outside $HOME (the harness project-walk never reaches ~/.claude), or
+ *   - CUE_APPEND_USER_CLAUDEMD=1|true forces the legacy always-append behavior.
+ *
+ * Net effect is no-regression: worst case (claude-code, cwd outside $HOME, or
+ * forced) is identical to today; the common case (cwd under $HOME) drops the
+ * duplicate.
+ */
+export function shouldAppendUserClaudeMd(opts: {
+  agent: "claude-code" | "codex";
+  cwd: string;
+  home: string;
+  env?: Record<string, string | undefined>;
+}): boolean {
+  const force = (opts.env ?? process.env).CUE_APPEND_USER_CLAUDEMD;
+  if (force === "1" || force === "true") return true;
+  if (opts.agent !== "claude-code") return true;
+  return !isInsideHome(opts.cwd, opts.home);
+}
+
+/** True when `cwd` is `home` itself or nested under it (separator-aware so
+ *  `/home/user2` is not treated as inside `/home/user`). */
+function isInsideHome(cwd: string, home: string): boolean {
+  const c = resolve(cwd);
+  const h = resolve(home);
+  // `h + sep` is the safe boundary: for a normal home it matches nested paths;
+  // for the pathological home === "/" it becomes "//" (which a resolved path
+  // never starts with), so we fall back to appending — the safe default when
+  // we can't be sure the harness loads the file itself.
+  return c === h || c.startsWith(h + sep);
 }
 
 async function readUserClaudeMd(agent: "claude-code" | "codex"): Promise<string> {

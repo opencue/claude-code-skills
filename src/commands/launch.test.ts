@@ -9,6 +9,7 @@ import {
   formatTokenWarning,
   getDefaultSelector,
   relativeTime,
+  shouldAppendUserClaudeMd,
   sortProfileOptions,
   splitSkillBytes,
   tokenLevelEmoji,
@@ -917,5 +918,39 @@ describe("formatTmuxTitle", () => {
   test("empty/whitespace profile name degrades to just the agent label", () => {
     expect(formatTmuxTitle("claude", "", [])).toBe("claude");
     expect(formatTmuxTitle("claude", "   ", [])).toBe("claude");
+  });
+});
+
+describe("shouldAppendUserClaudeMd", () => {
+  const home = "/home/u";
+
+  test("claude-code under $HOME → skip (harness already loads ~/.claude/CLAUDE.md)", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/home/u/proj/x", home })).toBe(false);
+  });
+
+  test("claude-code exactly at $HOME → skip", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/home/u", home })).toBe(false);
+  });
+
+  test("claude-code outside $HOME → append (cue is the only source)", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/tmp/proj", home })).toBe(true);
+  });
+
+  test("sibling dir sharing a name prefix is NOT inside $HOME", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/home/u2", home })).toBe(true);
+  });
+
+  test("codex always appends (its memory-load model is unverified here)", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "codex", cwd: "/home/u/proj", home })).toBe(true);
+  });
+
+  test("pathological home === '/' falls back to append (safe default)", () => {
+    expect(shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/home/u/proj", home: "/" })).toBe(true);
+  });
+
+  test("CUE_APPEND_USER_CLAUDEMD=1 forces the legacy always-append behavior", () => {
+    expect(
+      shouldAppendUserClaudeMd({ agent: "claude-code", cwd: "/home/u/proj", home, env: { CUE_APPEND_USER_CLAUDEMD: "1" } }),
+    ).toBe(true);
   });
 });
