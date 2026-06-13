@@ -152,6 +152,30 @@ describe("materializeRuntime", () => {
     expect(second.rebuilt).toBe(true);
   });
 
+  test("a stale .cue-hash (e.g. from a prior MATERIALIZER_VERSION) forces a rebuild", async () => {
+    // Guards the activation guarantee behind the version bump: when the
+    // generated output changes but no profile field does, an existing runtime
+    // must still rebuild. We simulate a runtime left by older code by writing a
+    // hash that can't match the current computation, then assert rebuilt=true.
+    const args = {
+      profile: sampleProfile,
+      agent: "claude-code" as const,
+      runtimeRoot: join(root, "runtime"),
+      skillSourceLookup: async (id: string) => `/fake/skills/${id}`,
+      mcpRegistry: { "claude-mem": { command: "claude-mem", args: [] } },
+      userClaudeMd: "# user CLAUDE.md\n",
+    };
+    const first = await materializeRuntime(args);
+    expect(first.rebuilt).toBe(true);
+    // Stomp the stored hash with a stale value (what a prior version would have left).
+    await writeFile(join(first.runtimeDir, ".cue-hash"), "stale-hash-from-old-version\n");
+    const second = await materializeRuntime(args);
+    expect(second.rebuilt).toBe(true);
+    // And the freshly written hash is the real current one (no longer stale).
+    const stored = (await readFile(join(first.runtimeDir, ".cue-hash"), "utf8")).trim();
+    expect(stored).toMatch(/^[a-f0-9]{64}$/);
+  });
+
   test("symlinks every local skill into <runtime>/skills/", async () => {
     const out = await materializeRuntime({
       profile: sampleProfile,

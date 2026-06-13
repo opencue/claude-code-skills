@@ -147,7 +147,11 @@ function sortedJson(value: unknown): string {
 // into the hash forces every profile to rebuild once on its next launch, so
 // layout fixes roll out without a manual `--rematerialize` per profile.
 //   v2: flat skill layout + .cue-skills manifest (was nested <category>/<slug>)
-const MATERIALIZER_VERSION = 2;
+//   v3: slimmer CLAUDE.md — drop the duplicate ~/.claude/CLAUDE.md append and
+//       default-off the per-session telemetry sections (#65). The generated
+//       content shrank but no profile field changed, so without this bump every
+//       already-materialized runtime would keep serving its cached 37KB file.
+const MATERIALIZER_VERSION = 3;
 
 function computeHash(profile: ResolvedProfile, agent: AgentKind): string {
   const canonical = sortedJson({ v: MATERIALIZER_VERSION, agent, profile });
