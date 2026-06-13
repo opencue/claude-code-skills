@@ -45,6 +45,12 @@ class CueEvolutionConfig:
     # Optimization parameters
     iterations: int = 10
     population_size: int = 5
+    # Single-shot writer->lint->critic loop: how many writer rounds to spend
+    # repairing lint failures / acting on critic fixes before giving up. 1 = the
+    # old one-shot behaviour. Env-overridable so the Stop-hook loop can tune it.
+    writer_loop_rounds: int = field(
+        default_factory=lambda: max(1, int(os.getenv("CUE_WRITER_LOOP_ROUNDS", "2")))
+    )
 
     # LLM configuration (provider inferred from the string prefix by LiteLLM)
     optimizer_model: str = _DEFAULT_OPTIMIZER_MODEL

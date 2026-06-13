@@ -1,12 +1,19 @@
 """Single-shot reflective skill-body improver — the lightweight optimizer.
 
 GEPA's iterative loop makes dozens of LLM calls and is slow on every backend.
-This optimizer does the job in ONE `claude -p` call: read the current skill body
-(plus any friction signals), propose an improved body, return it. The caller
-then runs the same `cue lint-skill` gate + apply/proposal decision as GEPA.
+This optimizer does the job in a few `claude -p` calls: read the current skill
+body (plus any friction signals), propose an improved body, lint it, and let an
+INDEPENDENT critic judge it — retrying the writer with the lint errors and the
+critic's fixes as feedback until it passes or the round budget runs out. The
+caller then runs the same `cue lint-skill` gate + apply/proposal decision.
 
 Needs NO DSPy and NO API key — just `claude -p` (the user's Claude Code auth).
-This is the path that actually delivers "skills improve as you use cue" cheaply.
+This is the path that actually delivers "skills improve as you use cue", and it
+is the path the automated Stop-hook loop runs (single-shot, propose-only).
+
+The multi-agent loop (writer -> lint -> critic -> retry) lives in
+`writer_critic_loop`. `propose_improved_body` / `judge_is_better` remain as
+thin one-shot wrappers so existing callers keep working.
 """
 
 import re
@@ -43,17 +50,44 @@ else:
 </SKILL_BODY>"""
 
 
-def propose_improved_body(skill: dict, config, signals: str = "", timeout: int = 300) -> str:
-    """One `claude -p` call → an improved skill body string.
+_LINT_RETRY_TMPL = """
+Your PREVIOUS attempt FAILED the cue gate. Fix exactly these and try again,
+keeping every critical command/path/flag:
+{lint}
+"""
 
-    Falls back to the original body if the model returns nothing usable (so a
-    bad response becomes a no-op "body unchanged", never a broken skill).
+_CRITIC_FIX_TMPL = """
+An independent reviewer judged a prior rewrite "{verdict_reason}".
+Make these concrete fixes this time:
+{fixes}
+"""
+
+
+def writer_step(skill: dict, config, signals: str = "", lint_feedback: str = "",
+                timeout: int = 300) -> str:
+    """One writer `claude -p` call → an improved skill body string.
+
+    `signals` carries observed friction plus any critic fixes from a prior round;
+    `lint_feedback` carries the `cue lint-skill` errors from a prior round so the
+    writer can repair them. Falls back to the original body if the model returns
+    nothing usable (a bad response becomes a no-op "body unchanged", never a
+    broken skill).
     """
     model = claude_model_name(config.optimizer_model)
-    signals_block = f"\nObserved friction to address:\n{signals}\n" if signals.strip() else ""
-    prompt = _PROMPT.format(desc=skill["description"], body=skill["body"], signals_block=signals_block)
+    blocks = ""
+    if signals.strip():
+        blocks += f"\nObserved friction / fixes to address:\n{signals}\n"
+    if lint_feedback.strip():
+        blocks += _LINT_RETRY_TMPL.format(lint=lint_feedback)
+    prompt = _PROMPT.format(desc=skill["description"], body=skill["body"], signals_block=blocks)
     out = run_claude_p(prompt, model=model, timeout=timeout)
     return _extract_body(out, fallback=skill["body"])
+
+
+def propose_improved_body(skill: dict, config, signals: str = "", timeout: int = 300) -> str:
+    """Back-compat one-shot writer (no lint-retry loop). Thin wrapper over
+    `writer_step` so existing callers and tests keep working."""
+    return writer_step(skill, config, signals=signals, timeout=timeout)
 
 
 _JUDGE_PROMPT = """You are a strict, INDEPENDENT reviewer of Claude Code SKILL.md bodies — you did
@@ -75,19 +109,23 @@ REVISED:
 {revised}
 </B>
 
-Reply on a single line, exactly: VERDICT: BETTER|EQUAL|WORSE — <one-line reason>"""
+Reply on the FIRST line, exactly: VERDICT: BETTER|EQUAL|WORSE — <one-line reason>
+If the verdict is EQUAL or WORSE, add a SECOND line listing concrete, specific
+fixes the writer should make next:
+FIXES: <semicolon-separated, imperative — e.g. "restore the `--json` flag; tighten the trigger line">"""
 
 
-def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180,
-                    evidence: str = ""):
-    """Independent reviewer `claude -p` call: is the evolved body genuinely
-    better? Returns (is_better: bool, reason: str). Conservative — anything but
-    BETTER → False.
+def critic_step(skill: dict, evolved_body: str, config, evidence: str = "",
+                timeout: int = 180):
+    """Independent reviewer `claude -p` call. Returns
+    (is_better: bool, reason: str, suggested_fixes: str).
 
-    Uses `config.reviewer_model` (a DIFFERENT, stronger model than the proposer's
-    `optimizer_model`) so the rewrite isn't graded by its own author, and is fed
-    deterministic `evidence` (lint/size/token-preservation results) to anchor the
-    verdict in facts rather than vibes.
+    Conservative — anything but BETTER → is_better False. On a non-BETTER verdict
+    the critic also returns actionable `suggested_fixes` so the writer can repair
+    the candidate on the next round. Uses `config.reviewer_model` (a DIFFERENT,
+    stronger model than the writer's `optimizer_model`) so the rewrite isn't
+    graded by its own author, anchored on deterministic `evidence` (lint/size/
+    token-preservation results).
     """
     model = claude_model_name(config.reviewer_model)
     evidence_block = f"\nDeterministic gate results (already checked):\n{evidence}\n" if evidence.strip() else ""
@@ -95,11 +133,104 @@ def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180,
         desc=skill["description"], original=skill["body"], revised=evolved_body,
         evidence_block=evidence_block)
     out = run_claude_p(prompt, model=model, timeout=timeout)
-    m = re.search(r"VERDICT:\s*(BETTER|EQUAL|WORSE)\s*[—\-:]*\s*(.*)", out, re.IGNORECASE)
+    m = re.search(r"VERDICT:\s*(BETTER|EQUAL|WORSE)\s*[—\-:]*\s*([^\n]*)", out, re.IGNORECASE)
     if not m:
-        return False, f"unparseable judge verdict: {out.strip()[:120]}"
+        return False, f"unparseable judge verdict: {out.strip()[:120]}", ""
     verdict = m.group(1).upper()
-    return verdict == "BETTER", f"{verdict}: {m.group(2).strip()[:160]}"
+    reason = f"{verdict}: {m.group(2).strip()[:160]}"
+    fm = re.search(r"FIXES:\s*(.+)", out, re.IGNORECASE | re.DOTALL)
+    fixes = fm.group(1).strip()[:400] if fm else ""
+    return verdict == "BETTER", reason, fixes
+
+
+def judge_is_better(skill: dict, evolved_body: str, config, timeout: int = 180,
+                    evidence: str = ""):
+    """Back-compat one-shot reviewer. Thin wrapper over `critic_step` that drops
+    the suggested-fixes field. Returns (is_better, reason)."""
+    is_better, reason, _ = critic_step(skill, evolved_body, config, evidence=evidence, timeout=timeout)
+    return is_better, reason
+
+
+def writer_critic_loop(skill: dict, config, validate_fn, max_rounds: int = 2,
+                       signals: str = "", console=None,
+                       timeout_write: int = 300, timeout_judge: int = 180) -> dict:
+    """Multi-agent writer -> lint -> critic loop (all `claude -p`, DSPy-free).
+
+    Each round:
+      1. WRITER proposes a body (fed the prior round's lint errors AND the
+         critic's suggested fixes as feedback).
+      2. `validate_fn(body)` runs the cue constraint gate (incl. `cue lint-skill`)
+         and returns {ok, results, evidence, lint_errors}.
+      3. If lint fails and rounds remain → retry the writer with the lint errors.
+      4. CRITIC judges evolved vs baseline. BETTER → accept and stop. EQUAL/WORSE
+         with rounds remaining → retry the writer with the critic's fixes.
+
+    Returns the best body seen (a lint-clean candidate is preferred over a
+    lint-failing one):
+      {body, candidate_ok, results, quality_ok, judge_reason, rounds}
+
+    Runs in propose-only too — the loop still iterates to produce a higher-quality
+    PROPOSAL; the caller's `_finalize` is what refuses to apply. Cost scales with
+    rounds: up to `max_rounds` writer calls + up to `max_rounds` critic calls.
+    """
+    max_rounds = max(1, int(max_rounds))
+    best = {"body": skill["body"], "candidate_ok": False, "results": None,
+            "quality_ok": False, "judge_reason": "no candidate", "rounds": 0}
+    lint_feedback = ""
+    critic_fixes = ""
+
+    for rnd in range(1, max_rounds + 1):
+        extra = "\n".join(s for s in (signals, critic_fixes) if s.strip())
+        # Fail-soft: a `claude -p` outage must degrade to "keep best so far"
+        # (a proposal), never crash the run — the Stop-hook loop runs unattended.
+        try:
+            body = writer_step(skill, config, signals=extra, lint_feedback=lint_feedback,
+                               timeout=timeout_write)
+        except RuntimeError as exc:
+            if console:
+                console.print(f"  [yellow]✗ round {rnd}: writer unavailable ({exc})[/yellow]")
+            break
+        v = validate_fn(body)
+        changed = body.strip() != skill["body"].strip()
+
+        # Keep this candidate as best-so-far if it's lint-clean, or if we have
+        # nothing better yet (first attempt). A later lint-failing round must
+        # never clobber an earlier lint-clean one.
+        if v["ok"] or best["results"] is None:
+            best = {"body": body, "candidate_ok": v["ok"], "results": v["results"],
+                    "quality_ok": False, "judge_reason": "", "rounds": rnd}
+
+        if not v["ok"]:
+            lint_feedback = v["lint_errors"]
+            if console:
+                console.print(f"  [yellow]✗ round {rnd}: lint failed → retry with feedback[/yellow]")
+            continue
+
+        if not changed:
+            best["judge_reason"] = "body unchanged"
+            break
+
+        try:
+            is_better, reason, fixes = critic_step(
+                skill, body, config, evidence=v["evidence"], timeout=timeout_judge)
+        except RuntimeError as exc:
+            # Critic outage: keep the lint-clean candidate as a proposal, don't apply.
+            best["quality_ok"], best["judge_reason"] = False, f"critic unavailable: {exc}"
+            if console:
+                console.print(f"  [yellow]✗ round {rnd} critic unavailable ({exc})[/yellow]")
+            break
+        best["quality_ok"], best["judge_reason"] = is_better, reason
+        if console:
+            console.print(f"  [{'green' if is_better else 'yellow'}]"
+                          f"{'✓' if is_better else '✗'} round {rnd} critic: {reason}[/]")
+        if is_better:
+            break
+
+        # Not better: feed the critic's fixes back to the writer for another round.
+        critic_fixes = _CRITIC_FIX_TMPL.format(verdict_reason=reason, fixes=fixes) if fixes else ""
+        lint_feedback = ""  # lint passed this round; don't re-send stale errors
+
+    return best
 
 
 def _extract_body(text: str, fallback: str) -> str:
