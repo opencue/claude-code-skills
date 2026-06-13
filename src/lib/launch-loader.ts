@@ -67,8 +67,6 @@ export interface LoaderHandle {
   stop(): void;
 }
 
-const NOOP: LoaderHandle = { setMessage() {}, stop() {} };
-
 /** Dependencies the pure core needs — injected so tests drive it without a TTY. */
 interface CoreDeps {
   write(s: string): void;
@@ -144,13 +142,15 @@ function createLoaderCore(deps: CoreDeps, message: string): LoaderCore {
 
 /**
  * Start the launch loader. Returns a handle whose stop() must be called before
- * exec'ing the agent. In any non-interactive context returns a no-op handle.
+ * exec'ing the agent, or `null` in any non-interactive context (no TTY,
+ * --dry-run via CUE_BYPASS, CUE_NO_LOADER). A null return lets callers route
+ * progress text to stderr instead of the (absent) animated line.
  */
-export function startLoader(opts: LoaderOptions = {}): LoaderHandle {
+export function startLoader(opts: LoaderOptions = {}): LoaderHandle | null {
   const stream = opts.stream ?? process.stderr;
-  if (!stream.isTTY) return NOOP;
-  if (process.env.CUE_BYPASS === "1") return NOOP;
-  if (process.env.CUE_NO_LOADER === "1") return NOOP;
+  if (!stream.isTTY) return null;
+  if (process.env.CUE_BYPASS === "1") return null;
+  if (process.env.CUE_NO_LOADER === "1") return null;
 
   const logoCols = opts.logoCols ?? 2;
   const useKitty = !!opts.logoPath && existsSync(opts.logoPath) && isKittyTerminal();
@@ -215,5 +215,4 @@ export const __test = {
   TICK_MS,
   START_DELAY_MS,
   ESC: { HIDE_CURSOR, SHOW_CURSOR, ERASE_LINE },
-  NOOP,
 };

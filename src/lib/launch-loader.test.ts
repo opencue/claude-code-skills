@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { __test, startLoader, type LoaderHandle } from "./launch-loader";
+import { __test, startLoader } from "./launch-loader";
 
 const { createLoaderCore, FRAMES, ESC } = __test;
 
@@ -119,8 +119,8 @@ describe("launch-loader core — lifecycle guards", () => {
   });
 });
 
-describe("startLoader — non-interactive no-op handle", () => {
-  test("returns a no-op handle when the stream is not a TTY", () => {
+describe("startLoader — non-interactive returns null", () => {
+  test("returns null and writes nothing when the stream is not a TTY", () => {
     let wrote = "";
     const fakeStream = {
       isTTY: false,
@@ -129,9 +129,8 @@ describe("startLoader — non-interactive no-op handle", () => {
         return true;
       },
     } as unknown as NodeJS.WriteStream;
-    const handle: LoaderHandle = startLoader({ stream: fakeStream, startDelayMs: 0 });
-    handle.setMessage("x");
-    handle.stop();
+    const handle = startLoader({ stream: fakeStream, startDelayMs: 0 });
+    expect(handle).toBeNull();
     expect(wrote).toBe("");
   });
 });

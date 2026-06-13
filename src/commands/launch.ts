@@ -30,6 +30,8 @@ import { loadProfile, listProfiles, listFeaturedProfiles, parseProfileSelector }
 import { resolveProfileForCwd } from "../lib/cwd-resolver";
 import { DIVIDER_PREFIX, runPicker, type PickerOption, type ProfileTally } from "../lib/picker";
 import { materializeRuntime } from "../lib/runtime-materializer";
+import { startLoader } from "../lib/launch-loader";
+import { ensureClaudeLogoPath } from "../lib/claude-logo";
 import { resolveLocalSkill } from "../lib/resolver-local";
 import { expandSkillWildcards, loadMcpRegistry, resolveClaudeCredentialsSource as resolveSharedClaudeCredentialsSource } from "../lib/runtime-install";
 import { detectKittyTerminal, kittyPlaceholderLabel, transmitKittyImage } from "../lib/kitty-image";
@@ -1538,65 +1540,96 @@ export async function run(args: string[]): Promise<number> {
     } catch (err) { debug("launch:staleness", err); /* fail-open — never blocks launch */ }
   }
 
-  // --subset / CUE_SMART_SUBSET: ask claude --print which skills are relevant
-  // to the prompt and prune profile.skills.local before materialization. Fails
-  // open — any error keeps the full skill set.
+  // ── Launch loader ─────────────────────────────────────────────────────
+  // Animate the two genuinely slow steps of the handoff — smart-subset LLM
+  // classification (cold miss ~2s) and runtime materialization — then fully
+  // restore the terminal before any warning prints or the agent execs.
   //
-  // Auto-mode: if CUE_SMART_SUBSET=1 and no explicit --subset, look up the most
-  // recent first prompt captured by resources/hooks/first-prompt-capture.sh for
-  // this cwd. Cycle is: first launch loads full set → first prompt gets captured
-  // → second+ launch in same cwd auto-subsets using the historical prompt.
-  let subsetPrompt: string | null = parsed.subset;
-  if (!subsetPrompt && process.env.CUE_SMART_SUBSET) {
-    try {
-      const { createHash } = await import("node:crypto");
-      const cwdAbs = process.cwd();
-      const cwdHash = createHash("sha1").update(cwdAbs).digest("hex").slice(0, 16);
-      const captured = join(configDir(), "first-prompts", `${cwdHash}.json`);
-      const { existsSync, readFileSync } = await import("node:fs");
-      if (existsSync(captured)) {
-        const { prompt } = JSON.parse(readFileSync(captured, "utf8")) as { prompt?: string };
-        if (prompt && prompt.trim().length >= 8) {
-          subsetPrompt = prompt;
-          process.stderr.write(`  💡 smart-subset using captured first prompt from prior session\n`);
+  // The loader returns null (no animation) for --dry-run / --rematerialize and
+  // any non-TTY context. While it animates it OWNS one stderr line, so every
+  // progress message inside the bracket routes through `progress()`: the
+  // loader's setMessage when animating, plain stderr.write otherwise (CI logs,
+  // dry-run). This is what keeps the spinner from interleaving with output.
+  const loader =
+    parsed.dryRun || parsed.rematerialize
+      ? null
+      : startLoader({ logoPath: ensureClaudeLogoPath() ?? undefined });
+  const progress = (active: string, fallback: string): void => {
+    if (loader) loader.setMessage(active);
+    else process.stderr.write(fallback);
+  };
+
+  let runtime!: Awaited<ReturnType<typeof materializeRuntime>>;
+  try {
+    // --subset / CUE_SMART_SUBSET: ask claude --print which skills are relevant
+    // to the prompt and prune profile.skills.local before materialization. Fails
+    // open — any error keeps the full skill set.
+    //
+    // Auto-mode: if CUE_SMART_SUBSET=1 and no explicit --subset, look up the most
+    // recent first prompt captured by resources/hooks/first-prompt-capture.sh for
+    // this cwd. Cycle is: first launch loads full set → first prompt gets captured
+    // → second+ launch in same cwd auto-subsets using the historical prompt.
+    let subsetPrompt: string | null = parsed.subset;
+    if (!subsetPrompt && process.env.CUE_SMART_SUBSET) {
+      try {
+        const { createHash } = await import("node:crypto");
+        const cwdAbs = process.cwd();
+        const cwdHash = createHash("sha1").update(cwdAbs).digest("hex").slice(0, 16);
+        const captured = join(configDir(), "first-prompts", `${cwdHash}.json`);
+        const { existsSync, readFileSync } = await import("node:fs");
+        if (existsSync(captured)) {
+          const { prompt } = JSON.parse(readFileSync(captured, "utf8")) as { prompt?: string };
+          if (prompt && prompt.trim().length >= 8) {
+            subsetPrompt = prompt;
+            progress("Selecting skills…", `  💡 smart-subset using captured first prompt from prior session\n`);
+          }
         }
-      }
-    } catch { /* fail-open — no captured prompt, run full set */ }
-  }
-
-  if (subsetPrompt && profile.skills.local.length > 4) {
-    try {
-      const { selectRelevantSkills } = await import("../lib/skill-subset");
-      const ids = profile.skills.local.map((s) => s.id);
-      const result = await selectRelevantSkills(ids, subsetPrompt);
-      process.stderr.write(`  🎯 smart-subset: ${result.reason}\n`);
-      if (result.classified && result.selected.length < ids.length) {
-        const keep = new Set(result.selected);
-        profile.skills.local = profile.skills.local.filter((s) => keep.has(s.id));
-        // Force a rebuild so the smaller skill set actually lands on disk.
-        const { rm: rmFile } = await import("node:fs/promises");
-        const hashPath = join(configDir(), "runtime", profileName, agentKind === "claude-code" ? "claude" : "codex", ".cue-hash");
-        try { await rmFile(hashPath, { force: true }); } catch { /* ok */ }
-      }
-    } catch (err) {
-      process.stderr.write(`  ⚠️  smart-subset failed (${(err as Error).message}) — kept full skill set\n`);
+      } catch { /* fail-open — no captured prompt, run full set */ }
     }
+
+    if (subsetPrompt && profile.skills.local.length > 4) {
+      try {
+        const { selectRelevantSkills } = await import("../lib/skill-subset");
+        const ids = profile.skills.local.map((s) => s.id);
+        // Explicit --subset bypasses the keep-set cache (the user is overriding
+        // deliberately); the auto-captured prompt path uses it.
+        const result = await selectRelevantSkills(ids, subsetPrompt, { noCache: !!parsed.subset });
+        progress(`Skills: ${result.reason}`, `  🎯 smart-subset: ${result.reason}\n`);
+        if (result.classified && result.selected.length < ids.length) {
+          const keep = new Set(result.selected);
+          // Copy-on-write: never mutate the (possibly manifest-cached) profile
+          // object in place — a shared reference would poison sibling reads.
+          profile = { ...profile, skills: { ...profile.skills, local: profile.skills.local.filter((s) => keep.has(s.id)) } };
+          // Force a rebuild so the smaller skill set actually lands on disk.
+          const { rm: rmFile } = await import("node:fs/promises");
+          const hashPath = join(configDir(), "runtime", profileName, agentKind === "claude-code" ? "claude" : "codex", ".cue-hash");
+          try { await rmFile(hashPath, { force: true }); } catch { /* ok */ }
+        }
+      } catch (err) {
+        progress("Loading skills…", `  ⚠️  smart-subset failed (${(err as Error).message}) — kept full skill set\n`);
+      }
+    }
+
+    // Rescue-before-wipe: if this runtime's credentials belong to a different
+    // account than credentialsSource, the materializer's identity guard is
+    // about to discard them — return them to their owning account dir first.
+    if (agentKind === "claude-code") await rescueRuntimeCredsToOwner(profileName);
+
+    progress("Preparing runtime…", "");
+    runtime = await materializeRuntime({
+      profile: await applyWorkspaceOverrides(profile),
+      agent: agentKind,
+      runtimeRoot: join(configDir(), "runtime"),
+      skillSourceLookup: (id) => resolveLocalSkill(id),
+      mcpRegistry: await loadMcpRegistry(agentKind),
+      userClaudeMd: await buildUserClaudeMd(profile, agentKind),
+      credentialsSource,
+    });
+  } finally {
+    // Always restore the terminal before the warning block / exec, even if
+    // materialize threw. stop() is idempotent and a no-op when loader is null.
+    loader?.stop();
   }
-
-  // Rescue-before-wipe: if this runtime's credentials belong to a different
-  // account than credentialsSource, the materializer's identity guard is
-  // about to discard them — return them to their owning account dir first.
-  if (agentKind === "claude-code") await rescueRuntimeCredsToOwner(profileName);
-
-  const runtime = await materializeRuntime({
-    profile: await applyWorkspaceOverrides(profile),
-    agent: agentKind,
-    runtimeRoot: join(configDir(), "runtime"),
-    skillSourceLookup: (id) => resolveLocalSkill(id),
-    mcpRegistry: await loadMcpRegistry(agentKind),
-    userClaudeMd: await buildUserClaudeMd(profile, agentKind),
-    credentialsSource,
-  });
 
   // Run quickDiagnose on every launch — it's cheap (filesystem checks) and
   // the result feeds both the first-build inline print AND the tmux health
