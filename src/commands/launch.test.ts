@@ -147,6 +147,32 @@ describe("buildPickerSections", () => {
     ]);
   });
 
+  test("dedupes repeated parts in a composite Recent row (legacy analytics)", () => {
+    // Legacy analytics can carry a snowballed selector with parts repeated many
+    // times (an old pre-dedup picker path appended companions to the resolved
+    // profile each launch). The synthesized Recent row must show each profile
+    // exactly once — in BOTH value and label — never "gstack + … + gstack".
+    const all = [opt("gstack"), opt("core"), opt("improver"), opt("commerce")];
+    const recent = [
+      {
+        name: "gstack+core+improver+commerce+core+gstack+improver",
+        sessions: 4,
+        lastUsed: "2026-05-26T08:00:00Z",
+      },
+    ];
+    const out = buildPickerSections(opt("__default"), all, recent, 3, now);
+    const row = out.find((o) => o.value.startsWith("gstack+"))!;
+    expect(row).toBeDefined();
+    // value: each part once, first-seen order preserved — this is what gets
+    // pinned to .cue.profile and launched, so it must be clean.
+    expect(row.value).toBe("gstack+core+improver+commerce");
+    const valueParts = row.value.split("+");
+    expect(new Set(valueParts).size).toBe(valueParts.length);
+    // label: no icon/name repeated either (this is the row the user reads).
+    const labelParts = row.label.split(" + ");
+    expect(new Set(labelParts).size).toBe(labelParts.length);
+  });
+
   test("Recent shows the N most recently used profiles, sorted by lastUsed not by session count", () => {
     const all = [opt("career"), opt("core"), opt("ecc"), opt("skill-writer")];
     // Input arrives session-sorted (career has the most), but Recent must

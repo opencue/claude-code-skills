@@ -1373,6 +1373,13 @@ export async function runPicker(input: PickerInput): Promise<PickerOutput> {
     }
   }
 
+  // Normalize the selected primary: it may arrive as a composite ("a+b+c") —
+  // from a stacked Recent/Featured row, a pinned .cue.profile, or an explicit
+  // override — and legacy data can carry repeated parts. Collapse to first-seen
+  // order so the combine prompt, the pin, and the launched profile never echo a
+  // profile twice (e.g. "Combine gstack+…+gstack with…").
+  first = dedupeSelectorParts([first]).join("+");
+
   const picks: string[] = [first];
 
   // Suggested companions for the combine multiselect, drawn from three sources
