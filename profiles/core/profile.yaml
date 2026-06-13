@@ -10,6 +10,15 @@ description: Baseline shared by every cue profile — essentials only
 # "Model selection" persona block below for when to reach for Opus vs Sonnet.
 env:
   CLAUDE_CODE_SUBAGENT_MODEL: claude-sonnet-4-6
+  # Full-traffic wrap (global): route every cue-launched Claude session through
+  # the local headroom compression proxy (60–95% fewer tokens, reversible).
+  # Surfaced into settings.json via the runtime allowlist (claude-code only;
+  # codex uses OPENAI_BASE_URL and is unaffected). REQUIRES the always-on
+  # headroom proxy at 127.0.0.1:8787 — run as the `headroom-proxy` user service
+  # (`systemctl --user status headroom-proxy`, linger enabled). If that proxy is
+  # ever down, Claude cannot reach Anthropic, which is why it is a persistent,
+  # auto-restarting service. To opt a single launch out, unset ANTHROPIC_BASE_URL.
+  ANTHROPIC_BASE_URL: "http://127.0.0.1:8787"
 persona_includes:
   - integrity-protocol-compact  # resources/personas/integrity-protocol-compact.md — compact 7-tag system inline; full protocol + examples load on demand (integrity-protocol.md / meta/integrity-tags). Fans out via inheritance.
   - skill-evolution        # resources/personas/skill-evolution.md — post-task learning capture via bin/cue-learnings, fans out to every core-inheriting profile
