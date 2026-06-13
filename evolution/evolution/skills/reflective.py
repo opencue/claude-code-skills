@@ -236,7 +236,11 @@ def writer_critic_loop(skill: dict, config, validate_fn, max_rounds: int = 2,
         # never clobber an earlier lint-clean one.
         if v["ok"] or best["results"] is None:
             best = {"body": body, "candidate_ok": v["ok"], "results": v["results"],
-                    "quality_ok": False, "judge_reason": "", "rounds": rnd}
+                    "quality_ok": False,
+                    # "" gets overwritten by the critic below; a lint-failing
+                    # candidate never reaches the critic, so log WHY, not blank.
+                    "judge_reason": "" if v["ok"] else "lint failed; not judged",
+                    "rounds": rnd}
 
         if not v["ok"]:
             lint_feedback = v["lint_errors"]

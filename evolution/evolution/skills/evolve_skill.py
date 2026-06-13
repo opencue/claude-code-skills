@@ -291,9 +291,12 @@ def evolve(
             console.print(f"  [dim]grounding critic on a real mined task "
                           f"({len(task_input)} chars)[/dim]")
 
+        # The loop is propose-only-agnostic: it always iterates writer→critic to
+        # produce the best proposal; _finalize (below) is what refuses to APPLY
+        # when propose_only is set. So propose_only is NOT passed to the loop.
         loop = writer_critic_loop(
             skill, config, validate_fn=_validate, max_rounds=config.writer_loop_rounds,
-            task_input=task_input, propose_only=propose_only, console=console)
+            task_input=task_input, console=console)
         evolved_body = loop["body"]
         console.print("\n[bold]Final candidate constraints[/bold]")
         candidate_ok = (_print_constraints(loop["results"]) if loop["results"] is not None

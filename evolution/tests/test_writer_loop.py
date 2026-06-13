@@ -6,6 +6,7 @@ critic prompts ask for a VERDICT line). validate_fn is a test double that fails
 lint for any body containing the marker "LINTFAIL".
 """
 
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -210,6 +211,77 @@ def test_representative_task_mining(tmp_path):
     assert evolve_skill._representative_task(cfg, "meta/none") == ""             # no gaps
     cfg2 = SimpleNamespace(analytics_log=tmp_path / "missing.jsonl")
     assert evolve_skill._representative_task(cfg2, "meta/foo") == ""             # no file
+
+
+def test_critic_equal_then_better(monkeypatch):
+    # round1 EQUAL (with fixes) → retry → round2 BETTER. The loop's core claim.
+    fake = FakeClaude(writer=[_wrap("v1 clean"), _wrap("v2 better")],
+                      critic=["VERDICT: EQUAL — flat\nFIXES: sharpen the trigger line",
+                              "VERDICT: BETTER — sharper now"])
+    monkeypatch.setattr(reflective, "run_claude_p", fake)
+    out = reflective.writer_critic_loop(_skill(), _cfg(), validate_fn=_validate, max_rounds=2)
+    assert out["quality_ok"] is True
+    assert out["rounds"] == 2
+    assert out["body"] == "v2 better"
+    assert "sharpen the trigger line" in fake.writer_prompts[1]   # EQUAL fixes fed forward
+
+
+def test_all_rounds_lint_fail(monkeypatch):
+    fake = FakeClaude(writer=[_wrap("LINTFAIL a"), _wrap("LINTFAIL b")], critic=[])
+    monkeypatch.setattr(reflective, "run_claude_p", fake)
+    out = reflective.writer_critic_loop(_skill(), _cfg(), validate_fn=_validate, max_rounds=2)
+    assert out["candidate_ok"] is False
+    assert out["quality_ok"] is False
+    assert out["judge_reason"] != ""             # clear log sentinel, not blank
+    assert len(fake.critic_prompts) == 0          # critic never runs on a lint-failing candidate
+
+
+def test_max_rounds_one_worse_respects_budget(monkeypatch):
+    fake = FakeClaude(writer=[_wrap("only clean body")], critic=["VERDICT: WORSE — nope"])
+    monkeypatch.setattr(reflective, "run_claude_p", fake)
+    out = reflective.writer_critic_loop(_skill(), _cfg(), validate_fn=_validate, max_rounds=1)
+    assert out["rounds"] == 1
+    assert out["quality_ok"] is False
+    assert out["body"] == "only clean body"
+    assert len(fake.writer_prompts) == 1          # budget enforced — no 2nd writer call
+
+
+def test_evolve_single_shot_integration(tmp_path, monkeypatch):
+    """Exercise the REAL evolve() single-shot call site with claude -p and the cue
+    gate mocked. The unit tests call writer_critic_loop directly and so cannot
+    catch a signature mismatch at the call site — this test can (and does)."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))  # isolate log + analytics
+    from evolution.skills import evolve_skill
+
+    skill = {"name": "demo", "description": "a demo skill", "body": "OLD BODY",
+             "frontmatter": "---\nname: demo\ndescription: a demo skill\n---",
+             "raw": "---\nname: demo\ndescription: a demo skill\n---\nOLD BODY"}
+    monkeypatch.setattr(evolve_skill, "find_skill", lambda sid, root: tmp_path / "SKILL.md")
+    monkeypatch.setattr(evolve_skill, "load_skill", lambda p: skill)
+
+    class FakeValidator:
+        def __init__(self, config):
+            pass
+
+        def validate_all(self, body, raw, baseline_body=None):
+            return [SimpleNamespace(passed=True, constraint_name="lint", message="ok")]
+    monkeypatch.setattr(evolve_skill, "ConstraintValidator", FakeValidator)
+
+    def fake_claude(prompt, model="sonnet", timeout=300):
+        return ("<SKILL_BODY>NEW IMPROVED BODY</SKILL_BODY>" if "<CURRENT>" in prompt
+                else "VERDICT: BETTER — clearer")
+    monkeypatch.setattr(reflective, "run_claude_p", fake_claude)
+
+    rc = evolve_skill.evolve(skill_id="meta/demo", optimizer="single-shot",
+                             propose_only=True, cue_repo=str(tmp_path))
+    assert rc == 0  # would be a TypeError crash if the call site drifted from the loop signature
+    props = list((tmp_path / "evolution" / "proposals").rglob("evolved_SKILL.md"))
+    assert props, "expected a proposal file in propose-only mode"
+    assert "NEW IMPROVED BODY" in props[0].read_text()
+    log = tmp_path / "cfg" / "cue" / "evolution-log.jsonl"
+    assert log.exists()
+    entry = json.loads(log.read_text().strip().splitlines()[-1])
+    assert entry["optimizer"] == "writer-loop" and entry["applied"] is False
 
 
 def test_back_compat_wrappers(monkeypatch):
