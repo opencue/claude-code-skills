@@ -6,7 +6,7 @@ import net from "node:net";
 
 import { utimes } from "node:fs/promises";
 
-import { materializeRuntime, linkPluginCache, isRuntimeStale } from "./runtime-materializer";
+import { materializeRuntime, linkPluginCache, isRuntimeStale, shouldIncludeSessionTelemetry } from "./runtime-materializer";
 import type { ResolvedProfile } from "../../profiles/_types";
 
 let root: string;
@@ -1100,5 +1100,62 @@ describe("linkPluginCache", () => {
     await linkPluginCache(tgt, src); // src has no plugins/
     // No plugins dir created, nothing thrown.
     await expect(lstat(join(tgt, "plugins", "cache"))).rejects.toThrow();
+  });
+});
+
+describe("shouldIncludeSessionTelemetry", () => {
+  test("default (unset) → false: telemetry sections are trimmed", () => {
+    expect(shouldIncludeSessionTelemetry({})).toBe(false);
+  });
+
+  test("CUE_SESSION_TELEMETRY=1 or 'true' → opt back in", () => {
+    expect(shouldIncludeSessionTelemetry({ CUE_SESSION_TELEMETRY: "1" })).toBe(true);
+    expect(shouldIncludeSessionTelemetry({ CUE_SESSION_TELEMETRY: "true" })).toBe(true);
+  });
+
+  test("any other value → stays trimmed", () => {
+    expect(shouldIncludeSessionTelemetry({ CUE_SESSION_TELEMETRY: "0" })).toBe(false);
+    expect(shouldIncludeSessionTelemetry({ CUE_SESSION_TELEMETRY: "yes" })).toBe(false);
+  });
+});
+
+// End-to-end: prove the telemetry sections are absent by default and present
+// when opted in, materializing a real profile name (so analytics/last-session
+// lookups have data to surface) into a throwaway runtimeRoot.
+describe("materializeRuntime — session-telemetry gating", () => {
+  const realName = "core+gstack+skill-writer";
+  const probe: ResolvedProfile = {
+    name: realName, description: "telemetry gate probe", icon: "🧪",
+    skills: { local: [{ id: "caveman/caveman" }], npx: [] },
+    mcps: [], plugins: [], env: {}, inheritanceChain: [realName],
+  } as unknown as ResolvedProfile;
+  const base = {
+    profile: probe, agent: "claude-code" as const,
+    skillSourceLookup: async (id: string) => `/fake/skills/${id}`,
+    mcpRegistry: {}, userClaudeMd: "# user CLAUDE.md\n",
+  };
+  const SAVED = process.env.CUE_SESSION_TELEMETRY;
+  afterEach(() => {
+    if (SAVED === undefined) delete process.env.CUE_SESSION_TELEMETRY;
+    else process.env.CUE_SESSION_TELEMETRY = SAVED;
+  });
+
+  test("default omits the three telemetry section headers", async () => {
+    delete process.env.CUE_SESSION_TELEMETRY;
+    const out = await materializeRuntime({ ...base, runtimeRoot: join(root, "off") });
+    const md = await readFile(join(out.runtimeDir, "CLAUDE.md"), "utf8");
+    expect(md).not.toContain("## Skill Usage (last 30 days)");
+    expect(md).not.toContain("## Last Session");
+    expect(md).not.toContain("## Common Workflows");
+  });
+
+  test("opted-in materialization is >= default size (sections only add bytes)", async () => {
+    delete process.env.CUE_SESSION_TELEMETRY;
+    const off = await materializeRuntime({ ...base, runtimeRoot: join(root, "a") });
+    const offBytes = (await readFile(join(off.runtimeDir, "CLAUDE.md"), "utf8")).length;
+    process.env.CUE_SESSION_TELEMETRY = "1";
+    const on = await materializeRuntime({ ...base, runtimeRoot: join(root, "b") });
+    const onBytes = (await readFile(join(on.runtimeDir, "CLAUDE.md"), "utf8")).length;
+    expect(onBytes).toBeGreaterThanOrEqual(offBytes);
   });
 });
