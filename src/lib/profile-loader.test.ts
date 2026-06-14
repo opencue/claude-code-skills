@@ -533,3 +533,29 @@ describe("loadProfile (composite)", () => {
     expect(merged.icon).toBe("🅰️");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Real-profile guards. These point the loader at the repo's actual profiles/
+// (not a scratch fixture) to pin cross-profile persona policy that fans out
+// from core. beforeEach set CUE_PROFILES_DIR to a temp dir; we override it
+// here and afterEach restores it, so isolation holds.
+// ---------------------------------------------------------------------------
+describe("core persona_includes fan-out (real profiles)", () => {
+  const REAL_PROFILES = join(REPO_ROOT, "profiles");
+
+  test("core carries the headroom-compression include", async () => {
+    process.env.CUE_PROFILES_DIR = REAL_PROFILES;
+    const core = await loadProfile("core");
+    expect(core.personaIncludes).toContain("headroom-compression");
+  });
+
+  test("headroom-compression fans out to a child that defines its own persona", async () => {
+    // gstack overrides persona (leaf-wins), so this proves persona_includes is
+    // additive — a child keeping its own persona still inherits core's policy
+    // includes. Guards against a core edit silently dropping it everywhere.
+    process.env.CUE_PROFILES_DIR = REAL_PROFILES;
+    const gstack = await loadProfile("gstack");
+    expect(gstack.persona).toBeTruthy(); // gstack has its own persona block
+    expect(gstack.personaIncludes).toContain("headroom-compression");
+  });
+});
