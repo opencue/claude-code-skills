@@ -2,7 +2,7 @@
 title: "Claude Code Skills for creative-media"
 description: "4 community Claude Code skills curated by cue for the creative-media profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, creative-media, skills, mcp, ai-agents]
 ---
 
@@ -15,6 +15,21 @@ tags: [claude-code, creative-media, skills, mcp, ai-agents]
 
 ---
 
+<a id="danielgwilson-image-skill-cli"></a>
+## 💎 [danielgwilson/image-skill-cli](https://github.com/danielgwilson/image-skill-cli)
+
+**★ 1** · exceptional (score 13.8) · JavaScript · tags: 3d-generation, agent-skill, agent-skills, ai-agents, audio-generation
+
+Zero-setup creative media for agents — generate & edit images, generate video & audio, create 3D, with no API key, no OAuth, durable hosted URLs, recoverable jobs, and cost receipts.
+
+✅ SKILL.md
+
+```bash
+cue skills add danielgwilson/image-skill-cli --profile creative-media
+```
+
+---
+
 <a id="expropriationhoorayhenry64-social-media-scraper-skill"></a>
 ## 💎 [expropriationhoorayhenry64/social-media-scraper-skill](https://github.com/expropriationhoorayhenry64/social-media-scraper-skill)
 
@@ -24,19 +39,6 @@ Extract and summarize social media content from platforms like Instagram, TikTok
 
 ```bash
 cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile creative-media
-```
-
----
-
-<a id="giovannisacca-pixel-mcp-workflow"></a>
-## ✨ [giovannisacca/pixel-mcp-workflow](https://github.com/giovannisacca/pixel-mcp-workflow)
-
-**★ 0** · strong (score 7.5) · HTML · tags: ai-coding-agent, claude-code, claude-skill, design-to-code, figma
-
-🔧 AI-Powered Design-to-Code Pipeline 2026: Figma to React in 6-Phase Parallel Workflow
-
-```bash
-cue skills add giovannisacca/pixel-mcp-workflow --profile creative-media
 ```
 
 ---

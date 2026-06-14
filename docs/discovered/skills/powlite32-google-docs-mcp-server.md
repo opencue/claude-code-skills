@@ -2,7 +2,7 @@
 title: "powlite32/google-docs-mcp-server — Claude Code skill discovered by cue"
 description: "📄 Connect LLMs with Google Docs through this unofficial MCP server for smarter workflows and efficient document management."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-14
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: ai-integration, ai-tools, claude-ai, google, google-drive-api-v3, google-oauth, google-sheets, google-slides, googlecalendar, googledocs, llm-integration, llm-tools, mcp-server, model-context-protocol-servers, modelcontextprotocol, nodejs, openai, typescript
 
 ## Best fit cue profiles

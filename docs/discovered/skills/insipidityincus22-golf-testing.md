@@ -2,7 +2,7 @@
 title: "insipidityincus22/golf-testing — Claude Code skill discovered by cue"
 description: "🧪 Test MCP servers with AI agents and LLM judges to ensure seamless natural language interactions and effective performance evaluation."
 layout: page
-updated: 2026-06-06
+updated: 2026-06-14
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.5 based on:
 - ⭐ 0 stars
-- 🗓️ Last pushed: 2026-06-06
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: autocannon, cicd, descriptive-statistics, hypothesis-testing, inferential-statistics, kubernetes, kubernetes-deployment, leven, lighthouse, m, mcp, mcp-server, mcp-tools, problem-solving, puppeteer, python, shapiro-wilk, yaml
 
 ## Best fit cue profiles

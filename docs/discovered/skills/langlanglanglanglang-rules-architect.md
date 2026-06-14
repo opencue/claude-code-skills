@@ -2,7 +2,7 @@
 title: "langlanglanglanglang/rules-architect — Claude Code skill discovered by cue"
 description: " Claude.md 优化 / memory 优化方案 for Claude Code. Solves \"rules forgotten in memory\" and \"CLAUDE.md attention dilution\". 3 hooks + path-scoped rule + 5-layer memory "
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, skill, core]
 ---
 

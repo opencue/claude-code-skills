@@ -2,7 +2,7 @@
 title: "ggmenu/document-reader-mcp — Claude Code skill discovered by cue"
 description: "📄 Extract text from various document formats with this universal MCP server, featuring support for streaming and encoding detection across all major platforms."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-14
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: csv, csv-parser, cursor-ai, docx, fastmcp, markdown, mcp-server, pdf, pdf-parser, xlsx, xlsx-parser
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "mattaspira/google-docs-mcp-server — Claude Code skill discovered by cue"
 description: "🔗 Connect LLMs to Google Docs with this unofficial MCP server for smarter workflows and enhanced document management."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-14
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: ai, ai-tools, anthropic, claude-ai, claude-desktop, gmail, google, google-docs, google-drive, google-sheets-api-v4, google-slides, google-tasks, llm, mcp, mcp-server, model-context-protocol-server, nodejs, openai
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for frontend"
 description: "3 community Claude Code skills curated by cue for the frontend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, frontend, skills, mcp, ai-agents]
 ---
 
@@ -15,6 +15,19 @@ tags: [claude-code, frontend, skills, mcp, ai-agents]
 
 ---
 
+<a id="s2mgtvodois2-postgresql-mcp-js"></a>
+## 💎 [s2mgtvodois2/postgresql-mcp-js](https://github.com/s2mgtvodois2/postgresql-mcp-js)
+
+**★ 1** · exceptional (score 9.8) · TypeScript · tags: agent-framework, ai, ai-agent, bun, database
+
+🔌 Simplify PostgreSQL interactions with a secure MCP server for LLMs, enabling efficient access to schemas, tables, and query execution.
+
+```bash
+cue skills add s2mgtvodois2/postgresql-mcp-js --profile frontend
+```
+
+---
+
 <a id="byrobertocumbane-glitch-lottie-marketplace"></a>
 ## 💎 [byrobertocumbane-glitch/lottie-marketplace](https://github.com/byrobertocumbane-glitch/lottie-marketplace)
 
@@ -24,19 +37,6 @@ Search, fetch, and integrate Lottie animations into React, Vue, Flutter, and oth
 
 ```bash
 cue skills add byrobertocumbane-glitch/lottie-marketplace --profile frontend
-```
-
----
-
-<a id="giovannisacca-pixel-mcp-workflow"></a>
-## ✨ [giovannisacca/pixel-mcp-workflow](https://github.com/giovannisacca/pixel-mcp-workflow)
-
-**★ 0** · strong (score 7.5) · HTML · tags: ai-coding-agent, claude-code, claude-skill, design-to-code, figma
-
-🔧 AI-Powered Design-to-Code Pipeline 2026: Figma to React in 6-Phase Parallel Workflow
-
-```bash
-cue skills add giovannisacca/pixel-mcp-workflow --profile frontend
 ```
 
 ---

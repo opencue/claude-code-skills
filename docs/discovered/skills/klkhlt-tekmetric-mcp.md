@@ -2,7 +2,7 @@
 title: "klkhlt/tekmetric-mcp — Claude Code skill discovered by cue"
 description: "🔍 Ask questions about your shop data in natural language and get instant answers about appointments, customers, and repair orders with Tekmetric MCP."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-14
 tags: [claude-code, skill, core]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, core]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 7.8 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: ai, ai-assistant, auto-repair, automotive, business-intelligence, claude, llm, mcp, mcp-server, model-context-protocol, natural-language, oauth2, repair-shop, shop-management, tekmetric
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "Claude Code Skills for python"
 description: "1 community Claude Code skills curated by cue for the python profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, python, skills, mcp, ai-agents]
 ---
 
@@ -15,15 +15,15 @@ tags: [claude-code, python, skills, mcp, ai-agents]
 
 ---
 
-<a id="hanlulong-openecon-data"></a>
-## 💎 [hanlulong/openecon-data](https://github.com/hanlulong/openecon-data)
+<a id="mugoherick12-boop-skillz"></a>
+## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
 
-**★ 52** · exceptional (score 14) · Python · tags: ai, data-visualization, economic-data, economic-indicators, economics
+**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
 
-Give your AI agent accurate economic data. 330K indicators from FRED, World Bank, IMF, Eurostat & more. MCP server + web UI.
+🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
 
 ```bash
-cue skills add hanlulong/openecon-data --profile python
+cue skills add mugoherick12-boop/skillz --profile python
 ```
 
 ---

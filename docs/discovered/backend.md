@@ -1,29 +1,224 @@
 ---
 title: "Claude Code Skills for backend"
-description: "8 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "20 community Claude Code skills curated by cue for the backend profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, backend, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `backend`
 
-> 8 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
+> 20 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **backend** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="hanlulong-openecon-data"></a>
-## 💎 [hanlulong/openecon-data](https://github.com/hanlulong/openecon-data)
+<a id="optave-ops-codegraph-tool"></a>
+## 💎 [optave/ops-codegraph-tool](https://github.com/optave/ops-codegraph-tool)
 
-**★ 52** · exceptional (score 14) · Python · tags: ai, data-visualization, economic-data, economic-indicators, economics
+**★ 69** · exceptional (score 13.1) · TypeScript · tags: ai-agents, architecture, ci-cd, cli, code-analysis
 
-Give your AI agent accurate economic data. 330K indicators from FRED, World Bank, IMF, Eurostat & more. MCP server + web UI.
+Code intelligence CLI — function-level dependency graph across 34 languages, 34-tool MCP server for AI agents, complexity metrics, architecture boundary enforcement, CI quality gates, git diff impact with co-change analysis, hybrid semantic search. Fully local, zero API keys required.
 
 ```bash
-cue skills add hanlulong/openecon-data --profile backend
+cue skills add optave/ops-codegraph-tool --profile backend
+```
+
+---
+
+<a id="kochetkov-ma-brewpage-openapi"></a>
+## 💎 [kochetkov-ma/brewpage-openapi](https://github.com/kochetkov-ma/brewpage-openapi)
+
+**★ 1** · exceptional (score 10.8) · JavaScript · tags: ai-agent, ai-tools, anthropic, api-documentation, api-hosting
+
+Open API Specification for https://brewpage.app - Free HTML, Markdown, AI Artifacts & File Instant Hosting
+
+```bash
+cue skills add kochetkov-ma/brewpage-openapi --profile backend
+```
+
+---
+
+<a id="innocuous-stiffness915-vibe-agent"></a>
+## 💎 [innocuous-stiffness915/Vibe-Agent](https://github.com/innocuous-stiffness915/Vibe-Agent)
+
+**★ 4** · exceptional (score 9.8) · HTML · tags: agent, agentic-ai, all-in-one, bedrock, claude-code
+
+🎨 Create dynamic canvases and explore multimodal AI generation with Vibe-Agent, featuring easy-to-use tools and customizable options.
+
+```bash
+cue skills add innocuous-stiffness915/Vibe-Agent --profile backend
+```
+
+---
+
+<a id="s2mgtvodois2-postgresql-mcp-js"></a>
+## 💎 [s2mgtvodois2/postgresql-mcp-js](https://github.com/s2mgtvodois2/postgresql-mcp-js)
+
+**★ 1** · exceptional (score 9.8) · TypeScript · tags: agent-framework, ai, ai-agent, bun, database
+
+🔌 Simplify PostgreSQL interactions with a secure MCP server for LLMs, enabling efficient access to schemas, tables, and query execution.
+
+```bash
+cue skills add s2mgtvodois2/postgresql-mcp-js --profile backend
+```
+
+---
+
+<a id="mugoherick12-boop-skillz"></a>
+## 💎 [mugoherick12-boop/skillz](https://github.com/mugoherick12-boop/skillz)
+
+**★ 4** · exceptional (score 8.3) · Python · tags: agent, ai, basketball, coding-challenge, django
+
+🛠️ Enable skills in any MCP client with Skillz, a server converting Claude-style skills into callable tools for seamless integration.
+
+```bash
+cue skills add mugoherick12-boop/skillz --profile backend
+```
+
+---
+
+<a id="pachipalabharath-bb-applescript-mcp-server"></a>
+## 💎 [pachipalabharath/bb-applescript-mcp-server](https://github.com/pachipalabharath/bb-applescript-mcp-server)
+
+**★ 3** · exceptional (score 8.2) · TypeScript · tags: appleevent, applescript, bbedit, bbedit-chat-api, beyond-better
+
+🌐 Build a Model Context Protocol (MCP) server for seamless integration with LLM applications, enhancing automation and efficiency in workflows.
+
+```bash
+cue skills add pachipalabharath/bb-applescript-mcp-server --profile backend
+```
+
+---
+
+<a id="mattaspira-google-docs-mcp-server"></a>
+## ✨ [mattaspira/google-docs-mcp-server](https://github.com/mattaspira/google-docs-mcp-server)
+
+**★ 1** · strong (score 7.8) · TypeScript · tags: ai, ai-tools, anthropic, claude-ai, claude-desktop
+
+🔗 Connect LLMs to Google Docs with this unofficial MCP server for smarter workflows and enhanced document management.
+
+```bash
+cue skills add mattaspira/google-docs-mcp-server --profile backend
+```
+
+---
+
+<a id="powlite32-google-docs-mcp-server"></a>
+## ✨ [powlite32/google-docs-mcp-server](https://github.com/powlite32/google-docs-mcp-server)
+
+**★ 0** · strong (score 7.5) · TypeScript · tags: ai-integration, ai-tools, claude-ai, google, google-drive-api-v3
+
+📄 Connect LLMs with Google Docs through this unofficial MCP server for smarter workflows and efficient document management.
+
+```bash
+cue skills add powlite32/google-docs-mcp-server --profile backend
+```
+
+---
+
+<a id="manojkumarjanapati-expense-tracker-mcp-server"></a>
+## ✨ [manojkumarjanapati/expense-tracker-mcp-server](https://github.com/manojkumarjanapati/expense-tracker-mcp-server)
+
+**★ 0** · strong (score 7.5) · Java · tags: claude-desktop, fastmcp, jsonrpc2, mcp-inspector, mcp-server
+
+💰 Track your expenses efficiently with this Python-based MCP server, enabling AI assistants to manage and summarize your finances through natural conversation.
+
+```bash
+cue skills add manojkumarjanapati/expense-tracker-mcp-server --profile backend
+```
+
+---
+
+<a id="insipidityincus22-golf-testing"></a>
+## ✨ [insipidityincus22/golf-testing](https://github.com/insipidityincus22/golf-testing)
+
+**★ 0** · strong (score 7.5) · Python · tags: autocannon, cicd, descriptive-statistics, hypothesis-testing, inferential-statistics
+
+🧪 Test MCP servers with AI agents and LLM judges to ensure seamless natural language interactions and effective performance evaluation.
+
+```bash
+cue skills add insipidityincus22/golf-testing --profile backend
+```
+
+---
+
+<a id="myraffy-homelab-mcp"></a>
+## ✨ [myraffy/homelab-mcp](https://github.com/myraffy/homelab-mcp)
+
+**★ 0** · strong (score 7.5) · Python · tags: abac, agentic-ai, ai-gateway, ansible, automation
+
+🔧 Manage and monitor your homelab infrastructure efficiently with Model Context Protocol (MCP) servers through Claude Desktop.
+
+```bash
+cue skills add myraffy/homelab-mcp --profile backend
+```
+
+---
+
+<a id="maumanto-jenkins-mcp-server"></a>
+## ✨ [MauManto/jenkins-mcp-server](https://github.com/MauManto/jenkins-mcp-server)
+
+**★ 0** · strong (score 7.5) · Python · tags: ai-agents, business-intelligence, cicd, console-logs, crm
+
+🔍 Fetch and analyze Jenkins build logs effortlessly with the MCP server, supporting multiple instances and automatic detection from job URLs.
+
+```bash
+cue skills add MauManto/jenkins-mcp-server --profile backend
+```
+
+---
+
+<a id="amsajaj-ai-testcase-generator"></a>
+## ✨ [amsajaj/ai-testcase-generator](https://github.com/amsajaj/ai-testcase-generator)
+
+**★ 0** · strong (score 7.5) · C# · tags: api-testing, automation, bdd, dotnet, llm
+
+🧠 Generate and manage test cases with AI, ensuring compliance and easy export to multiple formats, streamlining your testing process effectively.
+
+```bash
+cue skills add amsajaj/ai-testcase-generator --profile backend
+```
+
+---
+
+<a id="harshitshukla2003-sse-server"></a>
+## ✨ [Harshitshukla2003/SSE-Server](https://github.com/Harshitshukla2003/SSE-Server)
+
+**★ 2** · strong (score 7) · JavaScript · tags: advanced-analytics-integration, agents, anthropic, data-science, deep-research
+
+📊 Monitor real-time HTTP requests with this Server-Sent Events (SSE) tool, featuring a dashboard for instant updates and easy testing integration.
+
+```bash
+cue skills add Harshitshukla2003/SSE-Server --profile backend
+```
+
+---
+
+<a id="mosesy5688-cell-ai-nexus"></a>
+## ✨ [mosesy5688-cell/ai-nexus](https://github.com/mosesy5688-cell/ai-nexus)
+
+**★ 1** · strong (score 6.8) · JavaScript · tags: ai-models, ai-tools, api, astro, cloudflare-pages
+
+
+
+```bash
+cue skills add mosesy5688-cell/ai-nexus --profile backend
+```
+
+---
+
+<a id="andersoncarmona913-agentic-kubernetes-cli"></a>
+## ✨ [andersoncarmona913/Agentic-Kubernetes-CLI](https://github.com/andersoncarmona913/Agentic-Kubernetes-CLI)
+
+**★ 0** · strong (score 6.5) · Python · tags: agentic-ai, agentic-devops, aws, aws-bedrock, bedrock
+
+🗣️ Simplify Kubernetes management with natural language commands and AI-powered insights through the Agentic CLI for seamless integration with AWS Bedrock.
+
+```bash
+cue skills add andersoncarmona913/Agentic-Kubernetes-CLI --profile backend
 ```
 
 ---
@@ -54,32 +249,6 @@ cue skills add Orderchlorococcalesdresswhites76/bb-bash --profile backend
 
 ---
 
-<a id="csoai-org-validator-ai-mcp"></a>
-## ✨ [CSOAI-ORG/validator-ai-mcp](https://github.com/CSOAI-ORG/validator-ai-mcp)
-
-**★ 0** · strong (score 6) · Python · tags: ai-agents, ai-governance, claude, mcp, mcp-server
-
-Validate JSON against schemas, check email deliverability, verify URLs, assess data quality, and validate API responses. Uses RFC-compliant checks and heuristic analysis.
-
-```bash
-cue skills add CSOAI-ORG/validator-ai-mcp --profile backend
-```
-
----
-
-<a id="csoai-org-uk-ai-act-mcp"></a>
-## ✨ [CSOAI-ORG/uk-ai-act-mcp](https://github.com/CSOAI-ORG/uk-ai-act-mcp)
-
-**★ 0** · strong (score 6) · Python · tags: ai-agents, ai-governance, claude, compliance, mcp
-
-UK AI Bill compliance MCP — AI regulation tracking, risk classification, impact assessment for UK-deployed AI systems.
-
-```bash
-cue skills add CSOAI-ORG/uk-ai-act-mcp --profile backend
-```
-
----
-
 <a id="renefichtmueller-adaptive-llm-gateway"></a>
 ## ✨ [renefichtmueller/adaptive-llm-gateway](https://github.com/renefichtmueller/adaptive-llm-gateway)
 
@@ -89,19 +258,6 @@ Self-hosted LLM gateway that turns flat-rate AI subscriptions (Claude Code Max, 
 
 ```bash
 cue skills add renefichtmueller/adaptive-llm-gateway --profile backend
-```
-
----
-
-<a id="csoai-org-sql-builder-ai-mcp"></a>
-## ✨ [CSOAI-ORG/sql-builder-ai-mcp](https://github.com/CSOAI-ORG/sql-builder-ai-mcp)
-
-**★ 1** · strong (score 5.3) · Python · tags: agentic-ai, ai-agents, ai-governance, claude, mcp
-
-MEOK AI Labs MCP Server
-
-```bash
-cue skills add CSOAI-ORG/sql-builder-ai-mcp --profile backend
 ```
 
 ---

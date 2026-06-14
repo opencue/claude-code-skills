@@ -2,7 +2,7 @@
 title: "innocuous-stiffness915/Vibe-Agent — Claude Code skill discovered by cue"
 description: "🎨 Create dynamic canvases and explore multimodal AI generation with Vibe-Agent, featuring easy-to-use tools and customizable options."
 layout: page
-updated: 2026-06-07
+updated: 2026-06-14
 tags: [claude-code, skill, backend]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, backend]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 9.8 based on:
 - ⭐ 4 stars
-- 🗓️ Last pushed: 2026-06-07
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: agent, agentic-ai, all-in-one, bedrock, claude-code, copilot, docker, genai, git-worktree, kiro, litellm, mcp-client, mcp-server, nestia, nestjs, no-coding, prisma, vibe-coding
 
 ## Best fit cue profiles

@@ -2,7 +2,7 @@
 title: "fourparty-utnapishtim59/llm-knowledge-base — Claude Code skill discovered by cue"
 description: "Build and maintain LLM-compiled knowledge bases with a versioned schema, structured learning layer, and clear markdown workflows"
 layout: page
-updated: 2026-06-09
+updated: 2026-06-14
 tags: [claude-code, skill, docs-writer]
 ---
 
@@ -16,7 +16,7 @@ tags: [claude-code, skill, docs-writer]
 
 cue ran [GitHub Code Search](https://docs.github.com/en/search-github/searching-on-github/searching-code) for `filename:SKILL.md` and found this repo. It scored 6.3 based on:
 - ⭐ 1 stars
-- 🗓️ Last pushed: 2026-06-09
+- 🗓️ Last pushed: 2026-06-14
 - 🏷️ Tags: agent-skills, bioinformatics, bioinformatics-algorithms, claude-code-skill, google-adk, gpt, gpt35turbo, knowledge-base, knowledge-management, llama, local-knowledge, personal-wiki, retrieval, retrieval-augmented-generation, sentence-transformers
 
 ## Best fit cue profiles

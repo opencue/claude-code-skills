@@ -1,14 +1,14 @@
 ---
 title: "Claude Code Skills for video"
-description: "2 community Claude Code skills curated by cue for the video profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "1 community Claude Code skills curated by cue for the video profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, video, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `video`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **video** profile.
+> 1 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **video** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
@@ -24,19 +24,6 @@ Extract and summarize social media content from platforms like Instagram, TikTok
 
 ```bash
 cue skills add expropriationhoorayhenry64/social-media-scraper-skill --profile video
-```
-
----
-
-<a id="csoai-org-video-editing-ai-mcp"></a>
-## ✨ [CSOAI-ORG/video-editing-ai-mcp](https://github.com/CSOAI-ORG/video-editing-ai-mcp)
-
-**★ 0** · strong (score 6) · Python · tags: ai-agents, ai-governance, claude, mcp, mcp-server
-
-AI-powered video editing toolkit: scene splitting, subtitle generation, thumbnail planning, color grading, and aspect ratio conversion. By MEOK AI Labs.
-
-```bash
-cue skills add CSOAI-ORG/video-editing-ai-mcp --profile video
 ```
 
 ---

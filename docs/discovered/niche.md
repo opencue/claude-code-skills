@@ -1,31 +1,31 @@
 ---
 title: "Claude Code Skills for niche"
-description: "3 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "2 community Claude Code skills curated by cue for the niche profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, niche, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `niche`
 
-> 3 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
+> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **niche** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="jayden-lg-costing-master"></a>
-## 💎 [jayden-lg/costing-master](https://github.com/jayden-lg/costing-master)
+<a id="martellevaliant19-grant-thinking-cn-biology"></a>
+## 💎 [martellevaliant19/grant-thinking-cn-biology](https://github.com/martellevaliant19/grant-thinking-cn-biology)
 
-**★ 5** · exceptional (score 10.7) · tags: ai-agent-skill, china, claude-code, construction, cost-estimation
+**★ 0** · exceptional (score 10.5) · tags: biology, china-grants, claude-code, claude-code-skill, claude-skills
 
-造价大师 — 中国建设工程造价管理全流程AI助手。遵循GB/T 50500-2024，覆盖投资估算到竣工决算，兼容各省定额与广联达。
+Evaluate biology grant proposals for Chinese funding agencies, identify structural gaps, and improve funding odds through logic assessment and research diagnostics.
 
 ✅ SKILL.md
 
 ```bash
-cue skills add jayden-lg/costing-master --profile niche
+cue skills add martellevaliant19/grant-thinking-cn-biology --profile niche
 ```
 
 ---
@@ -41,21 +41,6 @@ Evaluate project fundability and refine grant logic using AI agent skills to ide
 
 ```bash
 cue skills add Ikramahmadmemon13/grant-thinking-skill --profile niche
-```
-
----
-
-<a id="martellevaliant19-grant-thinking-cn-biology"></a>
-## 💎 [martellevaliant19/grant-thinking-cn-biology](https://github.com/martellevaliant19/grant-thinking-cn-biology)
-
-**★ 0** · exceptional (score 10.5) · tags: biology, china-grants, claude-code, claude-code-skill, claude-skills
-
-Evaluate biology grant proposals for Chinese funding agencies, identify structural gaps, and improve funding odds through logic assessment and research diagnostics.
-
-✅ SKILL.md
-
-```bash
-cue skills add martellevaliant19/grant-thinking-cn-biology --profile niche
 ```
 
 ---

@@ -1,31 +1,29 @@
 ---
 title: "Claude Code Skills for docs-writer"
-description: "2 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
+description: "6 community Claude Code skills curated by cue for the docs-writer profile. Hidden-gem repos with SKILL.md, MCP servers, and CLI integrations."
 layout: page
-updated: 2026-06-13
+updated: 2026-06-14
 tags: [claude-code, docs-writer, skills, mcp, ai-agents]
 ---
 
 # Claude Code Skills for `docs-writer`
 
-> 2 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
+> 6 community-built skills curated by [cue](https://github.com/opencue/cuecards) for the **docs-writer** profile.
 > Each one was discovered via GitHub Code Search, scored on signal quality, and mapped to this profile by keyword overlap.
 
 **[← back to all discovered skills](./index.md)**
 
 ---
 
-<a id="jamesbuckett-skill-build-educational-site"></a>
-## 💎 [jamesbuckett/skill-build-educational-site](https://github.com/jamesbuckett/skill-build-educational-site)
+<a id="kochetkov-ma-brewpage-openapi"></a>
+## 💎 [kochetkov-ma/brewpage-openapi](https://github.com/kochetkov-ma/brewpage-openapi)
 
-**★ 0** · exceptional (score 15) · HTML · tags: claude-code, claude-code-skill, claude-skill, educational-content, fintech
+**★ 1** · exceptional (score 10.8) · JavaScript · tags: ai-agent, ai-tools, anthropic, api-documentation, api-hosting
 
-Turns a topic name into a single self-contained HTML explainer page for technical and regulatory subjects.
-
-✅ SKILL.md
+Open API Specification for https://brewpage.app - Free HTML, Markdown, AI Artifacts & File Instant Hosting
 
 ```bash
-cue skills add jamesbuckett/skill-build-educational-site --profile docs-writer
+cue skills add kochetkov-ma/brewpage-openapi --profile docs-writer
 ```
 
 ---
@@ -39,6 +37,58 @@ Build a structured knowledge base with LLM agents to automate documentation, lin
 
 ```bash
 cue skills add howdow698-ui/llm-wiki --profile docs-writer
+```
+
+---
+
+<a id="whitenoisek-obsidian-llm-wiki-skill"></a>
+## 💎 [WhiteNoiseK/obsidian-llm-wiki-skill](https://github.com/WhiteNoiseK/obsidian-llm-wiki-skill)
+
+**★ 0** · exceptional (score 8) · PowerShell · tags: ai-agents, anthropic, claude, claude-code, claude-skill
+
+Your project docs are scattered. Your knowledge dies with the repo. LLM Wiki fixes that — auto-classify, sync, and refactor docs into a permanent Obsidian vault as you build.
+
+```bash
+cue skills add WhiteNoiseK/obsidian-llm-wiki-skill --profile docs-writer
+```
+
+---
+
+<a id="mindgameolympiangames78-llm-knowledge-base"></a>
+## 💎 [mindgameolympiangames78/llm-knowledge-base](https://github.com/mindgameolympiangames78/llm-knowledge-base)
+
+**★ 0** · exceptional (score 8) · tags: bert-models, biomedical-informatics, claude-code, claude-code-skill, gpt
+
+Automate your personal knowledge base in Obsidian using Claude. Feed raw content and let the LLM organize, link, and synthesize your notes.
+
+```bash
+cue skills add mindgameolympiangames78/llm-knowledge-base --profile docs-writer
+```
+
+---
+
+<a id="amri854-obsidian-mcp-server"></a>
+## ✨ [Amri854/obsidian-mcp-server](https://github.com/Amri854/obsidian-mcp-server)
+
+**★ 0** · strong (score 6.5) · TypeScript · tags: claude, claude-desktop, cursor, knowledge-base, llm
+
+🗂️ Boost your Obsidian experience with a powerful Model Context Protocol server for vault access, knowledge graph analysis, and seamless integrations.
+
+```bash
+cue skills add Amri854/obsidian-mcp-server --profile docs-writer
+```
+
+---
+
+<a id="fourparty-utnapishtim59-llm-knowledge-base"></a>
+## ✨ [fourparty-utnapishtim59/llm-knowledge-base](https://github.com/fourparty-utnapishtim59/llm-knowledge-base)
+
+**★ 1** · strong (score 6.3) · tags: agent-skills, bioinformatics, bioinformatics-algorithms, claude-code-skill, google-adk
+
+Build and maintain LLM-compiled knowledge bases with a versioned schema, structured learning layer, and clear markdown workflows
+
+```bash
+cue skills add fourparty-utnapishtim59/llm-knowledge-base --profile docs-writer
 ```
 
 ---
