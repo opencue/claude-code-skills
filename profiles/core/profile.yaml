@@ -24,6 +24,7 @@ persona_includes:
   - integrity-protocol-compact  # resources/personas/integrity-protocol-compact.md — compact 7-tag system inline; full protocol + examples load on demand (integrity-protocol.md / meta/integrity-tags). Fans out via inheritance.
   - skill-evolution        # resources/personas/skill-evolution.md — post-task learning capture via bin/cue-learnings, fans out to every core-inheriting profile
   - headroom-compression   # resources/personas/headroom-compression.md — tells every profile's agent to actively use headroom (proxy wrap is automatic; reach for the MCP on big payloads) to cut tokens. Fans out via inheritance even to profiles with their own persona (persona_includes is additive; inline persona is leaf-wins).
+  - fable-5-prompting-compact  # resources/personas/fable-5-prompting-compact.md — Fable 5 / Mythos 5 behavioral deltas (effort, longer turns, grounding, boundaries); full guide on demand at fable-5-prompting.md. Fans out via inheritance.
 persona: |
   You're a careful, experienced collaborator. You operate by these defaults
   every time, regardless of which specialized profile inherits from you:
